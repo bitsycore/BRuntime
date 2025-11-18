@@ -8,8 +8,8 @@
 // =========================================================
 
 typedef struct {
-	BCObject* key;
-	BCObject* value;
+	BCObjectRef key;
+	BCObjectRef value;
 } BCDictionaryEntry;
 
 typedef struct BCDictionary {
@@ -25,14 +25,14 @@ typedef struct BCDictionary {
 // =========================================================
 
 static void _Indent(int level);
-static void _DictPutInternal(BCDictionaryEntry* buckets, size_t cap, BCObject* key, BCObject* val);
+static void _DictPutInternal(BCDictionaryEntry* buckets, size_t cap, BCObjectRef key, BCObjectRef val);
 
 // =========================================================
 // MARK: Class
 // =========================================================
 
-void _BCDictDealloc(BCObject* obj) {
-	BCDictionary* d = (BCDictionary*) obj;
+void _BCDictDealloc(BCObjectRef obj) {
+	BCDictionaryRef d = (BCDictionaryRef) obj;
 	for (size_t i = 0; i < d->capacity; i++) {
 		if (d->buckets[i].key) {
 			BCRelease(d->buckets[i].key);
@@ -42,15 +42,15 @@ void _BCDictDealloc(BCObject* obj) {
 	free(d->buckets);
 }
 
-void _BCDictDesc(const BCObject* obj, int indent) {
-	BCDictionary* d = (BCDictionary*) obj;
+void _BCDictDesc(BCObjectRef obj, int indent) {
+	BCDictionaryRef d = (BCDictionaryRef) obj;
 	printf("{\n");
 	for (size_t i = 0; i < d->capacity; i++) {
 		if (d->buckets[i].key) {
 			_Indent(indent + 1);
-			d->buckets[i].key->isa->description(d->buckets[i].key, indent + 1);
+			BCLog(d->buckets[i].key, indent + 1);
 			printf(" : ");
-			d->buckets[i].value->isa->description(d->buckets[i].value, indent + 1);
+			d->buckets[i].value->cls->description(d->buckets[i].value, indent + 1);
 			printf(",\n");
 		}
 	}
@@ -66,24 +66,22 @@ static const BCClass kBCDictClass = {
 // MARK: Public
 // =========================================================
 
-BCDictionary* BCDictionaryCreate() {
-	BCDictionary* d = (BCDictionary*) BCAllocRaw(&kBCDictClass, NULL, sizeof(BCDictionary) - sizeof(BCObject));
-	d->isMutable = false;
-	d->capacity = 8;
-	d->buckets = calloc(d->capacity, sizeof(BCDictionaryEntry));
-	return d;
+BCDictionaryRef BCDictionaryCreate() {
+	BCMutableDictionaryRef dic = BCMutableDictionaryCreate();
+	dic->isMutable = false;
+	return  dic;
 }
 
-BCMutableDictionary* BCMutableDictionaryCreate() {
-	BCDictionary* d = (BCDictionary*) BCAllocRaw(&kBCDictClass, NULL, sizeof(BCDictionary) - sizeof(BCObject));
+BCMutableDictionaryRef BCMutableDictionaryCreate() {
+	BCDictionaryRef d = (BCDictionaryRef) BCAllocRaw((BCClassRef)&kBCDictClass, NULL, sizeof(BCDictionary) - sizeof(BCObject));
 	d->isMutable = true;
 	d->capacity = 8;
 	d->buckets = calloc(d->capacity, sizeof(BCDictionaryEntry));
-	return (BCMutableDictionary*)d;
+	return (BCMutableDictionaryRef)d;
 }
 
-void BCDictionarySet(BCMutableDictionary* d, BCObject* key, BCObject* val) {
-	BCDictionary *dict = (BCDictionary*)d;
+void BCDictionarySet(BCMutableDictionaryRef d, BCObjectRef key, BCObjectRef val) {
+	BCDictionary *dict = (BCDictionaryRef)d;
 	if (!dict->isMutable) return;
 
 	// Resize Check
@@ -119,7 +117,7 @@ void BCDictionarySet(BCMutableDictionary* d, BCObject* key, BCObject* val) {
 	dict->count++;
 }
 
-BCObject* BCDictionaryGet(BCDictionary* d, BCObject* key) {
+BCObjectRef BCDictionaryGet(BCDictionaryRef d, BCObjectRef key) {
 	uint32_t hash = BCHash(key);
 	size_t idx = hash % d->capacity;
 	size_t start = idx;
@@ -133,8 +131,8 @@ BCObject* BCDictionaryGet(BCDictionary* d, BCObject* key) {
 	return NULL;
 }
 
-BCArray* BCDictionaryKeys(BCDictionary* d) {
-	BCArray* arr = BCArrayCreate();
+BCArrayRef BCDictionaryKeys(BCDictionaryRef d) {
+	BCArrayRef arr = BCArrayCreate();
 	for (size_t i = 0; i < d->capacity; i++) {
 		if (d->buckets[i].key) {
 			BCArrayAdd(arr, d->buckets[i].key);
@@ -151,7 +149,7 @@ static void _Indent(int level) {
 	for (int i = 0; i < level; i++) printf(" ");
 }
 
-static void _DictPutInternal(BCDictionaryEntry* buckets, size_t cap, BCObject* key, BCObject* val) {
+static void _DictPutInternal(BCDictionaryEntry* buckets, size_t cap, BCObjectRef key, BCObjectRef val) {
 	uint32_t hash = BCHash(key);
 	size_t idx = hash % cap;
 	while (buckets[idx].key) {

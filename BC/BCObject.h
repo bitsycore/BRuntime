@@ -1,42 +1,41 @@
 #ifndef BCRUNTIME_BCOBJECT_H
 #define BCRUNTIME_BCOBJECT_H
 
-#include <stdatomic.h>
 #include "BCTypes.h"
 
-struct BCAllocator {
+#include <stdatomic.h>
+
+typedef struct BCClass {
+	const char* name;
+	BCDeallocFunc dealloc;
+	BCHashFunc hash;
+	BCEqualFunc equal;
+	BCDescFunc description;
+	BCCopyFunc copy;
+} BCClass;
+
+typedef struct BCObject {
+	BCClassRef cls;
+	atomic_int ref_count;
+	BCAllocatorRef allocator;
+} BCObject;
+
+typedef struct BCAllocator {
 	void* (* alloc)(size_t size, void* ctx);
 	void (* free)(void* ptr, void* ctx);
 	void* context;
-};
+} BCAllocator;
 
-extern BCAllocator* const kBCDefaultAllocator;
+extern BCAllocatorRef const kBCDefaultAllocator;
 
-// CLASS
-typedef struct BCClass {
-	const char* name;
-	BCDeallocProc dealloc;
-	BCHashProc hash;
-	BCEqualProc equal;
-	BCDescProc description;
-	BCCopyProc copy;
-} BCClass;
-
-// BASE OBJECT
-typedef struct BCObject {
-	const BCClass* isa;
-	atomic_int ref_count;
-	BCAllocator* allocator;
-} BCObject;
-
-BCObject* BCAllocRaw(const BCClass* cls, BCAllocator* alloc, size_t extraSize);
-BCObject* BCRetain(BCObject* obj);
-void      BCRelease(BCObject* obj);
-BCObject* BCCopy(const BCObject* obj);
-uint32_t  BCHash(const BCObject* obj);
-bool      BCEqual(const BCObject* a, const BCObject* b);
-void      BCLog(const BCObject* obj);
-bool      BCIsKindOf(const BCObject* obj, const BCClass* cls);
-BCString* BCClassName(const BCClass* cls);
+BCObject* BCAllocRaw(BCClassRef cls, BCAllocatorRef alloc, size_t extraSize);
+BCObject* BCRetain(BCObjectRef obj);
+void BCRelease(BCObjectRef obj);
+BCObject* BCCopy(BCObjectRef obj);
+uint32_t BCHash(BCObjectRef obj);
+bool BCEqual(BCObjectRef a, BCObjectRef b);
+void BCLog(BCObjectRef obj, int indent);
+bool BCIsKindOf(BCObjectRef obj, BCClassRef cls);
+BCStringRef BCClassName(BCClassRef cls);
 
 #endif //BCRUNTIME_BCOBJECT_H

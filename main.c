@@ -20,9 +20,9 @@ int main() {
 	SUB_TITLE("Test String");
 	// ================================
 
-	BCString* str1 = BCStringConst("username"); // Pooled
-	BCString* str2 = BCStringConst("username"); // Same Instance
-	BCString* str3 = BCStringCreate("username"); // New Instance
+	BCStringRef str1 = BCStringConst("username"); // Pooled
+	BCStringRef str2 = BCStringConst("username"); // Same Instance
+	BCStringRef str3 = BCStringCreate("username"); // New Instance
 
 	printf("Pool Test: s1=%p, s2=%p (SamePtr? %s)\n", str1, str2, (str1 == str2) ? "YES" : "NO");
 	printf("Alloc Test: s1=%p, s3=%p (SamePtr? %s)\n", str1, str3, (str1 == str3) ? "YES" : "NO");
@@ -32,31 +32,32 @@ int main() {
 	SUB_TITLE("Test Array");
 	// ================================
 
-	BCArray* array = BCArrayCreate();
+	BCArrayRef array = BCArrayCreate();
 	BCArrayAdd(array, CAST BCStringConst("Admin"));
 	BCArrayAdd(array, CAST BCStringConst("Editor"));
 
 	printf("Array Dump: \n");
-	BCLog(CAST array);
+	BCLog(CAST array, 0);
 
 	printf("\nGet Element: \n");
-	BCLog(BCArrayGet(array, 0));
-	BCLog(BCArrayGet(array, 1));
+	BCLog(BCArrayGet(array, 0), 0);
+	BCLog(BCArrayGet(array, 1), 0);
 
 
 	// ================================
 	SUB_TITLE("Test Dictionary");
 	// ================================
 
-	BCMutableDictionary * dictionary = BCMutableDictionaryCreate();
+	BCMutableDictionaryRef dictionary = BCMutableDictionaryCreate();
+	BCDictionaryRef dictionaryCst = BCDictionaryCreate();
 	BCAutorelease(CAST dictionary);
 
 	// Key is "username" (Pooled), Value is Array
 	BCDictionarySet(dictionary, CAST (str1), CAST (array));
 
 	// Key is dynamic string "id", Value is dynamic string "101"
-	BCString* key = BCStringCreate("id");
-	BCString* value = BCStringCreate("10%d", 1);
+	BCStringRef key = BCStringCreate("id");
+	BCStringRef value = BCStringCreate("10%d", 1);
 	BCDictionarySet(dictionary, CAST (key), CAST (value));
 
 	// Release Locals reference, Dictionary will retain its own
@@ -68,13 +69,13 @@ int main() {
 	// Description of Dictionary
 	printf("Dictionary Dump: \n");
 	puts("----");
-	BCLog(CAST dictionary);
+	BCLog(CAST dictionary, 0);
 
 	// Get Value by Key
 	printf("\nGet \"username\": \n");
 	puts("----");
 	BCObject* found = BCDictionaryGet(CAST dictionary, CAST (str2)); // Look up using pooled string
-	if (found) BCLog(found);
+	if (found) BCLog(found, 0);
 
 	// ===========================
 	// Pop Autorelease Pool

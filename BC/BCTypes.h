@@ -5,15 +5,16 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-typedef struct BCObject BCObject;
-typedef struct BCAllocator BCAllocator;
-typedef struct BCString BCString;
-typedef struct BCArray BCArray;
+typedef struct BCObject* BCObjectRef;
+typedef struct BCAllocator* BCAllocatorRef;
+typedef struct BCString* BCStringRef;
+typedef struct BCArray* BCArrayRef;
+typedef struct BCClass* BCClassRef;
 
-typedef void (* BCDeallocProc)(BCObject* obj);
-typedef uint32_t (* BCHashProc)(const BCObject* obj);
-typedef bool (* BCEqualProc)(const BCObject* a, const BCObject* b);
-typedef void (* BCDescProc)(const BCObject* obj, int indent);
-typedef struct BCObject* (* BCCopyProc)(const BCObject*);
+typedef void (* BCDeallocFunc)(BCObjectRef obj);
+typedef uint32_t (* BCHashFunc)(BCObjectRef obj);
+typedef bool (* BCEqualFunc)(BCObjectRef a, BCObjectRef b);
+typedef void (* BCDescFunc)(BCObjectRef obj, int indent);
+typedef struct BCObject* (* BCCopyFunc)(BCObjectRef);
 
 #endif //BCRUNTIME_BCTYPES_H

@@ -29,19 +29,19 @@ typedef struct BCString {
 // MARK: Class
 // =========================================================
 
-void _BCStrDealloc(BCObject* obj) {
-	BCString* s = (BCString*)obj;
+void _BCStrDealloc(BCObjectRef obj) {
+	BCStringRef s = (BCStringRef) obj;
 	if (s->_isPooled) return;
 	if (s->buffer) free(s->buffer);
 }
 
-uint32_t _BCStrHashImpl(const BCObject* obj) {
-	return BCStringHash((BCString*)obj);
+uint32_t _BCStrHashImpl(BCObjectRef obj) {
+	return BCStringHash((BCStringRef) obj);
 }
 
-bool _BCStrEqImpl(const BCObject* a, const BCObject* b) {
-	BCString* s1 = (BCString*)a;
-	BCString* s2 = (BCString*)b;
+bool _BCStrEqImpl(BCObjectRef a, BCObjectRef b) {
+	BCStringRef s1 = (BCStringRef) a;
+	BCStringRef s2 = (BCStringRef) b;
 
 	if (s1 == s2) return true;
 
@@ -60,12 +60,12 @@ bool _BCStrEqImpl(const BCObject* a, const BCObject* b) {
 	return memcmp(s1->buffer, s2->buffer, BCStringLength(s1)) == 0;
 }
 
-void _BCStrDesc(const BCObject* obj, int indent) {
-	printf("\"%s\"", ((const BCString*)obj)->buffer);
+void _BCStrDesc(BCObjectRef obj, int indent) {
+	printf("\"%s\"", ((const BCStringRef) obj)->buffer);
 }
 
-BCObject* _BCStrCopy(const BCObject* obj) {
-	return BCRetain((BCObject*)obj);
+BCObject* _BCStrCopy(BCObjectRef obj) {
+	return BCRetain(obj);
 }
 
 static const BCClass kBCStringClass = {
@@ -82,7 +82,7 @@ static const BCClass kBCStringClass = {
 // =========================================================
 
 typedef struct StringPoolNode {
-	BCString* str;
+	BCStringRef str;
 	struct StringPoolNode* next;
 } StringPoolNode;
 
@@ -100,13 +100,13 @@ static void _BCPoolInit(void) {
 static uint32_t _RawHash(const char* s) {
 	uint32_t hash = 2166136261u;
 	while (*s) {
-		hash ^= (uint8_t)*s++;
+		hash ^= (uint8_t) *s++;
 		hash *= 16777619;
 	}
 	return (hash == BC_HASH_Unset) ? 1 : hash;
 }
 
-static BCString* _BCStringPoolGetOrInsert(const char* text, size_t len, uint32_t hash) {
+static BCStringRef _BCStringPoolGetOrInsert(const char* text, size_t len, uint32_t hash) {
 	call_once(&_BCStringPool.flag, _BCPoolInit);
 
 	uint32_t idx = hash % POOL_SIZE;
@@ -119,7 +119,7 @@ static BCString* _BCStringPoolGetOrInsert(const char* text, size_t len, uint32_t
 		// Safe to read hash non-atomically inside lock as pooled strings are settled
 		if (atomic_load(&node->str->_hash) == hash) {
 			if (strcmp(node->str->buffer, text) == 0) {
-				BCString* ret = (BCString*)BCRetain((BCObject*)node->str);
+				BCStringRef ret = (BCStringRef) BCRetain((BCObject*) node->str);
 				mtx_unlock(&_BCStringPool.lock);
 				return ret;
 			}
@@ -128,7 +128,7 @@ static BCString* _BCStringPoolGetOrInsert(const char* text, size_t len, uint32_t
 	}
 
 	// Insert
-	BCString* newStr = (BCString*)BCAllocRaw(&kBCStringClass, NULL, sizeof(BCString) - sizeof(BCObject));
+	BCStringRef newStr = (BCStringRef) BCAllocRaw((BCClassRef) &kBCStringClass, NULL, sizeof(BCString) - sizeof(BCObject));
 	newStr->buffer = malloc(len + 1);
 	memcpy(newStr->buffer, text, len + 1);
 	atomic_init(&newStr->_length, len);
@@ -142,21 +142,21 @@ static BCString* _BCStringPoolGetOrInsert(const char* text, size_t len, uint32_t
 
 	mtx_unlock(&_BCStringPool.lock);
 
-	return (BCString*)BCRetain((BCObject*)newStr); // Retain for caller
+	return (BCStringRef) BCRetain((BCObject*) newStr); // Retain for caller
 }
 
 // =========================================================
 // MARK: Public
 // =========================================================
 
-BCString* BCStringCreate(const char* fmt, ...) {
+BCStringRef BCStringCreate(const char* fmt, ...) {
 	va_list args, copy;
 	va_start(args, fmt);
 	va_copy(copy, args);
 	int len = vsnprintf(NULL, 0, fmt, copy);
 	va_end(copy);
 
-	BCString* str = (BCString*)BCAllocRaw(&kBCStringClass, NULL, sizeof(BCString) - sizeof(BCObject));
+	BCStringRef str = (BCStringRef) BCAllocRaw((BCClassRef) &kBCStringClass, NULL, sizeof(BCString) - sizeof(BCObject));
 	str->buffer = malloc(len + 1);
 	vsnprintf(str->buffer, len + 1, fmt, args);
 	va_end(args);
@@ -167,12 +167,12 @@ BCString* BCStringCreate(const char* fmt, ...) {
 	return str;
 }
 
-BCString* BCStringConst(const char* text) {
+BCStringRef BCStringConst(const char* text) {
 	if (!text) return NULL;
 	return _BCStringPoolGetOrInsert(text, strlen(text), _RawHash(text));
 }
 
-size_t BCStringLength(BCString* self) {
+size_t BCStringLength(BCStringRef self) {
 	if (!self) return 0;
 	size_t len = atomic_load_explicit(&self->_length, memory_order_relaxed);
 	if (len == BC_LEN_Unset) {
@@ -182,7 +182,7 @@ size_t BCStringLength(BCString* self) {
 	return len;
 }
 
-uint32_t BCStringHash(BCString* self) {
+uint32_t BCStringHash(BCStringRef self) {
 	if (!self) return 0;
 	uint32_t hash = atomic_load_explicit(&self->_hash, memory_order_relaxed);
 	if (hash == BC_HASH_Unset) {

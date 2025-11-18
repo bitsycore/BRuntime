@@ -19,78 +19,78 @@ static void _StdFree(void* p, void* c) {
 }
 
 static BCAllocator _kDefaultAlloc = {_StdAlloc, _StdFree, NULL};
-BCAllocator* const kBCDefaultAllocator = &_kDefaultAlloc;
+BCAllocatorRef const kBCDefaultAllocator = &_kDefaultAlloc;
 
 // =========================================================
 // MARK: Public
 // =========================================================
 
-BCObject* BCAllocRaw(const BCClass* cls, BCAllocator* alloc, size_t extraSize) {
+BCObjectRef BCAllocRaw(BCClassRef cls, BCAllocatorRef alloc, size_t extraSize) {
 	if (!alloc) alloc = kBCDefaultAllocator;
 	size_t totalSize = sizeof(BCObject) + extraSize;
 
-	BCObject* obj = alloc->alloc(totalSize, alloc->context);
-	obj->isa = cls;
+	BCObjectRef obj = alloc->alloc(totalSize, alloc->context);
+	obj->cls = cls;
 	obj->allocator = alloc;
 	atomic_init(&obj->ref_count, 1);
 	return obj;
 }
 
-BCObject* BCRetain(BCObject* obj) {
+BCObjectRef BCRetain(BCObjectRef obj) {
 	if (!obj) return NULL;
 	atomic_fetch_add(&obj->ref_count, 1);
 	return obj;
 }
 
-void BCRelease(BCObject* obj) {
+void BCRelease(BCObjectRef obj) {
 	if (!obj) return;
 	atomic_int old_count = atomic_fetch_sub(&obj->ref_count, 1);
 	if (old_count <= 1) {
-		if (obj->isa->dealloc) {
-			obj->isa->dealloc(obj);
+		if (obj->cls->dealloc) {
+			obj->cls->dealloc(obj);
 		}
 		obj->allocator->free(obj, obj->allocator->context);
 	}
 }
 
-BCObject* BCCopy(const BCObject* obj) {
+BCObjectRef BCCopy(BCObjectRef obj) {
 	if (!obj) return NULL;
-	if (obj->isa->copy) {
-		return obj->isa->copy(obj);
+	if (obj->cls->copy) {
+		return obj->cls->copy(obj);
 	}
 	// Default behavior: Retain (assumes immutable if no copy provided)
-	return BCRetain((BCObject*)obj);
+	return BCRetain((BCObjectRef)obj);
 }
 
-uint32_t BCHash(const BCObject* obj) {
+uint32_t BCHash(BCObjectRef obj) {
 	if (!obj) return 0;
-	if (obj->isa->hash) return obj->isa->hash(obj);
+	if (obj->cls->hash) return obj->cls->hash(obj);
 	return (uint32_t)(uintptr_t)obj;
 }
 
-bool BCEqual(const BCObject* a, const BCObject* b) {
+bool BCEqual(BCObjectRef a, BCObjectRef b) {
 	if (a == b) return true;
 	if (!a || !b) return false;
-	if (a->isa != b->isa) return false;
-	if (a->isa->equal) return a->isa->equal(a, b);
+	if (a->cls != b->cls) return false;
+	if (a->cls->equal) return a->cls->equal(a, b);
 	return false;
 }
 
-void BCLog(const BCObject* obj) {
+void BCLog(BCObjectRef obj, int indent) {
 	if (obj == NULL) return;
-	if (obj->isa->description) {
-		obj->isa->description(obj, 0);
+	if (obj->cls->description) {
+		obj->cls->description(obj, indent);
 		printf("\n");
 	} else {
 		printf("<BCObject %p>\n", (void*)obj);
 	}
 }
 
-bool BCIsKindOf(const BCObject* obj, const BCClass* cls) {
+bool BCIsKindOf(BCObjectRef obj, BCClassRef cls) {
 	if (!obj || !cls) return false;
-	return (obj->isa == cls);
+	return (obj->cls == cls);
 }
 
-BCString* BCClassName(const BCClass* cls) {
+BCStringRef BCClassName(BCClassRef cls) {
 	return BCStringConst(cls->name);
 }

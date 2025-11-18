@@ -3,8 +3,8 @@
 
 #include "BCObject.h"
 
-BCArray* BCArrayCreate(void);
-void BCArrayAdd(BCArray* arr, BCObject* item);
-BCObject* BCArrayGet(BCArray* arr, size_t idx);
+BCArrayRef BCArrayCreate(void);
+void BCArrayAdd(BCArrayRef arr, BCObject* item);
+BCObject* BCArrayGet(BCArrayRef arr, size_t idx);
 
 #endif //BCRUNTIME_BCARRAY_H

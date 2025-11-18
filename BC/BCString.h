@@ -3,10 +3,10 @@
 
 #include "BCTypes.h"
 
-BCString* BCStringCreate(const char* fmt, ...);
-BCString* BCStringConst(const char* text);
-size_t BCStringLength(BCString* str);
-uint32_t BCStringHash(BCString* str);
-const char* BCStringGetCString(const BCString* str);
+BCStringRef BCStringCreate(const char* fmt, ...);
+BCStringRef BCStringConst(const char* text);
+size_t BCStringLength(BCStringRef str);
+uint32_t BCStringHash(BCStringRef str);
+const char* BCStringGetCString(BCStringRef str);
 
 #endif //BCRUNTIME_BCSTRING_H

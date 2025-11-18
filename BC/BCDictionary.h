@@ -5,13 +5,13 @@
 
 #include "BCObject.h"
 
-typedef struct BCDictionary BCDictionary;
-typedef struct BCMutableDictionary BCMutableDictionary;
+typedef struct BCDictionary* BCDictionaryRef;
+typedef struct BCDictionary* BCMutableDictionaryRef;
 
-BCDictionary* BCDictionaryCreate();
-BCMutableDictionary* BCMutableDictionaryCreate();
-void BCDictionarySet(BCMutableDictionary * d, BCObject* key, BCObject* val);
-BCObject* BCDictionaryGet(BCDictionary* d, BCObject* key);
-BCArray* BCDictionaryKeys(BCDictionary* d);
+BCDictionaryRef BCDictionaryCreate();
+BCMutableDictionaryRef BCMutableDictionaryCreate();
+void BCDictionarySet(BCMutableDictionaryRef d, BCObjectRef key, BCObjectRef val);
+BCObjectRef BCDictionaryGet(BCDictionaryRef d, BCObjectRef key);
+BCArrayRef BCDictionaryKeys(BCDictionaryRef d);
 
 #endif //BCRUNTIME_BCDICTIONARY_H
