@@ -49,7 +49,8 @@ void BCRelease(BCObjectRef obj) {
 		if (obj->cls->dealloc) {
 			obj->cls->dealloc(obj);
 		}
-		obj->allocator->free(obj, obj->allocator->context);
+		if (obj->allocator != NULL)
+			obj->allocator->free(obj, obj->allocator->context);
 	}
 }
 
@@ -76,13 +77,12 @@ bool BCEqual(BCObjectRef a, BCObjectRef b) {
 	return false;
 }
 
-void BCLog(BCObjectRef obj, int indent) {
+void BCDescription(BCObjectRef obj, int indent) {
 	if (obj == NULL) return;
 	if (obj->cls->description) {
 		obj->cls->description(obj, indent);
-		printf("\n");
 	} else {
-		printf("<BCObject %p>\n", (void*)obj);
+		printf("<BCObject %p>", (void*)obj);
 	}
 }
 

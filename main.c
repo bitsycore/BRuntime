@@ -9,25 +9,8 @@
 #define BIG_TITLE(_x_) printf("\n=================================================================\n                      " _x_ "\n=================================================================\n")
 #define SUB_TITLE(_x_) printf("\n-------------------------------\n        " _x_ "\n-------------------------------\n\n")
 
-#define test(_x_) _Generic((_x_), \
-	int8_t: "int8_t", \
-	int16_t: "int16_t", \
-	int32_t: "int32_t", \
-	int64_t: "int64_t", \
-	uint8_t: "uint8_t", \
-	uint16_t: "uint16_t", \
-	uint32_t: "uint32_t", \
-	uint64_t: "uint64_t", \
-	float: "float", \
-	double: "double", \
-	bool: "bool", \
-	default: "unknown" \
-)
-
 int main() {
 	BIG_TITLE("BC Startup");
-
-	printf(test(true));
 
 	// ===========================
 	// Push Autorelease Pool
@@ -50,6 +33,7 @@ int main() {
 	// ================================
 
 	val numIntAuto = $(5);
+	BCAutorelease($$ numIntAuto);
 	val boolean = BCTrue;
 
 	BCArrayRef array = BCArrayCreate();
@@ -58,11 +42,13 @@ int main() {
 	BCArrayAdd(array, $$ BCTrue);
 
 	printf("Array Dump: \n");
-	BCLog($$ array, 0);
+	BCDescription($$ array, 0);
 
 	printf("\nGet Element: \n");
-	BCLog(BCArrayGet(array, 0), 0);
-	BCLog(BCArrayGet(array, 1), 0);
+	BCDescription(BCArrayGet(array, 0), 0);
+	puts("");
+	BCDescription(BCArrayGet(array, 1), 0);
+	puts("");
 
 	// ================================
 	SUB_TITLE("Test Number");
@@ -74,13 +60,25 @@ int main() {
 	BCNumberRef numDouble = BCNumberCreate(3.14159);
 	BCNumberRef numInt64 = BCNumberCreate(9223372036854775807);
 	BCNumberRef numUInt64 = BCNumberCreate(9223372036854775807u);
+	
+	BCAutorelease($$ numInt);
+	BCAutorelease($$ numFloat);
+	BCAutorelease($$ numDouble);
+	BCAutorelease($$ numInt64);
+	BCAutorelease($$ numUInt64);
+	BCAutorelease($$ numBool);
 
 	printf("Numbers Dump: \n");
-	BCLog($$ numInt, 0);
-	BCLog($$ numFloat, 0);
-	BCLog($$ numDouble, 0);
-	BCLog($$ numInt64, 0);
-	BCLog($$ numUInt64, 0);
+	BCDescription($$ numInt, 0);
+	puts("");
+	BCDescription($$ numFloat, 0);
+	puts("");
+	BCDescription($$ numDouble, 0);
+	puts("");
+	BCDescription($$ numInt64, 0);
+	puts("");
+	BCDescription($$ numUInt64, 0);
+	puts("");
 
 	int32_t valInt;
 	BCNumberGetValue(numInt, &valInt);
@@ -97,10 +95,6 @@ int main() {
 	printf("42 (Int) == 42.0 (Float): %s\n", BCEqual($$ numInt, $$ numFloat2) ? "YES" : "NO");
 	printf("42 (Int) == 3.14 (Float): %s\n", BCEqual($$ numInt, $$ numFloat) ? "YES" : "NO");
 
-	BCAutorelease($$ numInt);
-	BCAutorelease($$ numFloat);
-	BCAutorelease($$ numDouble);
-	BCAutorelease($$ numInt64);
 	BCAutorelease($$ numInt2);
 	BCAutorelease($$ numFloat2);
 
@@ -109,7 +103,6 @@ int main() {
 	// ================================
 
 	BCMutableDictionaryRef dictionary = BCMutableDictionaryCreate();
-	BCDictionaryRef dictionaryCst = BCDictionaryCreate();
 	BCAutorelease($$ dictionary);
 
 	// Key is "username" (Pooled), Value is Array
@@ -127,18 +120,16 @@ int main() {
 	BCRelease($$ value);
 	BCRelease($$ str3);
 
-	BCHash($$ dictionaryCst);
-
 	// Description of Dictionary
 	printf("Dictionary Dump: \n");
 	puts("----");
-	BCLog($$ dictionary, 0);
+	BCDescription($$ dictionary, 0);
 
 	// Get Value by Key
 	printf("\nGet \"username\": \n");
 	puts("----");
 	BCObject* found = BCDictionaryGet( dictionary, $$ str2); // Look up using pooled string
-	if (found) BCLog(found, 0);
+	if (found) BCDescription(found, 0);
 
 	// ===========================
 	// Pop Autorelease Pool

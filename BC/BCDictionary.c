@@ -24,14 +24,17 @@ typedef struct BCDictionary {
 // MARK: Forward
 // =========================================================
 
-static void _Indent(int level);
-static void _DictPutInternal(BCDictionaryEntry* buckets, size_t cap, BCObjectRef key, BCObjectRef val);
+static void _DicPutInternal(BCDictionaryEntry* buckets, size_t cap, BCObjectRef key, BCObjectRef value);
+
+static void _Indent(int indent) {
+	for (int i = 0; i < indent; i++) printf("  ");
+}
 
 // =========================================================
 // MARK: Class
 // =========================================================
 
-void _BCDictDealloc(BCObjectRef obj) {
+void DictionaryDeallocImpl(BCObjectRef obj) {
 	BCDictionaryRef d = (BCDictionaryRef) obj;
 	for (size_t i = 0; i < d->capacity; i++) {
 		if (d->buckets[i].key) {
@@ -42,24 +45,24 @@ void _BCDictDealloc(BCObjectRef obj) {
 	free(d->buckets);
 }
 
-void _BCDictDesc(BCObjectRef obj, int indent) {
+void DictionaryDescriptionImpl(BCObjectRef obj, int indent) {
 	BCDictionaryRef d = (BCDictionaryRef) obj;
+	int indentBase = indent;
+	_Indent(indentBase);
 	printf("{\n");
 	for (size_t i = 0; i < d->capacity; i++) {
 		if (d->buckets[i].key) {
-			_Indent(indent + 1);
-			BCLog(d->buckets[i].key, indent + 1);
+			BCDescription(d->buckets[i].key, indentBase + (int)1);
 			printf(":");
-			d->buckets[i].value->cls->description(d->buckets[i].value, indent + 1);
+			d->buckets[i].value->cls->description(d->buckets[i].value, indentBase + 1);
 			printf(",\n");
 		}
 	}
-	_Indent(indent);
 	printf("}");
 }
 
 static const BCClass kBCDictClass = {
-	"BCDictionary", _BCDictDealloc, NULL, NULL, _BCDictDesc, NULL
+	"BCDictionary", DictionaryDeallocImpl, NULL, NULL, DictionaryDescriptionImpl, NULL
 };
 
 // =========================================================
@@ -91,7 +94,7 @@ void BCDictionarySet(BCMutableDictionaryRef d, BCObjectRef key, BCObjectRef val)
 		if (!newBuckets) return;
 		for (size_t i = 0; i < dict->capacity; i++) {
 			if (dict->buckets[i].key) {
-				_DictPutInternal(newBuckets, newCap, dict->buckets[i].key, dict->buckets[i].value);
+				_DicPutInternal(newBuckets, newCap, dict->buckets[i].key, dict->buckets[i].value);
 			}
 		}
 		free(dict->buckets);
@@ -131,7 +134,7 @@ BCObjectRef BCDictionaryGet(BCDictionaryRef d, BCObjectRef key) {
 	return NULL;
 }
 
-BCArrayRef BCDictionaryKeys(BCDictionaryRef d) {
+BCArrayRef BCDictionaryCopyKeys(BCDictionaryRef d) {
 	BCArrayRef arr = BCArrayCreate();
 	for (size_t i = 0; i < d->capacity; i++) {
 		if (d->buckets[i].key) {
@@ -145,11 +148,7 @@ BCArrayRef BCDictionaryKeys(BCDictionaryRef d) {
 // MARK: Internal
 // =========================================================
 
-static void _Indent(int level) {
-	for (int i = 0; i < level; i++) printf(" ");
-}
-
-static void _DictPutInternal(BCDictionaryEntry* buckets, size_t cap, BCObjectRef key, BCObjectRef val) {
+static void _DicPutInternal(BCDictionaryEntry* buckets, size_t cap, BCObjectRef key, BCObjectRef val) {
 	uint32_t hash = BCHash(key);
 	size_t idx = hash % cap;
 	while (buckets[idx].key) {

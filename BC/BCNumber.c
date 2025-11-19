@@ -101,9 +101,17 @@ static BCBool kBCNumberBoolFalse = (BCBool) {
 	.value = false
 };
 
+static bool kBcNumberBoolInitialized = false;
+
 BCBoolRef BCNumberGetBool(bool value) {
 	BCNumberRef val = value ? (BCNumberRef)&kBCNumberBoolTrue : (BCNumberRef)&kBCNumberBoolFalse;
-	val->super.cls = kBCNumberBoolClassRef; // Ensure class is set
+	if (!kBcNumberBoolInitialized) {
+		kBCNumberBoolTrue.super.super.cls = kBCNumberBoolClassRef;
+		atomic_init(&kBCNumberBoolTrue.super.super.ref_count, -1);
+		kBCNumberBoolFalse.super.super.cls = kBCNumberBoolClassRef;
+		atomic_init(&kBCNumberBoolFalse.super.super.ref_count, -1);
+		kBcNumberBoolInitialized = true;
+	}
 	return (BCBoolRef)val;
 }
 
@@ -152,7 +160,7 @@ static void NumberDesc(BCObjectRef obj, int indent) {
     BCNumberType type = classToType(obj->cls);
 
     // Indent
-    for (int i = 0; i < indent; i++) printf("\t");
+    for (int i = 0; i < indent; i++) printf("  ");
 
     switch (type) {
         case BCNumberTypeInt8: printf("Int8(%d)", ((BCNumberInt8*)obj)->value); break;

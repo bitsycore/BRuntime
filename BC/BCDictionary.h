@@ -12,6 +12,6 @@ BCDictionaryRef BCDictionaryCreate();
 BCMutableDictionaryRef BCMutableDictionaryCreate();
 void BCDictionarySet(BCMutableDictionaryRef d, BCObjectRef key, BCObjectRef val);
 BCObjectRef BCDictionaryGet(BCDictionaryRef d, BCObjectRef key);
-BCArrayRef BCDictionaryKeys(BCDictionaryRef d);
+BCArrayRef BCDictionaryCopyKeys(BCDictionaryRef d);
 
 #endif //BCRUNTIME_BCDICTIONARY_H

@@ -15,12 +15,6 @@ typedef struct BCArray {
 } BCArray;
 
 // =========================================================
-// MARK: Forward
-// =========================================================
-
-static void _Indent(int level);
-
-// =========================================================
 // MARK: Class
 // =========================================================
 
@@ -32,13 +26,15 @@ static void _BCArrDealloc(BCObjectRef obj) {
 
 static void _BCArrDesc(BCObjectRef obj, int indent) {
 	BCArrayRef arr = (BCArrayRef) obj;
+	for (int i = 0; i < indent; i++) printf("  ");
 	printf("[\n");
+
 	for (size_t i = 0; i < arr->count; i++) {
-		_Indent(indent + 1);
-		arr->items[i]->cls->description(arr->items[i], indent + 1);
+		arr->items[i]->cls->description(arr->items[i], indent +1);
 		printf(",\n");
 	}
-	_Indent(indent);
+
+	for (int i = 0; i < indent; i++) printf("  ");
 	printf("]");
 }
 
@@ -75,12 +71,4 @@ void BCArrayAdd(BCArrayRef arr, BCObjectRef item) {
 BCObjectRef BCArrayGet(BCArrayRef arr, size_t idx) {
 	if (idx >= arr->count) return NULL;
 	return arr->items[idx];
-}
-
-// =========================================================
-// MARK: Internal
-// =========================================================
-
-static void _Indent(int level) {
-	for (int i = 0; i < level; i++) printf("  ");
 }
