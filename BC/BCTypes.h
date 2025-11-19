@@ -10,7 +10,8 @@ typedef struct BCAllocator* BCAllocatorRef;
 typedef struct BCString* BCStringRef;
 typedef struct BCArray* BCArrayRef;
 typedef struct BCClass* BCClassRef;
-typedef struct BCObject* BCNumberRef;
+typedef struct BCNumber* BCNumberRef;
+typedef struct BCBool* BCBoolRef;
 
 typedef void (* BCDeallocFunc)(BCObjectRef obj);
 typedef uint32_t (* BCHashFunc)(BCObjectRef obj);

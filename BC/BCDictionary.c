@@ -49,7 +49,7 @@ void _BCDictDesc(BCObjectRef obj, int indent) {
 		if (d->buckets[i].key) {
 			_Indent(indent + 1);
 			BCLog(d->buckets[i].key, indent + 1);
-			printf(" : ");
+			printf(":");
 			d->buckets[i].value->cls->description(d->buckets[i].value, indent + 1);
 			printf(",\n");
 		}

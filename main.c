@@ -4,15 +4,30 @@
 #include "BC/BCArray.h"
 #include "BC/BCDictionary.h"
 #include "BC/BCNumber.h"
+#include "BC/BCCore.h"
 
 #define BIG_TITLE(_x_) printf("\n=================================================================\n                      " _x_ "\n=================================================================\n")
 #define SUB_TITLE(_x_) printf("\n-------------------------------\n        " _x_ "\n-------------------------------\n\n")
 
-#define $$ (BCObjectRef)
-#define $(_x_) _Generic(_x_)
+#define test(_x_) _Generic((_x_), \
+	int8_t: "int8_t", \
+	int16_t: "int16_t", \
+	int32_t: "int32_t", \
+	int64_t: "int64_t", \
+	uint8_t: "uint8_t", \
+	uint16_t: "uint16_t", \
+	uint32_t: "uint32_t", \
+	uint64_t: "uint64_t", \
+	float: "float", \
+	double: "double", \
+	bool: "bool", \
+	default: "unknown" \
+)
 
 int main() {
 	BIG_TITLE("BC Startup");
+
+	printf(test(true));
 
 	// ===========================
 	// Push Autorelease Pool
@@ -34,9 +49,13 @@ int main() {
 	SUB_TITLE("Test Array");
 	// ================================
 
+	val numIntAuto = $(5);
+	val boolean = BCTrue;
+
 	BCArrayRef array = BCArrayCreate();
 	BCArrayAdd(array, $$ BCStringConst("Admin"));
 	BCArrayAdd(array, $$ BCStringConst("Editor"));
+	BCArrayAdd(array, $$ BCTrue);
 
 	printf("Array Dump: \n");
 	BCLog($$ array, 0);
@@ -50,15 +69,18 @@ int main() {
 	// ================================
 
 	BCNumberRef numInt = BCNumberCreate(42);
+	BCNumberRef numBool = BCNumberCreate(true);
 	BCNumberRef numFloat = BCNumberCreate(3.14f);
 	BCNumberRef numDouble = BCNumberCreate(3.14159);
-	BCNumberRef numInt64 = BCNumberCreate((int64_t)9223372036854775807LL);
+	BCNumberRef numInt64 = BCNumberCreate(9223372036854775807);
+	BCNumberRef numUInt64 = BCNumberCreate(9223372036854775807u);
 
 	printf("Numbers Dump: \n");
 	BCLog($$ numInt, 0);
 	BCLog($$ numFloat, 0);
 	BCLog($$ numDouble, 0);
 	BCLog($$ numInt64, 0);
+	BCLog($$ numUInt64, 0);
 
 	int32_t valInt;
 	BCNumberGetValue(numInt, &valInt);
