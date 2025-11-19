@@ -38,4 +38,6 @@ void BCLog(BCObjectRef obj, int indent);
 bool BCIsKindOf(BCObjectRef obj, BCClassRef cls);
 BCStringRef BCClassName(BCClassRef cls);
 
+BCClassRef BCGetClass(BCObjectRef obj);
+
 #endif //BCRUNTIME_BCOBJECT_H

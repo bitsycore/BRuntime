@@ -3,6 +3,8 @@ project(BC C)
 
 set(CMAKE_C_STANDARD 17)
 
+add_compile_options(-fextended-identifiers)
+
 add_executable(
 		BCRuntime
 		main.c
@@ -17,4 +19,6 @@ add_executable(
 		BC/BCAutoreleasePool.h
 		BC/BCArray.c
 		BC/BCArray.h
+		BC/BCNumber.c
+		BC/BCNumber.h
 )

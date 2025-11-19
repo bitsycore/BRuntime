@@ -10,11 +10,12 @@ typedef struct BCAllocator* BCAllocatorRef;
 typedef struct BCString* BCStringRef;
 typedef struct BCArray* BCArrayRef;
 typedef struct BCClass* BCClassRef;
+typedef struct BCObject* BCNumberRef;
 
 typedef void (* BCDeallocFunc)(BCObjectRef obj);
 typedef uint32_t (* BCHashFunc)(BCObjectRef obj);
 typedef bool (* BCEqualFunc)(BCObjectRef a, BCObjectRef b);
 typedef void (* BCDescFunc)(BCObjectRef obj, int indent);
-typedef struct BCObject* (* BCCopyFunc)(BCObjectRef);
+typedef BCObjectRef (* BCCopyFunc)(BCObjectRef);
 
 #endif //BCRUNTIME_BCTYPES_H
