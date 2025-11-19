@@ -3,7 +3,7 @@
 
 #define $$ (BCObjectRef)
 
-#define val __auto_type
+#define $AUTO __auto_type
 
 #ifdef WIN32
 

@@ -32,9 +32,9 @@ int main() {
 	SUB_TITLE("Test Array");
 	// ================================
 
-	val numIntAuto = $(5);
+	$AUTO numIntAuto = $(5);
 	BCAutorelease($$ numIntAuto);
-	val boolean = BCTrue;
+	$AUTO boolean = BCTrue;
 
 	BCArrayRef array = BCArrayCreate();
 	BCArrayAdd(array, $$ BCStringConst("Admin"));
@@ -60,7 +60,7 @@ int main() {
 	BCNumberRef numDouble = BCNumberCreate(3.14159);
 	BCNumberRef numInt64 = BCNumberCreate(9223372036854775807);
 	BCNumberRef numUInt64 = BCNumberCreate(9223372036854775807u);
-	
+
 	BCAutorelease($$ numInt);
 	BCAutorelease($$ numFloat);
 	BCAutorelease($$ numDouble);
