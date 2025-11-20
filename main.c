@@ -42,8 +42,8 @@ int main() {
 
 	BCArrayRef array = BCArrayCreate();
 	BCArrayAdd(array, $OBJ BCStringConst("Admin"));
-	BCArrayAdd(array, $OBJ BCStringConst("Editor"));
-	BCArrayAdd(array, $OBJ BCTrue);
+	BCArrayAdd(array, BCStringConst("Editor"));
+	BCArrayAdd(array, $(BCTrue));
 
 	printf("Array Dump: \n");
 	BCDescription($OBJ array, 0);

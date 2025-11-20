@@ -20,6 +20,7 @@ add_executable(
 		BC/BCNumber.c
 		BC/BCNumber.h
 		BC/BC.h
+		BC/BC.c
 		BC/BCMacroTools.h
 )
 
