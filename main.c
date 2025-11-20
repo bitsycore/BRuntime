@@ -150,6 +150,7 @@ void testDictionary() {
 		"Hello2", 7.5,
 		5, "Hello3"
 	);
+	BCAutorelease($OBJ abc);
 
 	BCDescription($(abc), 0);
 }
