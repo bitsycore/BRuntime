@@ -4,9 +4,16 @@
 #include "BCMacroTools.h"
 #include "BCTypes.h"
 
-#define $OBJ (BCObjectRef)
+// ================================================
+// MARK: SHORTCUT
+// ================================================
 
+#define $OBJ (BCObjectRef)
 #define $VAR __auto_type
+
+// ================================================
+// MARK: BOXING
+// ================================================
 
 #ifdef WIN32
 #define ___BC___PLATFORM_EXTRA_$_MACRO
@@ -31,15 +38,30 @@ static inline BCObjectRef ___BCCastToObject(void* obj) { return (BCObjectRef)obj
     bool: BCNumberGetBool,             \
     char*: BCStringCreate,             \
     const char*: BCStringCreate,       \
-    default: ___BCCastToObject         \
+    BCStringRef: ___BCCastToObject,    \
+    BCNumberRef: ___BCCastToObject,    \
+    BCArrayRef: ___BCCastToObject,     \
+    BCAllocatorRef: ___BCCastToObject, \
+    BCDictionaryRef: ___BCCastToObject,\
+    BCObjectRef: ___BCCastToObject     \
 )(__val__)
 
 #define $ARR(...) \
     ___BCArrayCreateWithObjectsNoRetain( \
-        ARG_COUNT(__VA_ARGS__), \
-        MAP($, __VA_ARGS__) \
+        BC_ARG_COUNT(__VA_ARGS__), \
+        BC_ARG_MAP($, __VA_ARGS__) \
     )
 
-void BCInitialize(void);
+#define REQUIRE_EVEN_ARG_COUNT(count) \
+
+
+#define $DIC(...) ({\
+    _Static_assert(((BC_ARG_COUNT(__VA_ARGS__)) % 2) == 0, "DIC requires an even number of arguments");\
+    $VAR ___temp = ___BCDictionaryCreateWithObjectsNoRetain( \
+        BC_ARG_COUNT(__VA_ARGS__), \
+        BC_ARG_MAP($, __VA_ARGS__) \
+    ); \
+    ___temp; \
+})
 
 #endif //BC_BC_H

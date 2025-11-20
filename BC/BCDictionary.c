@@ -2,6 +2,7 @@
 #include "BCArray.h"
 
 #include <stdio.h>
+#include <stdarg.h>
 
 // =========================================================
 // MARK: Struct
@@ -142,6 +143,22 @@ BCArrayRef BCDictionaryCopyKeys(BCDictionaryRef d) {
 		}
 	}
 	return arr;
+}
+
+BCDictionaryRef ___BCDictionaryCreateWithObjectsNoRetain(size_t count, ...) {
+	BCMutableDictionaryRef d = BCMutableDictionaryCreate();
+	va_list args;
+	va_start(args, count);
+	for (size_t i = 0; i < count/2; i++) {
+		BCObjectRef key = va_arg(args, BCObjectRef);
+		BCObjectRef val = va_arg(args, BCObjectRef);
+		BCDictionarySet(d, key, val);
+		BCRelease(key);
+		BCRelease(val);
+	}
+	va_end(args);
+	d->isMutable = false;
+	return d;
 }
 
 // =========================================================

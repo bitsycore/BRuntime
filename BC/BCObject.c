@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <assert.h>
 
 // =========================================================
 // MARK: Allocator
@@ -49,8 +50,9 @@ void BCRelease(BCObjectRef obj) {
 		if (obj->cls->dealloc) {
 			obj->cls->dealloc(obj);
 		}
-		if (obj->allocator != NULL)
+		if (obj->allocator != NULL) {
 			obj->allocator->free(obj, obj->allocator->context);
+		}
 	}
 }
 

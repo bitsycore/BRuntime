@@ -9,13 +9,7 @@
 #define BIG_TITLE(_x_) printf("\n=================================================================\n                      " _x_ "\n=================================================================\n")
 #define SUB_TITLE(_x_) printf("\n-------------------------------\n        " _x_ "\n-------------------------------\n\n")
 
-int main() {
-	BIG_TITLE("BC Startup");
-
-	// ===========================
-	// Push Autorelease Pool
-	BCPoolPush();
-
+void testString() {
 	// ================================
 	SUB_TITLE("Test String");
 	// ================================
@@ -23,25 +17,29 @@ int main() {
 	BCStringRef str1 = BCStringConst("username"); // Pooled
 	BCStringRef str2 = BCStringConst("username"); // Same Instance
 	BCStringRef str3 = BCStringCreate("username"); // New Instance
+	BCAutorelease($OBJ str3);
 
 	printf("Pool Test: s1=%p, s2=%p (SamePtr? %s)\n", str1, str2, (str1 == str2) ? "YES" : "NO");
 	printf("Alloc Test: s1=%p, s3=%p (SamePtr? %s)\n", str1, str3, (str1 == str3) ? "YES" : "NO");
 	printf("Equality Test (s1 vs s3): %s\n", BCEqual( $OBJ str1, $OBJ str3) ? "TRUE" : "FALSE");
+}
 
+void testArray() {
 	// ================================
 	SUB_TITLE("Test Array");
 	// ================================
 
 	$VAR numIntAuto = $(5);
 	BCAutorelease($OBJ numIntAuto);
-	$VAR boolean = BCTrue;
+
 	$VAR a = $("Hello");
 
 	$VAR arrayAuto = $ARR(a, 5, 6, 7, 8);
-
 	BCAutorelease($OBJ arrayAuto);
 
 	BCArrayRef array = BCArrayCreate();
+	BCAutorelease($OBJ array);
+
 	BCArrayAdd(array, $OBJ BCStringConst("Admin"));
 	BCArrayAdd(array, $OBJ BCStringConst("Editor"));
 	BCArrayAdd(array, $(BCTrue));
@@ -54,7 +52,9 @@ int main() {
 	puts("");
 	BCDescription(BCArrayGet(array, 1), 0);
 	puts("");
+}
 
+void testNumber() {
 	// ================================
 	SUB_TITLE("Test Number");
 	// ================================
@@ -96,34 +96,40 @@ int main() {
 	// Equality
 	BCNumberRef numInt2 = BCNumberCreate(42);
 	BCNumberRef numFloat2 = BCNumberCreate(42.0f);
-	printf("42 (Int) == 42 (Int): %s\n", BCEqual($OBJ numInt, $OBJ numInt2) ? "YES" : "NO");
-	printf("42 (Int) == 42.0 (Float): %s\n", BCEqual($OBJ numInt, $OBJ numFloat2) ? "YES" : "NO");
-	printf("42 (Int) == 3.14 (Float): %s\n", BCEqual($OBJ numInt, $OBJ numFloat) ? "YES" : "NO");
-
 	BCAutorelease($OBJ numInt2);
 	BCAutorelease($OBJ numFloat2);
 
+	printf("42 (Int) == 42 (Int): %s\n", BCEqual($OBJ numInt, $OBJ numInt2) ? "YES" : "NO");
+	printf("42 (Int) == 42.0 (Float): %s\n", BCEqual($OBJ numInt, $OBJ numFloat2) ? "YES" : "NO");
+	printf("42 (Int) == 3.14 (Float): %s\n", BCEqual($OBJ numInt, $OBJ numFloat) ? "YES" : "NO");
+}
+
+void testDictionary() {
 	// ================================
 	SUB_TITLE("Test Dictionary");
 	// ================================
 
+	$VAR array = $ARR("username", "password");
+	BCAutorelease($OBJ array);
+
+	BCStringRef str1 = BCStringConst("username");
+	BCStringRef str2 = BCStringConst("username");
+
+	$VAR numInt2 = $(42);
+	BCAutorelease($OBJ numInt2);
+
 	BCMutableDictionaryRef dictionary = BCMutableDictionaryCreate();
 	BCAutorelease($OBJ dictionary);
+
+	BCStringRef key = BCStringCreate("id");
+	BCAutorelease($OBJ key);
+	BCStringRef value = BCStringCreate("10%d", 1);
+	BCAutorelease($OBJ value);
 
 	// Key is "username" (Pooled), Value is Array
 	BCDictionarySet(dictionary, $OBJ (str1), $OBJ (array));
 	BCDictionarySet(dictionary, $OBJ (BCStringConst("test")), $OBJ (numInt2));
-
-	// Key is dynamic string "id", Value is dynamic string "101"
-	BCStringRef key = BCStringCreate("id");
-	BCStringRef value = BCStringCreate("10%d", 1);
 	BCDictionarySet(dictionary, $OBJ (key), $OBJ (value));
-
-	// Release Locals reference, Dictionary will retain its own
-	BCRelease($OBJ array);
-	BCRelease($OBJ key);
-	BCRelease($OBJ value);
-	BCRelease($OBJ str3);
 
 	// Description of Dictionary
 	printf("Dictionary Dump: \n");
@@ -135,6 +141,30 @@ int main() {
 	puts("----");
 	BCObject* found = BCDictionaryGet( dictionary, $OBJ str2); // Look up using pooled string
 	if (found) BCDescription(found, 0);
+
+	puts("");
+
+	$VAR abc = $DIC(
+		"Hello", "World",
+		"Hello1", 5,
+		"Hello2", 7.5,
+		5, "Hello3"
+	);
+
+	BCDescription($(abc), 0);
+}
+
+int main() {
+	BIG_TITLE("BC Startup");
+
+	// ===========================
+	// Push Autorelease Pool
+	BCPoolPush();
+
+	testString();
+	testArray();
+	testNumber();
+	testDictionary();
 
 	// ===========================
 	// Pop Autorelease Pool
