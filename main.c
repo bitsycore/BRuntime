@@ -36,13 +36,14 @@ int main() {
 	BCAutorelease($OBJ numIntAuto);
 	$VAR boolean = BCTrue;
 	$VAR a = $("Hello");
-	$VAR ab = $("Hello");
 
-	$ARR(a, 5, 6, 7, 8);
+	$VAR arrayAuto = $ARR(a, 5, 6, 7, 8);
+
+	BCAutorelease($OBJ arrayAuto);
 
 	BCArrayRef array = BCArrayCreate();
 	BCArrayAdd(array, $OBJ BCStringConst("Admin"));
-	BCArrayAdd(array, BCStringConst("Editor"));
+	BCArrayAdd(array, $OBJ BCStringConst("Editor"));
 	BCArrayAdd(array, $(BCTrue));
 
 	printf("Array Dump: \n");

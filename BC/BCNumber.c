@@ -244,6 +244,9 @@ static BCNumberType classToType(BCClassRef cls) {
 // MARK: Init
 // =============================================================================
 
+BCBoolRef BCTrue = (BCBoolRef) &kBCNumberBoolTrue;
+BCBoolRef BCFalse = (BCBoolRef) &kBCNumberBoolFalse;
+
 void _BCNumberInitialize(void) {
 	kBCNumberBoolTrue = (BCNumberBool) {
 		.super = {

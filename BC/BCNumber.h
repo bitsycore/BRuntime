@@ -30,8 +30,8 @@ BCNumberRef BCNumberCreateFloat(float value);
 BCNumberRef BCNumberCreateDouble(double value);
 BCBoolRef BCNumberGetBool(bool value);
 
-#define BCTrue ( (BCBoolRef) BCNumberGetBool(true) )
-#define BCFalse ( (BCBoolRef) BCNumberGetBool(false) )
+extern BCBoolRef BCTrue;
+extern BCBoolRef BCFalse;
 
 #ifdef WIN32
 
