@@ -33,6 +33,7 @@ void testArray() {
 	BCAutorelease($OBJ numIntAuto);
 
 	$VAR a = $("Hello");
+	BCAutorelease($OBJ a);
 
 	$VAR arrayAuto = $ARR(a, 5, 6, 7, 8);
 	BCAutorelease($OBJ arrayAuto);
@@ -42,7 +43,7 @@ void testArray() {
 
 	BCArrayAdd(array, $OBJ BCStringConst("Admin"));
 	BCArrayAdd(array, $OBJ BCStringConst("Editor"));
-	BCArrayAdd(array, $(BCTrue));
+	BCArrayAdd(array, $OBJ BCTrue);
 
 	printf("Array Dump: \n");
 	BCDescription($OBJ array, 0);
@@ -144,15 +145,37 @@ void testDictionary() {
 
 	puts("");
 
-	$VAR abc = $DIC(
-		"Hello", "World",
-		"Hello1", 5,
-		"Hello2", 7.5,
-		5, "Hello3"
-	);
-	BCAutorelease($OBJ abc);
+	$VAR nine = $(9);
+	BCAutorelease($OBJ nine);
+	$VAR three = $(3);
+	BCAutorelease($OBJ three);
 
-	BCDescription($(abc), 0);
+	$VAR abc = $DIC(
+		"nine", nine,
+		"three", three,
+		"array", array,
+		"dic", $$DIC("abc", nine)
+	);
+
+	$VAR header = $DIC(
+		"title", "Test Dictionary",
+		"version", "1.0.0",
+		"author", "Beej"
+	);
+	BCAutorelease($OBJ header);
+
+	BCDescription($OBJ header, 0);
+
+	puts("");
+
+	BCDescription($OBJ abc, 0);
+
+	BCRelease($OBJ abc);
+
+	BCNumberGetTypeID(nine);
+	BCNumberGetTypeID(three);
+
+
 }
 
 int main() {

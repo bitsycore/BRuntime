@@ -1,6 +1,12 @@
 #ifndef BC_BCMACROTOOLS_H
 #define BC_BCMACROTOOLS_H
 
+#define ___BC___M_STR2(x) #x
+#define BC_M_STR(x) ___BC___M_STR2(x)
+
+#define ___BC___M_CAT2(a, b) a##b
+#define BC_M_CAT(a, b)  ___BC___M_CAT2(a, b)
+
 #define ___BC___MAP_0(F)
 #define ___BC___MAP_1(F, X)      F(X)
 #define ___BC___MAP_2(F, X, ...) F(X), ___BC___MAP_1(F, __VA_ARGS__)
