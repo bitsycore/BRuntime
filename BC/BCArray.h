@@ -4,6 +4,8 @@
 #include "BCObject.h"
 
 BCArrayRef BCArrayCreate(void);
+BCArrayRef BCArrayCreateWithObjects(size_t count, ...);
+BCArrayRef ___BCArrayCreateWithObjectsNoRetain(size_t count, ...);
 void BCArrayAdd(BCArrayRef arr, BCObject* item);
 BCObject* BCArrayGet(BCArrayRef arr, size_t idx);
 

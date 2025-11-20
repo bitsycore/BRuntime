@@ -1,5 +1,6 @@
 #include <malloc.h>
 #include <stdio.h>
+#include <stdarg.h>
 
 #include "BCArray.h"
 
@@ -71,4 +72,29 @@ void BCArrayAdd(BCArrayRef arr, BCObjectRef item) {
 BCObjectRef BCArrayGet(BCArrayRef arr, size_t idx) {
 	if (idx >= arr->count) return NULL;
 	return arr->items[idx];
+}
+
+BCArrayRef BCArrayCreateWithObjects(size_t count, ...) {
+	BCArrayRef arr = BCArrayCreate();
+	va_list args;
+	va_start(args, count);
+	for (size_t i = 0; i < count; i++) {
+		BCObjectRef item = va_arg(args, BCObjectRef);
+		BCArrayAdd(arr, item);
+	}
+	va_end(args);
+	return arr;
+}
+
+BCArrayRef ___BCArrayCreateWithObjectsNoRetain(size_t count, ...) {
+	BCArrayRef arr = BCArrayCreate();
+	va_list args;
+	va_start(args, count);
+	for (size_t i = 0; i < count; i++) {
+		BCObjectRef item = va_arg(args, BCObjectRef);
+		BCArrayAdd(arr, item);
+		BCRelease(item);
+	}
+	va_end(args);
+	return arr;
 }

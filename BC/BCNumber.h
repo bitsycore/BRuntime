@@ -70,7 +70,7 @@ BCBoolRef BCNumberGetBool(bool value);
 
 #endif
 
-void BCNumberGetValueExplicit(BCNumberRef num, void* value, BCNumberType type);
+void BCNumberGetValueExplicit(BCNumberRef num, void* value, BCNumberType dstType);
 BCNumberType BCNumberGetTypeID(BCNumberRef num);
 
 #define BCNumberGetValue(num, outPtr) _Generic( (outPtr), \

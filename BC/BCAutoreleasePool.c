@@ -54,3 +54,9 @@ BCObject* BCAutorelease(BCObject* obj) {
 	return obj;
 
 }
+
+void BCAutoreleaseScope(void (^block)(void)) {
+	BCPoolPush();
+	block();
+	BCPoolPop();
+}

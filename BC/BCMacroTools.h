@@ -1,0 +1,5 @@
+#ifndef BC_BCMACROTOOLS_H
+#define BC_BCMACROTOOLS_H
+
+
+#endif //BC_BCMACROTOOLS_H

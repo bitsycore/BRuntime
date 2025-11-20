@@ -35,7 +35,7 @@ BCObject* BCCopy(BCObjectRef obj);
 uint32_t BCHash(BCObjectRef obj);
 bool BCEqual(BCObjectRef a, BCObjectRef b);
 void BCDescription(BCObjectRef obj, int indent);
-bool BCIsKindOf(BCObjectRef obj, BCClassRef cls);
+bool BCIsClass(BCObjectRef obj, BCClassRef cls);
 BCStringRef BCClassName(BCClassRef cls);
 
 BCClassRef BCGetClass(BCObjectRef obj);

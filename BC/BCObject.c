@@ -86,7 +86,7 @@ void BCDescription(BCObjectRef obj, int indent) {
 	}
 }
 
-bool BCIsKindOf(BCObjectRef obj, BCClassRef cls) {
+bool BCIsClass(BCObjectRef obj, BCClassRef cls) {
 	if (!obj || !cls) return false;
 	return (obj->cls == cls);
 }
