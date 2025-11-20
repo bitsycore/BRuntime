@@ -4,6 +4,7 @@
 #include "BCTypes.h"
 
 typedef enum {
+	BCNumberTypeError = -1,
 	BCNumberTypeInt8 = 0,
 	BCNumberTypeInt16 = 1,
 	BCNumberTypeInt32 = 2,

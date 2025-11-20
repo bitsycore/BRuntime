@@ -3,8 +3,6 @@
 
 #include <stdio.h>
 
-#define BCNumberTypeError (-1)
-
 // =============================================================================
 // MARK: Struct
 // =============================================================================
@@ -15,7 +13,7 @@ typedef struct BCNumber {;
 
 #define DEFINE_NUMBER_STRUCT(Type, Name) \
     typedef struct BCNumber##Name { \
-        BCNumber super;    \
+        BCObject super;    \
         Type value;         \
     } BCNumber##Name;
 
@@ -31,7 +29,7 @@ DEFINE_NUMBER_STRUCT(float, Float)
 DEFINE_NUMBER_STRUCT(double, Double)
 
 typedef struct BCBool {
-	BCNumber super;
+	BCObject super;
 	bool value;
 } BCBool;
 
@@ -43,61 +41,41 @@ static bool isNumber(BCClassRef cls);
 static BCClassRef typeToClass(BCNumberType type);
 static BCNumberType classToType(BCClassRef cls);
 
-#define DECLARE_CLASS(Name) extern BCClassRef kBCNumber##Name##ClassRef;
-
-DECLARE_CLASS(Int8)
-DECLARE_CLASS(Int16)
-DECLARE_CLASS(Int32)
-DECLARE_CLASS(Int64)
-DECLARE_CLASS(UInt8)
-DECLARE_CLASS(UInt16)
-DECLARE_CLASS(UInt32)
-DECLARE_CLASS(UInt64)
-DECLARE_CLASS(Float)
-DECLARE_CLASS(Double)
-DECLARE_CLASS(Bool)
+extern const BCClass kClassList[];
 
 // =============================================================================
 // MARK: Create
 // =============================================================================
 
-#define IMPLEMENT_CREATE(Type, Name, ClassName) \
-    BCNumberRef BCNumberCreate##Name(Type value) { \
-        BCNumber##Name* obj = (BCNumber##Name*)BCAllocRaw(kBCNumber##ClassName##ClassRef, kBCDefaultAllocator, sizeof(BCNumber##Name) - sizeof(BCObject)); \
+#define IMPLEMENT_CREATE(Type, _Name_) \
+    BCNumberRef BCNumberCreate##_Name_(Type value) { \
+        BCNumber##_Name_* obj = (BCNumber##_Name_*)BCAllocRaw( (BCClassRef) &kClassList[BCNumberType##_Name_], kBCDefaultAllocator, sizeof(BCNumber##_Name_) - sizeof(BCObject)); \
         if (obj) { \
             obj->value = value; \
         } \
         return (BCNumberRef)obj; \
     }
 
-IMPLEMENT_CREATE(int8_t, Int8, Int8)
-IMPLEMENT_CREATE(int16_t, Int16, Int16)
-IMPLEMENT_CREATE(int32_t, Int32, Int32)
-IMPLEMENT_CREATE(int64_t, Int64, Int64)
-IMPLEMENT_CREATE(uint8_t, UInt8, UInt8)
-IMPLEMENT_CREATE(uint16_t, UInt16, UInt16)
-IMPLEMENT_CREATE(uint32_t, UInt32, UInt32)
-IMPLEMENT_CREATE(uint64_t, UInt64, UInt64)
-IMPLEMENT_CREATE(float, Float, Float)
-IMPLEMENT_CREATE(double, Double, Double)
+IMPLEMENT_CREATE(int8_t, Int8)
+IMPLEMENT_CREATE(int16_t, Int16)
+IMPLEMENT_CREATE(int32_t, Int32)
+IMPLEMENT_CREATE(int64_t, Int64)
+IMPLEMENT_CREATE(uint8_t, UInt8)
+IMPLEMENT_CREATE(uint16_t, UInt16)
+IMPLEMENT_CREATE(uint32_t, UInt32)
+IMPLEMENT_CREATE(uint64_t, UInt64)
+IMPLEMENT_CREATE(float, Float)
+IMPLEMENT_CREATE(double, Double)
 
 // Bool is a special case, it is a singleton object that is always allowed.
 
 static BCBool kBCNumberBoolTrue = (BCBool) {
-	.super = {
-		.super = {
-			.cls = NULL, .allocator = NULL, .ref_count = -1
-		}
-	},
+	.super = { .cls = &kClassList[BCNumberTypeBool] },
 	.value = true
 };
 
 static BCBool kBCNumberBoolFalse = (BCBool) {
-	.super = {
-		.super = {
-			.cls = NULL, .allocator = NULL, .ref_count = -1
-		}
-	},
+	.super = { .cls = &kClassList[BCNumberTypeBool] },
 	.value = false
 };
 
@@ -106,10 +84,10 @@ static bool kBcNumberBoolInitialized = false;
 BCBoolRef BCNumberGetBool(bool value) {
 	BCNumberRef val = value ? (BCNumberRef)&kBCNumberBoolTrue : (BCNumberRef)&kBCNumberBoolFalse;
 	if (!kBcNumberBoolInitialized) {
-		kBCNumberBoolTrue.super.super.cls = kBCNumberBoolClassRef;
-		atomic_init(&kBCNumberBoolTrue.super.super.ref_count, -1);
-		kBCNumberBoolFalse.super.super.cls = kBCNumberBoolClassRef;
-		atomic_init(&kBCNumberBoolFalse.super.super.ref_count, -1);
+		kBCNumberBoolTrue.super.cls = (BCClassRef) kClassList + BCNumberTypeBool;
+		atomic_init(&kBCNumberBoolTrue.super.ref_count, -1);
+		kBCNumberBoolFalse.super.cls = (BCClassRef) kClassList + BCNumberTypeBool;
+		atomic_init(&kBCNumberBoolFalse.super.ref_count, -1);
 		kBcNumberBoolInitialized = true;
 	}
 	return (BCBoolRef)val;
@@ -184,17 +162,16 @@ static BCObjectRef NumberCopy(BCObjectRef obj) { return BCRetain(obj); }
 // MARK: Class
 // =============================================================================
 
-#define INIT_CLASS(StrName) \
-    { \
-        .name = "BCNumber" #StrName, \
-        .dealloc = NULL, \
-        .hash = NumberHash, \
-        .equal = NumberEqual, \
-        .description = NumberDesc, \
-        .copy = NumberCopy \
-    }
+#define INIT_CLASS(StrName) { \
+    .name = "BCNumber" #StrName, \
+    .dealloc = NULL, \
+    .hash = NumberHash, \
+    .equal = NumberEqual, \
+    .description = NumberDesc, \
+    .copy = NumberCopy \
+}
 
-BCClass kClassList[] = {
+BCClass const kClassList[] = {
 	INIT_CLASS(Int8),
 	INIT_CLASS(Int16),
 	INIT_CLASS(Int32),
@@ -207,20 +184,6 @@ BCClass kClassList[] = {
 	INIT_CLASS(Double),
 	INIT_CLASS(Bool),
 };
-
-#define GLOBAL_CLASS(Name, Index) BCClassRef kBCNumber##Name##ClassRef = &kClassList[Index];
-
-GLOBAL_CLASS(Int8, 0)
-GLOBAL_CLASS(Int16, 1)
-GLOBAL_CLASS(Int32, 2)
-GLOBAL_CLASS(Int64, 3)
-GLOBAL_CLASS(UInt8, 4)
-GLOBAL_CLASS(UInt16, 5)
-GLOBAL_CLASS(UInt32, 6)
-GLOBAL_CLASS(UInt64, 7)
-GLOBAL_CLASS(Float, 8)
-GLOBAL_CLASS(Double, 9)
-GLOBAL_CLASS(Bool, 10)
 
 // =============================================================================
 // MARK: Public
@@ -256,7 +219,8 @@ void BCNumberGetValueExplicit(BCNumberRef num, void* value, BCNumberType type) {
             case BCNumberTypeUInt64: CONVERT_AND_STORE(SrcType, SrcName, uint64_t); break; \
             case BCNumberTypeFloat: CONVERT_AND_STORE(SrcType, SrcName, float); break; \
             case BCNumberTypeDouble: CONVERT_AND_STORE(SrcType, SrcName, double); break; \
-            case BCNumberTypeBool: CONVERT_AND_STORE(SrcType, SrcName, bool); break; \
+            case BCNumberTypeBool: CONVERT_AND_STORE(SrcType, SrcName, bool); break;   \
+        	default: return;\
         }
 
 	switch (srcType) {
@@ -269,8 +233,9 @@ void BCNumberGetValueExplicit(BCNumberRef num, void* value, BCNumberType type) {
 		case BCNumberTypeUInt32: DISPATCH_DEST(uint32_t, UInt32); break;
 		case BCNumberTypeUInt64: DISPATCH_DEST(uint64_t, UInt64); break;
 		case BCNumberTypeFloat: DISPATCH_DEST(float, Float); break;
-		case BCNumberTypeDouble: DISPATCH_DEST(double, Double); break;
-		case BCNumberTypeBool: DISPATCH_DEST(bool, Double); break;
+		case BCNumberTypeDouble: DISPATCH_DEST(double, Double) break;
+		case BCNumberTypeBool: DISPATCH_DEST(bool, Double) break;
+		default: return;
 	}
 }
 
@@ -289,7 +254,7 @@ static bool isNumber(BCClassRef cls) { return cls >= kClassList && cls < kClassL
 
 static BCClassRef typeToClass(BCNumberType type) {
 	if (type > BCNumberTypeBool || type <= BCNumberTypeError) return NULL;
-	return kClassList + type;
+	return (BCClassRef) &kClassList[type];
 }
 
 static BCNumberType classToType(BCClassRef cls) {
