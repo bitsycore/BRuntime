@@ -50,7 +50,7 @@ BCObject* BCAutorelease(BCObject* obj) {
 		pool->capacity *= 2;
 		pool->stack = realloc(pool->stack, pool->capacity * sizeof(BCObject*));
 	}
+
 	pool->stack[pool->count++] = obj;
 	return obj;
-
 }

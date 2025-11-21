@@ -1,16 +1,14 @@
 #include "BCString.h"
 
+#include <stdarg.h>
 #include <stdatomic.h>
-#include <threads.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
-#include <stdarg.h>
+#include <threads.h>
 
 #include "BCObject.h"
 
-#define BC_HASH_Unset 0
-#define BC_LEN_Unset SIZE_MAX
 #define POOL_SIZE 1024
 
 // =========================================================
@@ -51,7 +49,7 @@ bool StringEqualImpl(const BCObjectRef a, const BCObjectRef b) {
 	// Check Hash Cache
 	const uint32_t h1 = atomic_load(&s1->_hash);
 	const uint32_t h2 = atomic_load(&s2->_hash);
-	if (h1 != BC_HASH_Unset && h2 != BC_HASH_Unset && h1 != h2) return false;
+	if (h1 != BC_HASH_UNSET && h2 != BC_HASH_UNSET && h1 != h2) return false;
 
 	// Check Length
 	if (BCStringLength(s1) != BCStringLength(s2)) return false;
@@ -60,9 +58,8 @@ bool StringEqualImpl(const BCObjectRef a, const BCObjectRef b) {
 	return memcmp(s1->buffer, s2->buffer, BCStringLength(s1)) == 0;
 }
 
-void StringDescriptionImpl(const BCObjectRef obj, const int indent) {
-	for (int i = 0; i < indent; i++) printf("  ");
-	printf("\"%s\"", ((const BCStringRef) obj)->buffer);
+BCStringRef StringToStringImpl(const BCObjectRef obj) {
+	return (BCStringRef)BCRetain(obj);
 }
 
 BCObject* StringCopyImpl(const BCObjectRef obj) {
@@ -78,9 +75,9 @@ static const BCClass kBCStringClass = {
 	.dealloc = StringDeallocImpl,
 	.hash = StringHashImpl,
 	.equal = StringEqualImpl,
-	.description = StringDescriptionImpl,
+	.toString = StringToStringImpl,
 	.copy = StringCopyImpl,
-	.bytes_size = sizeof(BCString)
+	.allocSize = sizeof(BCString)
 };
 
 // =========================================================
@@ -109,10 +106,10 @@ static uint32_t RawHash(const char* s) {
 		hash ^= (uint8_t) *s++;
 		hash *= 16777619;
 	}
-	return (hash == BC_HASH_Unset) ? 1 : hash;
+	return hash == BC_HASH_UNSET ? 1 : hash;
 }
 
-static BCStringRef StringPoolGetOrInsert(const char* text, size_t len, uint32_t hash) {
+static BCStringRef StringPoolGetOrInsert(const char* text, const size_t len, const uint32_t hash) {
 	call_once(&_BCStringPool.flag, PoolInit);
 
 	const uint32_t idx = hash % POOL_SIZE;
@@ -167,8 +164,8 @@ BCStringRef BCStringCreate(const char* fmt, ...) {
 	vsnprintf(str->buffer, len + 1, fmt, args);
 	va_end(args);
 
-	str->_length = BC_LEN_Unset;
-	str->_hash = BC_HASH_Unset;
+	str->_length = BC_LEN_UNSET;
+	str->_hash = BC_HASH_UNSET;
 
 	str->_isPooled = false;
 	return str;
@@ -182,7 +179,7 @@ BCStringRef BCStringConst(const char* text) {
 size_t BCStringLength(const BCStringRef str) {
 	if (!str) return 0;
 	size_t len = atomic_load_explicit(&str->_length, memory_order_relaxed);
-	if (len == BC_LEN_Unset) {
+	if (len == BC_LEN_UNSET) {
 		len = strlen(str->buffer);
 		atomic_store_explicit(&str->_length, len, memory_order_relaxed);
 	}
@@ -192,9 +189,13 @@ size_t BCStringLength(const BCStringRef str) {
 uint32_t BCStringHash(const BCStringRef str) {
 	if (!str) return 0;
 	uint32_t hash = atomic_load_explicit(&str->_hash, memory_order_relaxed);
-	if (hash == BC_HASH_Unset) {
+	if (hash == BC_HASH_UNSET) {
 		hash = RawHash(str->buffer);
 		atomic_store_explicit(&str->_hash, hash, memory_order_relaxed);
 	}
 	return hash;
+}
+
+const char* BCStringGetCString(const BCStringRef str) {
+	return str->buffer;
 }

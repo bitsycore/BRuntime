@@ -1,8 +1,11 @@
 #include "BCDictionary.h"
-#include "BCArray.h"
 
-#include <stdio.h>
+#include "BCArray.h"
+#include "BCString.h"
+
 #include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 // =========================================================
 // MARK: Struct
@@ -27,16 +30,12 @@ typedef struct BCDictionary {
 
 static void _DicPutInternal(BCDictionaryEntry* buckets, size_t cap, BCObjectRef key, BCObjectRef val);
 
-static void _Indent(const int indent) {
-	for (int i = 0; i < indent; i++) printf("  ");
-}
-
 // =========================================================
 // MARK: Class
 // =========================================================
 
-void DictionaryDeallocImpl(BCObjectRef obj) {
-	BCDictionaryRef d = (BCDictionaryRef) obj;
+static void DictionaryDeallocImpl(const BCObjectRef obj) {
+	const BCDictionaryRef d = (BCDictionaryRef) obj;
 	for (size_t i = 0; i < d->capacity; i++) {
 		if (d->buckets[i].key) {
 			BCRelease(d->buckets[i].key);
@@ -46,16 +45,15 @@ void DictionaryDeallocImpl(BCObjectRef obj) {
 	free(d->buckets);
 }
 
-void DictionaryDescriptionImpl(BCObjectRef obj, int indent) {
-	BCDictionaryRef d = (BCDictionaryRef) obj;
-	int indentBase = indent;
-	_Indent(indentBase);
+BCStringRef DictionaryToStringImpl(const BCObjectRef obj) {
+	const BCDictionaryRef d = (BCDictionaryRef) obj;
+	return BCStringCreate("BCDictionary(count: %zu)", d->count);
 	printf("{\n");
 	for (size_t i = 0; i < d->capacity; i++) {
 		if (d->buckets[i].key) {
-			BCDescription(d->buckets[i].key, indentBase + (int)1);
+			BCToString(d->buckets[i].key);
 			printf(":");
-			d->buckets[i].value->cls->description(d->buckets[i].value, indentBase + 1);
+			d->buckets[i].value->cls->toString(d->buckets[i].value);
 			printf(",\n");
 		}
 	}
@@ -67,7 +65,7 @@ static const BCClass kBCDictClass = {
 	DictionaryDeallocImpl,
 	NULL,
 	NULL,
-	DictionaryDescriptionImpl,
+	DictionaryToStringImpl,
 	NULL,
 	sizeof(BCDictionary)
 };
@@ -86,6 +84,7 @@ BCMutableDictionaryRef BCMutableDictionaryCreate() {
 	const BCDictionaryRef d = (BCDictionaryRef) BCObjectAlloc((BCClassRef)&kBCDictClass, NULL);
 	d->isMutable = true;
 	d->capacity = 8;
+	d->count = 0;
 	d->buckets = calloc(d->capacity, sizeof(BCDictionaryEntry));
 	return d;
 }

@@ -11,9 +11,9 @@ typedef struct BCClass {
 	BCDeallocFunc dealloc;
 	BCHashFunc hash;
 	BCEqualFunc equal;
-	BCDescriptionFunc description;
+	BCDescriptionFunc toString;
 	BCCopyFunc copy;
-	size_t bytes_size;
+	size_t allocSize;
 } BCClass;
 
 typedef struct BCObject {
@@ -28,7 +28,7 @@ typedef struct BCAllocator {
 	void* context;
 } BCAllocator;
 
-extern BCAllocatorRef const kBCDefaultAllocator;
+extern BCAllocatorRef const kBCAllocatorDefault;
 
 BCObject* BCObjectAlloc(BCClassRef cls, BCAllocatorRef alloc);
 
@@ -38,7 +38,7 @@ void BCRelease(BCObjectRef obj);
 BCObject* BCObjectCopy(BCObjectRef obj);
 uint32_t BCHash(BCObjectRef obj);
 bool BCEqual(BCObjectRef a, BCObjectRef b);
-void BCDescription(BCObjectRef obj, int indent);
+BCStringRef BCToString(BCObjectRef obj);
 
 BCStringRef BCClassName(BCClassRef cls);
 

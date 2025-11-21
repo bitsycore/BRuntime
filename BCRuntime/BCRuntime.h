@@ -2,9 +2,8 @@
 #define BC_BCRUNTIME_H
 
 #include "BCMacroTools.h"
-#include "BCTypes.h"
 #include "BCObject.h"
-#include "BCNumber.h"
+#include "BCTypes.h"
 
 // ================================================
 // MARK: SHORTCUT
@@ -24,7 +23,7 @@
 #define ___BC___PLATFORM_EXTRA_$_MACRO long long: BCNumberCreateInt64,
 #endif
 
-static inline BCObjectRef ___BCRetain(void* obj) { return (BCObjectRef)BCRetain(obj); }
+static inline BCObjectRef ___BCRetain(void* obj) { return BCRetain(obj); }
 
 #define $(__val__) _Generic((__val__), \
     int8_t: BCNumberCreateInt8,        \
@@ -49,12 +48,13 @@ static inline BCObjectRef ___BCRetain(void* obj) { return (BCObjectRef)BCRetain(
     BCObjectRef: ___BCRetain           \
 )(__val__)
 
-#define __BC_$$_IMPL(__counter__, __result__, __type__) ( (__type__) BCAutorelease($OBJ (__result__)) )
-#define $$(__val__) __BC_$$_IMPL(__COUNTER__, $(__val__), __typeof__ ( $(__val__) ))
+#define __BC_$$_IMPL(__result__, __type__) ( (__type__) BCAutorelease($OBJ (__result__)) )
+#define $$(__val__) __BC_$$_IMPL($(__val__), __typeof__ ( $(__val__) ))
 
 #define __BC_ARR_IMPL(_counter_, ...) ({ \
-    BCAutoreleasePoolPush();                                              \
-    BCArrayRef BC_M_CAT(___temp_arr_impl___,_counter_) = ___BCArrayCreateWithObjectsNoRetain( \
+    BCAutoreleasePoolPush(); \
+    BCArrayRef BC_M_CAT(___temp_arr_impl___,_counter_) = BCArrayCreateWithObjects( \
+		false, /*NO RETAIN*/ \
         BC_ARG_COUNT(__VA_ARGS__), \
         BC_ARG_MAP($, __VA_ARGS__) \
     ); \

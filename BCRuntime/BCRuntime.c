@@ -8,6 +8,6 @@ void BCInitialize(void) {
 }
 
 __attribute__((destructor))
-void BCUninitilize(void) {
+void BCUninitialize(void) {
 
 }

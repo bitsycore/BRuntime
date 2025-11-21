@@ -1,13 +1,27 @@
 #ifndef BCRUNTIME_BCTYPES_H
 #define BCRUNTIME_BCTYPES_H
 
+#include <stdbool.h>
 #include <stdint.h>
 
+// =========================================================
+// MARK: Core
+// =========================================================
+
+typedef struct BCClass* BCClassRef;
 typedef struct BCObject* BCObjectRef;
 typedef struct BCAllocator* BCAllocatorRef;
+
+// =========================================================
+// MARK: Basic Types
+// =========================================================
+
 typedef struct BCString* BCStringRef;
-typedef struct BCArray* BCArrayRef;
-typedef struct BCClass* BCClassRef;
+
+// =========================================================
+// MARK: Numbers
+// =========================================================
+
 typedef struct BCNumber* BCNumberRef;
 typedef struct BCNumber* BCNumberInt8Ref;
 typedef struct BCNumber* BCNumberInt16Ref;
@@ -21,10 +35,22 @@ typedef struct BCNumber* BCNumberFloatRef;
 typedef struct BCNumber* BCNumberDoubleRef;
 typedef struct BCNumber* BCBoolRef;
 
+// =========================================================
+// MARK: Containers
+// =========================================================
+
+typedef struct BCArray* BCArrayRef;
+typedef struct BCDictionary* BCDictionaryRef;
+typedef struct BCDictionary* BCMutableDictionaryRef;
+
+// =========================================================
+// MARK: Function Types
+// =========================================================
+
 typedef void (* BCDeallocFunc)(BCObjectRef obj);
 typedef uint32_t (* BCHashFunc)(BCObjectRef obj);
 typedef bool (* BCEqualFunc)(BCObjectRef a, BCObjectRef b);
-typedef void (* BCDescriptionFunc)(BCObjectRef obj, int indent);
+typedef BCStringRef (* BCDescriptionFunc)(BCObjectRef obj);
 typedef BCObjectRef (* BCCopyFunc)(BCObjectRef);
 
 #endif //BCRUNTIME_BCTYPES_H

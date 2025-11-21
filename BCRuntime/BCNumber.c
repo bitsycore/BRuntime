@@ -3,6 +3,8 @@
 
 #include <stdio.h>
 
+#include "BCString.h"
+
 // =============================================================================
 // MARK: Struct
 // =============================================================================
@@ -47,7 +49,7 @@ static BCNumberType classToType(BCClassRef cls);
 
 #define IMPLEMENT_CREATE(Type, _Name_) \
     BCNumber##_Name_##Ref BCNumberCreate##_Name_(Type value) { \
-        BCNumber##_Name_* obj = (BCNumber##_Name_*)BCObjectAlloc( (BCClassRef) &kClassList[BCNumberType##_Name_], kBCDefaultAllocator); \
+        BCNumber##_Name_* obj = (BCNumber##_Name_*)BCObjectAlloc( (BCClassRef) &kClassList[BCNumberType##_Name_], NULL); \
         if (obj) { \
             obj->value = value; \
         } \
@@ -75,7 +77,7 @@ static BCNumberBool kBCNumberBoolFalse;
 
 static uint32_t NumberHash(BCObjectRef obj) {
 	if (!obj) return 0;
-    BCNumberType type = classToType(obj->cls);
+    const BCNumberType type = classToType(obj->cls);
     uint64_t v = 0;
     BCNumberGetValueExplicit((BCNumberRef)obj, &v, type);
     return (uint32_t)v;
@@ -84,55 +86,48 @@ static uint32_t NumberHash(BCObjectRef obj) {
 static bool NumberEqual(BCObjectRef a, BCObjectRef b) {
     if (a == b) return true;
 	if (!a || !b) return false;
-    BCNumberType typeA = classToType(a->cls);
-    BCNumberType typeB = classToType(b->cls);
+    const BCNumberType typeA = classToType(a->cls);
+    const BCNumberType typeB = classToType(b->cls);
     if (typeB == BCNumberTypeError) return false;
 
     // Compare as double if either is float/double
-    bool isFloatA = (typeA == BCNumberTypeFloat || typeA == BCNumberTypeDouble);
-    bool isFloatB = (typeB == BCNumberTypeFloat || typeB == BCNumberTypeDouble);
+    const bool isFloatA = (typeA == BCNumberTypeFloat || typeA == BCNumberTypeDouble);
+    const bool isFloatB = (typeB == BCNumberTypeFloat || typeB == BCNumberTypeDouble);
 
     if (isFloatA || isFloatB) {
         double valA, valB;
         BCNumberGetValueExplicit((BCNumberRef)a, &valA, BCNumberTypeDouble);
         BCNumberGetValueExplicit((BCNumberRef)b, &valB, BCNumberTypeDouble);
         return valA == valB; // Exact match for now
-    } else {
-        // Both integers. Compare as Int64?
-        // Careful with UInt64 large values vs Int64 negative values.
-        // If one is signed and one is unsigned...
-        // For simplicity, cast both to Int64 for now, or check signs.
-        // Let's use Int64 for now.
-        int64_t valA, valB;
-        BCNumberGetValueExplicit((BCNumberRef)a, &valA, BCNumberTypeInt64);
-        BCNumberGetValueExplicit((BCNumberRef)b, &valB, BCNumberTypeInt64);
-        return valA == valB;
     }
+
+	// For simplicity, cast both to Int64 for now
+	// Careful with UInt64 large values && Int64 negative values.
+	// If one is signed and one is unsigned...
+	int64_t valA, valB;
+	BCNumberGetValueExplicit((BCNumberRef)a, &valA, BCNumberTypeInt64);
+	BCNumberGetValueExplicit((BCNumberRef)b, &valB, BCNumberTypeInt64);
+	return valA == valB;
 }
 
-static void NumberDesc(BCObjectRef obj, int indent) {
-    BCNumberType type = classToType(obj->cls);
-
-    // Indent
-    for (int i = 0; i < indent; i++) printf("  ");
-
-    switch (type) {
-        case BCNumberTypeInt8: printf("Int8(%d)", ((BCNumberInt8*)obj)->value); break;
-        case BCNumberTypeInt16: printf("Int16(%d)", ((BCNumberInt16*)obj)->value); break;
-        case BCNumberTypeInt32: printf("Int32(%d)", ((BCNumberInt32*)obj)->value); break;
-        case BCNumberTypeInt64: printf("Int64(%zd)", ((BCNumberInt64*)obj)->value); break;
-        case BCNumberTypeUInt8: printf("UInt8(%u)", ((BCNumberUInt8*)obj)->value); break;
-        case BCNumberTypeUInt16: printf("UInt16(%u)", ((BCNumberUInt16*)obj)->value); break;
-        case BCNumberTypeUInt32: printf("UInt32(%u)", ((BCNumberUInt32*)obj)->value); break;
-        case BCNumberTypeUInt64: printf("UInt64(%zu)", ((BCNumberUInt64*)obj)->value); break;
-        case BCNumberTypeFloat: printf("Float(%f)", ((BCNumberFloat*)obj)->value); break;
-        case BCNumberTypeDouble: printf("Double(%lf)", ((BCNumberDouble*)obj)->value); break;
-        case BCNumberTypeBool: printf(((BCNumberBool*)obj)->value ? "true" : "false"); break;
-        default: printf("UnknownNumber()"); break;
-    }
+static BCStringRef NumberDesc(const BCObjectRef obj) {
+	switch (classToType(obj->cls)) {
+		case BCNumberTypeInt8: return BCStringCreate("%d", ((BCNumberInt8*)obj)->value);
+		case BCNumberTypeInt16: return BCStringCreate("%d", ((BCNumberInt16*)obj)->value);
+		case BCNumberTypeInt32: return BCStringCreate("%d", ((BCNumberInt32*)obj)->value);
+		case BCNumberTypeInt64: return BCStringCreate("%zd", ((BCNumberInt64*)obj)->value);
+		case BCNumberTypeUInt8: return BCStringCreate("%u", ((BCNumberUInt8*)obj)->value);
+		case BCNumberTypeUInt16: return BCStringCreate("%u", ((BCNumberUInt16*)obj)->value);
+		case BCNumberTypeUInt32: return BCStringCreate("%u", ((BCNumberUInt32*)obj)->value);
+		case BCNumberTypeUInt64: return BCStringCreate("%zu", ((BCNumberUInt64*)obj)->value);
+		case BCNumberTypeFloat: return BCStringCreate("%f", ((BCNumberFloat*)obj)->value);
+		case BCNumberTypeDouble: return BCStringCreate("%lf", ((BCNumberDouble*)obj)->value);
+		case BCNumberTypeBool: return BCStringCreate(((BCNumberBool*)obj)->value ? "true" : "false");
+		default: return BCStringCreate("<Number Error>");
+	}
 }
 
-static BCObjectRef NumberCopy(BCObjectRef obj) { return BCRetain(obj); }
+static BCObjectRef NumberCopy(const BCObjectRef obj) { return BCRetain(obj); }
 
 // =============================================================================
 // MARK: Class
@@ -143,9 +138,9 @@ static BCObjectRef NumberCopy(BCObjectRef obj) { return BCRetain(obj); }
     .dealloc = NULL, \
     .hash = NumberHash, \
     .equal = NumberEqual, \
-    .description = NumberDesc, \
+    .toString = NumberDesc, \
     .copy = NumberCopy, \
-    .bytes_size = sizeof(BCNumber##StrName) \
+    .allocSize = sizeof(BCNumber##StrName) \
 }
 
 BCClass kClassList[] = {
@@ -257,14 +252,14 @@ BCNumberType BCNumberGetType(BCNumberRef num) {
 
 #define CLASS_COUNT (sizeof(kClassList) / sizeof(kClassList[0]))
 
-static bool isNumber(BCClassRef cls) { return cls >= kClassList && cls < kClassList + CLASS_COUNT; }
+static inline bool isNumber(const BCClassRef cls) { return cls >= kClassList && cls < kClassList + CLASS_COUNT; }
 
-static BCClassRef typeToClass(BCNumberType type) {
+static inline BCClassRef typeToClass(const BCNumberType type) {
 	if (type > BCNumberTypeBool || type <= BCNumberTypeError) return NULL;
-	return (BCClassRef) &kClassList[type];
+	return &kClassList[type];
 }
 
-static BCNumberType classToType(BCClassRef cls) {
+static inline BCNumberType classToType(const BCClassRef cls) {
 	return !isNumber(cls) ? BCNumberTypeError : (BCNumberType) (cls - kClassList);
 }
 

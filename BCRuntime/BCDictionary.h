@@ -1,10 +1,8 @@
 #ifndef BCRUNTIME_BCDICTIONARY_H
 #define BCRUNTIME_BCDICTIONARY_H
 
-#include <stdlib.h>
-
-#include "BCObject.h"
 #include "BCMacroTools.h"
+#include "BCObject.h"
 
 typedef struct BCDictionary* BCDictionaryRef;
 typedef struct BCDictionary* BCMutableDictionaryRef;

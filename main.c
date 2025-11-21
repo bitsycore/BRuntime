@@ -1,26 +1,32 @@
-#include "BCRuntime/BCObject.h"
-#include "BCRuntime/BCAutoreleasePool.h"
-#include "BCRuntime/BCString.h"
 #include "BCRuntime/BCArray.h"
+#include "BCRuntime/BCAutoreleasePool.h"
 #include "BCRuntime/BCDictionary.h"
 #include "BCRuntime/BCNumber.h"
+#include "BCRuntime/BCObject.h"
 #include "BCRuntime/BCRuntime.h"
+#include "BCRuntime/BCString.h"
 
 #define BIG_TITLE(_x_) printf("\n=================================================================\n                      " _x_ "\n=================================================================\n")
 #define SUB_TITLE(_x_) printf("\n-------------------------------\n        " _x_ "\n-------------------------------\n\n")
+
+#define TO_STR(_x_) BCStringGetCString( \
+	(BCStringRef) ( BCAutorelease( \
+		$OBJ BCToString( $OBJ (_x_) ) \
+	) ) \
+)
 
 void testString() {
 	// ================================
 	SUB_TITLE("Test String");
 	// ================================
 
-	BCStringRef str1 = BCStringConst("username"); // Pooled
-	BCStringRef str2 = BCStringConst("username"); // Same Instance
-	BCStringRef str3 = BCStringCreate("username"); // New Instance
+	const BCStringRef str1 = BCStringConst("username"); // Pooled
+	const BCStringRef str2 = BCStringConst("username"); // Same Instance
+	const BCStringRef str3 = BCStringCreate("username"); // New Instance
 	BCAutorelease($OBJ str3);
 
-	printf("Pool Test: s1=%p, s2=%p (SamePtr? %s)\n", str1, str2, (str1 == str2) ? "YES" : "NO");
-	printf("Alloc Test: s1=%p, s3=%p (SamePtr? %s)\n", str1, str3, (str1 == str3) ? "YES" : "NO");
+	printf("Pool Test: s1=%p, s2=%p (SamePtr? %s)\n", str1, str2, str1 == str2 ? "YES" : "NO");
+	printf("Alloc Test: s1=%p, s3=%p (SamePtr? %s)\n", str1, str3, str1 == str3 ? "YES" : "NO");
 	printf("Equality Test (s1 vs s3): %s\n", BCEqual( $OBJ str1, $OBJ str3) ? "TRUE" : "FALSE");
 }
 
@@ -29,30 +35,25 @@ void testArray() {
 	SUB_TITLE("Test Array");
 	// ================================
 
-	$VAR numIntAuto = $(5);
+	const $VAR numIntAuto = $(5);
 	BCAutorelease($OBJ numIntAuto);
 
 	$VAR a = $("Hello");
 	BCAutorelease($OBJ a);
 
-	$VAR arrayAuto = $ARR(a, 5, 6, 7, 8);
+	const $VAR arrayAuto = $ARR(a, 5, 6, 7, 8);
 	BCAutorelease($OBJ arrayAuto);
 
-	BCArrayRef array = BCArrayCreate();
+	const BCArrayRef array = BCArrayCreate();
 	BCAutorelease($OBJ array);
 
 	BCArrayAdd(array, $OBJ BCStringConst("Admin"));
 	BCArrayAdd(array, $OBJ BCStringConst("Editor"));
 	BCArrayAdd(array, $OBJ kBCTrue);
 
-	printf("Array Dump: \n");
-	BCDescription($OBJ array, 0);
-
-	printf("\nGet Element: \n");
-	BCDescription(BCArrayGet(array, 0), 0);
-	puts("");
-	BCDescription(BCArrayGet(array, 1), 0);
-	puts("");
+	printf("Array Dump: %s\n", TO_STR(array));
+	printf("Get Element 0: %s\n", TO_STR(BCArrayGet(array, 0)));
+	printf("Get Element 1: %s\n", TO_STR(BCArrayGet(array, 1)));
 }
 
 
@@ -61,7 +62,6 @@ void testNumber() {
 	SUB_TITLE("Test Number");
 	// ================================
 
-	$CONST numInt8 =  BCNumberCreate((uint8_t)0x12);
 	$CONST numInt =  BCNumberCreate(42);
 	$CONST numBool = BCNumberCreate(true);
 	$CONST numFloat = BCNumberCreate(3.14f);
@@ -77,16 +77,12 @@ void testNumber() {
 	BCAutorelease($OBJ numBool);
 
 	printf("Numbers Dump: \n");
-	BCDescription($OBJ numInt, 0);
-	puts("");
-	BCDescription($OBJ numFloat, 0);
-	puts("");
-	BCDescription($OBJ numDouble, 0);
-	puts("");
-	BCDescription($OBJ numInt64, 0);
-	puts("");
-	BCDescription($OBJ numUInt64, 0);
-	puts("");
+	printf("%s\n", TO_STR(numInt));
+	printf("%s\n", TO_STR(numFloat));
+	printf("%s\n", TO_STR(numDouble));
+	printf("%s\n", TO_STR(numInt64));
+	printf("%s\n", TO_STR(numUInt64));
+	printf("%s\n", TO_STR(numBool));
 
 	int32_t valInt = 0;
 	BCNumberGetValue(numInt, &valInt);
@@ -115,36 +111,32 @@ void testDictionary() {
 	$VAR array = $ARR("username", "password");
 	BCAutorelease($OBJ array);
 
-	BCStringRef str1 = BCStringConst("username");
-	BCStringRef str2 = BCStringConst("username");
+	const BCStringRef str1 = BCStringConst("username");
+	const BCStringRef str2 = BCStringConst("username");
 
 	$CONST numInt2 = $(42);
 	BCAutorelease($OBJ numInt2);
 
-	BCMutableDictionaryRef dictionary = BCMutableDictionaryCreate();
+	const BCMutableDictionaryRef dictionary = BCMutableDictionaryCreate();
 	BCAutorelease($OBJ dictionary);
 
-	BCStringRef key = BCStringCreate("id");
+	const BCStringRef key = BCStringCreate("id");
 	BCAutorelease($OBJ key);
-	BCStringRef value = BCStringCreate("10%d", 1);
+	const BCStringRef value = BCStringCreate("10%d", 1);
 	BCAutorelease($OBJ value);
 
-	// Key is "username" (Pooled), Value is Array
-	BCDictionarySet(dictionary, $OBJ (str1), $OBJ (array));
-	BCDictionarySet(dictionary, $OBJ (BCStringConst("test")), $OBJ (numInt2));
-	BCDictionarySet(dictionary, $OBJ (key), $OBJ (value));
+	BCDictionarySet(dictionary, $OBJ str1, $OBJ array);
+	BCDictionarySet(dictionary, $OBJ BCStringConst("test"), $OBJ numInt2);
+	BCDictionarySet(dictionary, $OBJ key, $OBJ value);
 
 	// Description of Dictionary
-	printf("Dictionary Dump: \n");
-	puts("------------------------");
-	BCDescription($OBJ dictionary, 0);
+	printf("%s\n", TO_STR(dictionary));
 
 	puts("------------------------");
 
 	// Get Value by Key
-	printf("\"username\": \n");
 	const BCObjectRef found = BCDictionaryGet( dictionary, $OBJ str2); // Look up using pooled string
-	if (found) BCDescription(found, 0);
+	if (found) printf("\"username\": %s\n", TO_STR(found));
 
 	puts("------------------------");
 
@@ -158,19 +150,16 @@ void testDictionary() {
 		"innerDic", $$DIC("abc", nine),
 		"innerArr", $$ARR(nine, three)
 	);
-
-	BCDescription($OBJ autoDic, 0);
+	printf("%s\n", TO_STR(autoDic));
 
 	puts("------------------------");
 
-	$CONST dic = $DIC(
+	$CONST dic = $$DIC(
 		"title", "Test Dictionary",
 		"version", "1.0.0",
 		"author", "Beej"
 	);
-
-	BCAutorelease($OBJ dic);
-	BCDescription($OBJ dic, 0);
+	printf("%s\n", TO_STR(dic));
 }
 
 int main() {
