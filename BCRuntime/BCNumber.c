@@ -46,8 +46,8 @@ static BCNumberType classToType(BCClassRef cls);
 // =============================================================================
 
 #define IMPLEMENT_CREATE(Type, _Name_) \
-    BCNumberRef BCNumberCreate##_Name_(Type value) { \
-        BCNumber##_Name_* obj = (BCNumber##_Name_*)BCAllocRaw( (BCClassRef) &kClassList[BCNumberType##_Name_], kBCDefaultAllocator, sizeof(BCNumber##_Name_) - sizeof(BCObject)); \
+    BCNumber##_Name_##Ref BCNumberCreate##_Name_(Type value) { \
+        BCNumber##_Name_* obj = (BCNumber##_Name_*)BCObjectAlloc( (BCClassRef) &kClassList[BCNumberType##_Name_], kBCDefaultAllocator); \
         if (obj) { \
             obj->value = value; \
         } \
@@ -144,7 +144,8 @@ static BCObjectRef NumberCopy(BCObjectRef obj) { return BCRetain(obj); }
     .hash = NumberHash, \
     .equal = NumberEqual, \
     .description = NumberDesc, \
-    .copy = NumberCopy \
+    .copy = NumberCopy, \
+    .bytes_size = sizeof(BCNumber##StrName) \
 }
 
 BCClass kClassList[] = {
@@ -245,7 +246,7 @@ void BCNumberGetValueExplicit(BCNumberRef num, void* value, BCNumberType dstType
 	}
 }
 
-BCNumberType BCNumberGetTypeID(BCNumberRef num) {
+BCNumberType BCNumberGetType(BCNumberRef num) {
 	if (!num) return BCNumberTypeError;
 	return classToType(num->super.cls);
 }

@@ -12,6 +12,7 @@
 
 #define $OBJ (BCObjectRef)
 #define $VAR __auto_type
+#define $CONST const __auto_type
 
 // ================================================
 // MARK: BOXING
@@ -47,8 +48,6 @@ static inline BCObjectRef ___BCRetain(void* obj) { return (BCObjectRef)BCRetain(
     BCDictionaryRef: ___BCRetain,      \
     BCObjectRef: ___BCRetain           \
 )(__val__)
-
-
 
 #define __BC_$$_IMPL(__counter__, __result__, __type__) ( (__type__) BCAutorelease($OBJ (__result__)) )
 #define $$(__val__) __BC_$$_IMPL(__COUNTER__, $(__val__), __typeof__ ( $(__val__) ))

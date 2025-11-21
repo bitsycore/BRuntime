@@ -3,6 +3,8 @@
 
 #include "BCTypes.h"
 
+#include <stddef.h>
+
 BCStringRef BCStringCreate(const char* fmt, ...);
 BCStringRef BCStringConst(const char* text);
 size_t BCStringLength(BCStringRef str);

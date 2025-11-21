@@ -18,21 +18,21 @@ typedef enum {
 	BCNumberTypeBool = 10
 } BCNumberType;
 
-BCNumberRef BCNumberCreateInt8(int8_t value);
-BCNumberRef BCNumberCreateInt16(int16_t value);
-BCNumberRef BCNumberCreateInt32(int32_t value);
-BCNumberRef BCNumberCreateInt64(int64_t value);
-BCNumberRef BCNumberCreateUInt8(uint8_t value);
-BCNumberRef BCNumberCreateUInt16(uint16_t value);
-BCNumberRef BCNumberCreateUInt32(uint32_t value);
-BCNumberRef BCNumberCreateUInt64(uint64_t value);
-BCNumberRef BCNumberCreateFloat(float value);
-BCNumberRef BCNumberCreateDouble(double value);
+BCNumberInt8Ref BCNumberCreateInt8(int8_t value);
+BCNumberInt16Ref BCNumberCreateInt16(int16_t value);
+BCNumberInt32Ref BCNumberCreateInt32(int32_t value);
+BCNumberInt64Ref BCNumberCreateInt64(int64_t value);
+BCNumberUInt8Ref BCNumberCreateUInt8(uint8_t value);
+BCNumberUInt16Ref BCNumberCreateUInt16(uint16_t value);
+BCNumberUInt32Ref BCNumberCreateUInt32(uint32_t value);
+BCNumberUInt64Ref BCNumberCreateUInt64(uint64_t value);
+BCNumberFloatRef BCNumberCreateFloat(float value);
+BCNumberDoubleRef BCNumberCreateDouble(double value);
 
 extern BCBoolRef kBCTrue;
 extern BCBoolRef kBCFalse;
 
-static inline BCBoolRef ___BCBoolSelect(bool val) { return val ? kBCTrue : kBCFalse; }
+static inline BCBoolRef ___BCBoolSelect(const bool val) { return val ? kBCTrue : kBCFalse; }
 
 #ifdef WIN32
 #define ___BC___PLATFORM_EXTRA_NUM_CREA_MACRO
@@ -57,7 +57,7 @@ static inline BCBoolRef ___BCBoolSelect(bool val) { return val ? kBCTrue : kBCFa
 )(val)
 
 void BCNumberGetValueExplicit(BCNumberRef num, void* value, BCNumberType dstType);
-BCNumberType BCNumberGetTypeID(BCNumberRef num);
+BCNumberType BCNumberGetType(BCNumberRef num);
 
 #define BCNumberGetValue(num, outPtr) _Generic( (outPtr), \
     int8_t*		: BCNumberGetValueExplicit(num, outPtr, BCNumberTypeInt8), \

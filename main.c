@@ -55,17 +55,19 @@ void testArray() {
 	puts("");
 }
 
+
 void testNumber() {
 	// ================================
 	SUB_TITLE("Test Number");
 	// ================================
 
-	BCNumberRef numInt =  BCNumberCreate(42);
-	BCNumberRef numBool = BCNumberCreate(true);
-	BCNumberRef numFloat = BCNumberCreate(3.14f);
-	BCNumberRef numDouble = BCNumberCreate(3.14159);
-	BCNumberRef numInt64 = BCNumberCreate(9223372036854775807);
-	BCNumberRef numUInt64 = BCNumberCreate(9223372036854775807u);
+	$CONST numInt8 =  BCNumberCreate((uint8_t)0x12);
+	$CONST numInt =  BCNumberCreate(42);
+	$CONST numBool = BCNumberCreate(true);
+	$CONST numFloat = BCNumberCreate(3.14f);
+	$CONST numDouble = BCNumberCreate(3.14159);
+	$CONST numInt64 = BCNumberCreate(9223372036854775807);
+	$CONST numUInt64 = BCNumberCreate(9223372036854775807u);
 
 	BCAutorelease($OBJ numInt);
 	BCAutorelease($OBJ numFloat);
@@ -86,17 +88,17 @@ void testNumber() {
 	BCDescription($OBJ numUInt64, 0);
 	puts("");
 
-	int32_t valInt;
+	int32_t valInt = 0;
 	BCNumberGetValue(numInt, &valInt);
 	printf("Extracted Int: %d\n", valInt);
 
-	float valFloat;
+	float valFloat = 0;
 	BCNumberGetValue(numInt, &valFloat);
 	printf("Extracted Float: %f\n", valFloat);
 
 	// Equality
-	BCNumberRef numInt2 = BCNumberCreate(42);
-	BCNumberRef numFloat2 = BCNumberCreate(42.0f);
+	const BCNumberRef numInt2 = BCNumberCreate(42);
+	const BCNumberRef numFloat2 = BCNumberCreate(42.0f);
 	BCAutorelease($OBJ numInt2);
 	BCAutorelease($OBJ numFloat2);
 
@@ -116,7 +118,7 @@ void testDictionary() {
 	BCStringRef str1 = BCStringConst("username");
 	BCStringRef str2 = BCStringConst("username");
 
-	$VAR numInt2 = $(42);
+	$CONST numInt2 = $(42);
 	BCAutorelease($OBJ numInt2);
 
 	BCMutableDictionaryRef dictionary = BCMutableDictionaryCreate();
@@ -134,21 +136,22 @@ void testDictionary() {
 
 	// Description of Dictionary
 	printf("Dictionary Dump: \n");
-	puts("----");
+	puts("------------------------");
 	BCDescription($OBJ dictionary, 0);
 
+	puts("------------------------");
+
 	// Get Value by Key
-	printf("\nGet \"username\": \n");
-	puts("----");
-	BCObject* found = BCDictionaryGet( dictionary, $OBJ str2); // Look up using pooled string
+	printf("\"username\": \n");
+	const BCObjectRef found = BCDictionaryGet( dictionary, $OBJ str2); // Look up using pooled string
 	if (found) BCDescription(found, 0);
 
-	puts("");
+	puts("------------------------");
 
 	$VAR nine = $$(9);
 	$VAR three = $$(1024);
 
-	$VAR abc = $$DIC(
+	const $VAR autoDic = $$DIC(
 		"nine", nine,
 		"three", three,
 		"array", array,
@@ -156,41 +159,29 @@ void testDictionary() {
 		"innerArr", $$ARR(nine, three)
 	);
 
-	$VAR header = $DIC(
+	BCDescription($OBJ autoDic, 0);
+
+	puts("------------------------");
+
+	$CONST dic = $DIC(
 		"title", "Test Dictionary",
 		"version", "1.0.0",
 		"author", "Beej"
 	);
-	$ARR(1,2,3);
-	BCAutorelease($OBJ header);
 
-	BCDescription($OBJ header, 0);
-
-	puts("");
-
-	BCDescription($OBJ abc, 0);
-
-	BCNumberGetTypeID(nine);
-	BCNumberGetTypeID(three);
-
-
+	BCAutorelease($OBJ dic);
+	BCDescription($OBJ dic, 0);
 }
 
 int main() {
 	BIG_TITLE("BC Startup");
 
-	// ===========================
-	// Push Autorelease Pool
-	BCAutoreleasePoolPush();
-
-	testString();
-	testArray();
-	testNumber();
-	testDictionary();
-
-	// ===========================
-	// Pop Autorelease Pool
-	BCAutoreleasePoolPop();
+	BCAutoreleaseScope() {
+		testString();
+		testArray();
+		testNumber();
+		testDictionary();
+	}
 
 	BIG_TITLE("BC End");
 	return 0;

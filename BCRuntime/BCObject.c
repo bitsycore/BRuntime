@@ -1,22 +1,21 @@
 #include "BCObject.h"
 #include "BCString.h"
 
-#include <stdlib.h>
 #include <stdio.h>
-#include <assert.h>
+#include <stdlib.h>
 
 // =========================================================
 // MARK: Allocator
 // =========================================================
 
-static void* _StdAlloc(size_t s, void* c) {
-	(void)c;
-	return calloc(1, s);
+static void* _StdAlloc(const size_t size, const void* ctx) {
+	(void)ctx;
+	return malloc(size);
 }
 
-static void _StdFree(void* p, void* c) {
-	(void)c;
-	free(p);
+static void _StdFree(void* ptr, const void* ctx) {
+	(void)ctx;
+	free(ptr);
 }
 
 static BCAllocator _kDefaultAlloc = {_StdAlloc, _StdFree, NULL};
@@ -26,18 +25,19 @@ BCAllocatorRef const kBCDefaultAllocator = &_kDefaultAlloc;
 // MARK: Public
 // =========================================================
 
-BCObjectRef BCAllocRaw(BCClassRef cls, BCAllocatorRef alloc, size_t extraSize) {
-	if (!alloc) alloc = kBCDefaultAllocator;
-	size_t totalSize = sizeof(BCObject) + extraSize;
+BCObjectRef BCObjectAlloc(const BCClassRef cls, BCAllocatorRef alloc) {
 
-	BCObjectRef obj = alloc->alloc(totalSize, alloc->context);
+	if (!alloc) alloc = kBCDefaultAllocator;
+
+	const BCObjectRef obj = alloc->alloc(cls->bytes_size, alloc->context);
 	obj->cls = cls;
 	obj->allocator = alloc;
-	atomic_init(&obj->ref_count, 1);
+	obj->ref_count = 1;
+
 	return obj;
 }
 
-BCObjectRef BCRetain(BCObjectRef obj) {
+BCObjectRef BCRetain(const BCObjectRef obj) {
 	if (!obj) return NULL;
 	atomic_fetch_add(&obj->ref_count, 1);
 	return obj;
@@ -56,7 +56,7 @@ void BCRelease(BCObjectRef obj) {
 	}
 }
 
-BCObjectRef BCCopy(BCObjectRef obj) {
+BCObjectRef BCObjectCopy(BCObjectRef obj) {
 	if (!obj) return NULL;
 	if (obj->cls->copy) {
 		return obj->cls->copy(obj);
@@ -88,7 +88,7 @@ void BCDescription(BCObjectRef obj, int indent) {
 	}
 }
 
-bool BCIsClass(BCObjectRef obj, BCClassRef cls) {
+bool BCObjectIsClass(BCObjectRef obj, BCClassRef cls) {
 	if (!obj || !cls) return false;
 	return (obj->cls == cls);
 }

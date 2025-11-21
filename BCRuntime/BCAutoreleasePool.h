@@ -1,12 +1,20 @@
 #ifndef BCRUNTIME_BCAUTORELEASEPOOL_H
 #define BCRUNTIME_BCAUTORELEASEPOOL_H
 
+#include "BCObject.h"
+
 #include <stdlib.h>
 #include <stdio.h>
-#include "BCObject.h"
 
 void BCAutoreleasePoolPush(void);
 void BCAutoreleasePoolPop(void);
 BCObject* BCAutorelease(BCObject* obj);
+
+#define ____BCAutoreleaseScopeImpl(__name__) for ( \
+    bool __name__ = (BCAutoreleasePoolPush(), true); \
+    __name__; \
+    __name__ = false, BCAutoreleasePoolPop() \
+)
+#define BCAutoreleaseScope() ____BCAutoreleaseScopeImpl(BC_M_CAT(___temp_once_, __COUNTER__))
 
 #endif //BCRUNTIME_BCAUTORELEASEPOOL_H

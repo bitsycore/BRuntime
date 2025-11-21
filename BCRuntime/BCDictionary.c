@@ -25,9 +25,9 @@ typedef struct BCDictionary {
 // MARK: Forward
 // =========================================================
 
-static void _DicPutInternal(BCDictionaryEntry* buckets, size_t cap, BCObjectRef key, BCObjectRef value);
+static void _DicPutInternal(BCDictionaryEntry* buckets, size_t cap, BCObjectRef key, BCObjectRef val);
 
-static void _Indent(int indent) {
+static void _Indent(const int indent) {
 	for (int i = 0; i < indent; i++) printf("  ");
 }
 
@@ -63,7 +63,13 @@ void DictionaryDescriptionImpl(BCObjectRef obj, int indent) {
 }
 
 static const BCClass kBCDictClass = {
-	"BCDictionary", DictionaryDeallocImpl, NULL, NULL, DictionaryDescriptionImpl, NULL
+	"BCDictionary",
+	DictionaryDeallocImpl,
+	NULL,
+	NULL,
+	DictionaryDescriptionImpl,
+	NULL,
+	sizeof(BCDictionary)
 };
 
 // =========================================================
@@ -71,26 +77,26 @@ static const BCClass kBCDictClass = {
 // =========================================================
 
 BCDictionaryRef BCDictionaryCreate() {
-	BCMutableDictionaryRef dic = BCMutableDictionaryCreate();
+	const BCMutableDictionaryRef dic = BCMutableDictionaryCreate();
 	dic->isMutable = false;
 	return  dic;
 }
 
 BCMutableDictionaryRef BCMutableDictionaryCreate() {
-	BCDictionaryRef d = (BCDictionaryRef) BCAllocRaw((BCClassRef)&kBCDictClass, NULL, sizeof(BCDictionary) - sizeof(BCObject));
+	const BCDictionaryRef d = (BCDictionaryRef) BCObjectAlloc((BCClassRef)&kBCDictClass, NULL);
 	d->isMutable = true;
 	d->capacity = 8;
 	d->buckets = calloc(d->capacity, sizeof(BCDictionaryEntry));
-	return (BCMutableDictionaryRef)d;
+	return d;
 }
 
-void BCDictionarySet(BCMutableDictionaryRef d, BCObjectRef key, BCObjectRef val) {
+void BCDictionarySet(const BCMutableDictionaryRef d, const BCObjectRef key, const BCObjectRef val) {
 	BCDictionary *dict = (BCDictionaryRef)d;
 	if (!dict->isMutable) return;
 
 	// Resize Check
 	if (dict->count >= (size_t) ((double) dict->capacity * 0.75)) {
-		size_t newCap = dict->capacity * 2;
+		const size_t newCap = dict->capacity * 2;
 		BCDictionaryEntry* newBuckets = calloc(newCap, sizeof(BCDictionaryEntry));
 		if (!newBuckets) return;
 		for (size_t i = 0; i < dict->capacity; i++) {
@@ -104,7 +110,7 @@ void BCDictionarySet(BCMutableDictionaryRef d, BCObjectRef key, BCObjectRef val)
 	}
 
 	// Insert
-	uint32_t hash = BCHash(key);
+	const uint32_t hash = BCHash(key);
 	size_t idx = hash % dict->capacity;
 	while (dict->buckets[idx].key) {
 		if (BCEqual(dict->buckets[idx].key, key)) {
@@ -116,7 +122,7 @@ void BCDictionarySet(BCMutableDictionaryRef d, BCObjectRef key, BCObjectRef val)
 	}
 
 	// New Entry: COPY Key, RETAIN Value
-	dict->buckets[idx].key = BCCopy(key);
+	dict->buckets[idx].key = BCObjectCopy(key);
 	dict->buckets[idx].value = BCRetain(val);
 	dict->count++;
 }
@@ -165,8 +171,8 @@ BCDictionaryRef ___BCDictionaryCreateWithObjectsNoRetain(size_t count, ...) {
 // MARK: Internal
 // =========================================================
 
-static void _DicPutInternal(BCDictionaryEntry* buckets, size_t cap, BCObjectRef key, BCObjectRef val) {
-	uint32_t hash = BCHash(key);
+static void _DicPutInternal(BCDictionaryEntry* buckets, const size_t cap, const BCObjectRef key, const BCObjectRef val) {
+	const uint32_t hash = BCHash(key);
 	size_t idx = hash % cap;
 	while (buckets[idx].key) {
 		if (BCEqual(buckets[idx].key, key)) {

@@ -45,7 +45,8 @@ static const BCClass kBCArrayClass = {
 	NULL,
 	NULL,
 	_BCArrDesc,
-	NULL
+	NULL,
+	sizeof(BCArray)
 };
 
 // =========================================================
@@ -53,13 +54,13 @@ static const BCClass kBCArrayClass = {
 // =========================================================
 
 BCArrayRef BCArrayCreate(void) {
-	BCArrayRef arr = (BCArrayRef) BCAllocRaw((BCClassRef) &kBCArrayClass, NULL, sizeof(BCArray) - sizeof(BCObject));
+	const BCArrayRef arr = (BCArrayRef) BCObjectAlloc((BCClassRef) &kBCArrayClass, NULL);
 	arr->capacity = 8;
 	arr->items = calloc(arr->capacity, sizeof(BCObjectRef));
 	return arr;
 }
 
-void BCArrayAdd(BCArrayRef arr, BCObjectRef item) {
+void BCArrayAdd(const BCArrayRef arr, const BCObjectRef item) {
 	if (arr->count == arr->capacity) {
 		arr->capacity *= 2;
 		void* newBuff = realloc(arr->items, arr->capacity * sizeof(BCObjectRef));
@@ -86,12 +87,12 @@ BCArrayRef BCArrayCreateWithObjects(size_t count, ...) {
 	return arr;
 }
 
-BCArrayRef ___BCArrayCreateWithObjectsNoRetain(size_t count, ...) {
-	BCArrayRef arr = BCArrayCreate();
+BCArrayRef ___BCArrayCreateWithObjectsNoRetain(const size_t count, ...) {
+	const BCArrayRef arr = BCArrayCreate();
 	va_list args;
 	va_start(args, count);
 	for (size_t i = 0; i < count; i++) {
-		BCObjectRef item = va_arg(args, BCObjectRef);
+		const BCObjectRef item = va_arg(args, BCObjectRef);
 		BCArrayAdd(arr, item);
 		BCRelease(item);
 	}
