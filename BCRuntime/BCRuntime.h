@@ -1,5 +1,5 @@
-#ifndef BC_BC_H
-#define BC_BC_H
+#ifndef BC_BCRUNTIME_H
+#define BC_BCRUNTIME_H
 
 #include "BCMacroTools.h"
 #include "BCTypes.h"
@@ -36,7 +36,7 @@ static inline BCObjectRef ___BCRetain(void* obj) { return (BCObjectRef)BCRetain(
     ___BC___PLATFORM_EXTRA_$_MACRO     \
     float: BCNumberCreateFloat,        \
     double: BCNumberCreateDouble,      \
-    bool: BCNumberGetBool,             \
+    bool: ___BCBoolSelect,             \
     char*: BCStringCreate,             \
     const char*: BCStringCreate,       \
     BCStringRef: ___BCRetain,          \
@@ -72,4 +72,4 @@ static inline BCObjectRef ___BCRetain(void* obj) { return (BCObjectRef)BCRetain(
 #define $DIC(...) __BC_DIC_IMPL(__COUNTER__, false, __VA_ARGS__)
 #define $$DIC(...) __BC_DIC_IMPL(__COUNTER__, true, __VA_ARGS__)
 
-#endif //BC_BC_H
+#endif //BC_BCRUNTIME_H

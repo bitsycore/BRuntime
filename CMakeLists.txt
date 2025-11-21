@@ -1,27 +1,35 @@
 cmake_minimum_required(VERSION 3.28)
-project(BC C)
+project(BCRuntime C)
 
 set(CMAKE_C_STANDARD 23)
+
+add_subdirectory(BlockRuntime)
 
 add_executable(
 		BCRuntime
 		main.c
-		BC/BCObject.c
-		BC/BCObject.h
-		BC/BCTypes.h
-		BC/BCString.c
-		BC/BCString.h
-		BC/BCDictionary.c
-		BC/BCDictionary.h
-		BC/BCAutoreleasePool.c
-		BC/BCAutoreleasePool.h
-		BC/BCArray.c
-		BC/BCArray.h
-		BC/BCNumber.c
-		BC/BCNumber.h
-		BC/BC.h
-		BC/BC.c
-		BC/BCMacroTools.h
+		BCRuntime/BCObject.c
+		BCRuntime/BCObject.h
+		BCRuntime/BCTypes.h
+		BCRuntime/BCString.c
+		BCRuntime/BCString.h
+		BCRuntime/BCDictionary.c
+		BCRuntime/BCDictionary.h
+		BCRuntime/BCAutoreleasePool.c
+		BCRuntime/BCAutoreleasePool.h
+		BCRuntime/BCArray.c
+		BCRuntime/BCArray.h
+		BCRuntime/BCNumber.c
+		BCRuntime/BCNumber.h
+		BCRuntime/BCRuntime.h
+		BCRuntime/BCRuntime.c
+		BCRuntime/BCMacroTools.h
 )
 
 target_compile_options(BCRuntime PRIVATE -fblocks)
+target_link_libraries(BCRuntime PRIVATE BlockRuntime)
+add_custom_command(TARGET BCRuntime POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different
+		$<TARGET_FILE:BlockRuntime>
+		$<TARGET_FILE_DIR:BCRuntime>
+)

@@ -28,10 +28,9 @@ BCNumberRef BCNumberCreateUInt32(uint32_t value);
 BCNumberRef BCNumberCreateUInt64(uint64_t value);
 BCNumberRef BCNumberCreateFloat(float value);
 BCNumberRef BCNumberCreateDouble(double value);
-BCBoolRef BCNumberGetBool(bool value);
 
-extern BCBoolRef BCTrue;
-extern BCBoolRef BCFalse;
+extern BCBoolRef kBCTrue;
+extern BCBoolRef kBCFalse;
 
 #ifdef WIN32
 
@@ -52,6 +51,8 @@ extern BCBoolRef BCFalse;
 
 #else
 
+static inline BCBoolRef ___BCBoolSelect(bool val) { return val ? kBCTrue : kBCFalse; }
+
 #define BCNumberCreate(val) _Generic((val), \
     int8_t: BCNumberCreateInt8, \
     int16_t: BCNumberCreateInt16, \
@@ -64,7 +65,7 @@ extern BCBoolRef BCFalse;
     uint64_t: BCNumberCreateUInt64, \
     float: BCNumberCreateFloat, \
     double: BCNumberCreateDouble, \
-    bool: BCNumberGetBool, \
+    bool: ___BCBoolSelect, \
     default: BCNumberCreateInt32 \
 )(val)
 

@@ -69,10 +69,6 @@ IMPLEMENT_CREATE(double, Double)
 static BCNumberBool kBCNumberBoolTrue;
 static BCNumberBool kBCNumberBoolFalse;
 
-BCBoolRef BCNumberGetBool(bool value) {
-	return value ? (BCBoolRef) &kBCNumberBoolTrue : (BCBoolRef) &kBCNumberBoolFalse;
-}
-
 // =============================================================================
 // MARK: Class Methods
 // =============================================================================
@@ -169,6 +165,37 @@ BCClass kClassList[] = {
 // MARK: Public
 // =============================================================================
 
+#define DEFINE_NUMBER_GET(Type, Name) \
+	Type BCNumberGet##Name(BCNumberRef num) { \
+		if (!num) return 0; \
+		switch (classToType(num->super.cls)) { \
+			case BCNumberTypeInt8:   return (Type)((BCNumberInt8*)num)->value; \
+			case BCNumberTypeInt16:  return (Type)((BCNumberInt16*)num)->value; \
+			case BCNumberTypeInt32:  return (Type)((BCNumberInt32*)num)->value; \
+			case BCNumberTypeInt64:  return (Type)((BCNumberInt64*)num)->value; \
+			case BCNumberTypeUInt8:  return (Type)((BCNumberUInt8*)num)->value; \
+			case BCNumberTypeUInt16: return (Type)((BCNumberUInt16*)num)->value; \
+			case BCNumberTypeUInt32: return (Type)((BCNumberUInt32*)num)->value; \
+			case BCNumberTypeUInt64: return (Type)((BCNumberUInt64*)num)->value; \
+			case BCNumberTypeFloat:  return (Type)((BCNumberFloat*)num)->value; \
+			case BCNumberTypeDouble: return (Type)((BCNumberDouble*)num)->value; \
+			case BCNumberTypeBool:   return (Type)((BCNumberBool*)num)->value; \
+			default: return 0; \
+		}\
+	}
+
+DEFINE_NUMBER_GET(int8_t, Int8)
+DEFINE_NUMBER_GET(int16_t, Int16)
+DEFINE_NUMBER_GET(int32_t, Int32)
+DEFINE_NUMBER_GET(int64_t, Int64)
+DEFINE_NUMBER_GET(uint8_t, UInt8)
+DEFINE_NUMBER_GET(uint16_t, UInt16)
+DEFINE_NUMBER_GET(uint32_t, UInt32)
+DEFINE_NUMBER_GET(uint64_t, UInt64)
+DEFINE_NUMBER_GET(float, Float)
+DEFINE_NUMBER_GET(double, Double)
+DEFINE_NUMBER_GET(bool, Bool)
+
 void BCNumberGetValueExplicit(BCNumberRef num, void* value, BCNumberType dstType) {
 	if (!num || !value) return;
 	BCNumberType srcType = classToType(num->super.cls);
@@ -244,8 +271,8 @@ static BCNumberType classToType(BCClassRef cls) {
 // MARK: Init
 // =============================================================================
 
-BCBoolRef BCTrue = (BCBoolRef) &kBCNumberBoolTrue;
-BCBoolRef BCFalse = (BCBoolRef) &kBCNumberBoolFalse;
+BCBoolRef kBCTrue = (BCBoolRef) &kBCNumberBoolTrue;
+BCBoolRef kBCFalse = (BCBoolRef) &kBCNumberBoolFalse;
 
 void _BCNumberInitialize(void) {
 	kBCNumberBoolTrue = (BCNumberBool) {

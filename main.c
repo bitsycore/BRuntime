@@ -1,10 +1,10 @@
-#include "BC/BCObject.h"
-#include "BC/BCAutoreleasePool.h"
-#include "BC/BCString.h"
-#include "BC/BCArray.h"
-#include "BC/BCDictionary.h"
-#include "BC/BCNumber.h"
-#include "BC/BC.h"
+#include "BCRuntime/BCObject.h"
+#include "BCRuntime/BCAutoreleasePool.h"
+#include "BCRuntime/BCString.h"
+#include "BCRuntime/BCArray.h"
+#include "BCRuntime/BCDictionary.h"
+#include "BCRuntime/BCNumber.h"
+#include "BCRuntime/BCRuntime.h"
 
 #define BIG_TITLE(_x_) printf("\n=================================================================\n                      " _x_ "\n=================================================================\n")
 #define SUB_TITLE(_x_) printf("\n-------------------------------\n        " _x_ "\n-------------------------------\n\n")
@@ -43,7 +43,7 @@ void testArray() {
 
 	BCArrayAdd(array, $OBJ BCStringConst("Admin"));
 	BCArrayAdd(array, $OBJ BCStringConst("Editor"));
-	BCArrayAdd(array, $OBJ BCTrue);
+	BCArrayAdd(array, $OBJ kBCTrue);
 
 	printf("Array Dump: \n");
 	BCDescription($OBJ array, 0);
@@ -55,10 +55,22 @@ void testArray() {
 	puts("");
 }
 
+#define BCAutoReleaseScope(_block_) BCAutoreleaseScopeImpl(__COUNTER__, _block_)
+#define BCAutoreleaseScopeImpl(_counter_, _block_) ({ BCPoolPush(); $VAR BC_M_CAT(___block_result_, _counter_) = _block_(); BCPoolPop(); BC_M_CAT(___block_result_, _counter_);})
+
 void testNumber() {
 	// ================================
 	SUB_TITLE("Test Number");
 	// ================================
+
+	BCAutoReleaseScope(^{
+		$VAR array = $ARR(0xFF, 0xFF, 0xFF, 0xFF);
+		$VAR num = $(12345);
+
+
+
+		return num;
+	});
 
 	BCNumberRef numInt = BCNumberCreate(42);
 	BCNumberRef numBool = BCNumberCreate(true);
@@ -91,7 +103,7 @@ void testNumber() {
 	printf("Extracted Int: %d\n", valInt);
 
 	float valFloat;
-	BCNumberGetValue(numFloat, &valFloat);
+	BCNumberGetValue(numInt, &valFloat);
 	printf("Extracted Float: %f\n", valFloat);
 
 	// Equality
@@ -147,14 +159,15 @@ void testDictionary() {
 
 	$VAR nine = $(9);
 	BCAutorelease($OBJ nine);
-	$VAR three = $(3);
+	$VAR three = $(1024);
 	BCAutorelease($OBJ three);
 
 	$VAR abc = $DIC(
 		"nine", nine,
 		"three", three,
 		"array", array,
-		"dic", $$DIC("abc", nine)
+		"innerDic", $$DIC("abc", nine),
+		"innerArr", $$ARR(nine, three)
 	);
 
 	$VAR header = $DIC(

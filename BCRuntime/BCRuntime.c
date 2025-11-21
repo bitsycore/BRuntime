@@ -1,4 +1,4 @@
-#include "BC.h"
+#include "BCRuntime.h"
 
 extern void _BCNumberInitialize();
 
