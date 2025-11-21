@@ -32,32 +32,19 @@ BCNumberRef BCNumberCreateDouble(double value);
 extern BCBoolRef kBCTrue;
 extern BCBoolRef kBCFalse;
 
-#ifdef WIN32
-
-#define BCNumberCreate(val) _Generic((val), \
-    int8_t: BCNumberCreateInt8, \
-    int16_t: BCNumberCreateInt16, \
-    int32_t: BCNumberCreateInt32, \
-    int64_t: BCNumberCreateInt64, \
-    uint8_t: BCNumberCreateUInt8, \
-    uint16_t: BCNumberCreateUInt16, \
-    uint32_t: BCNumberCreateUInt32, \
-    uint64_t: BCNumberCreateUInt64, \
-    float: BCNumberCreateFloat, \
-    double: BCNumberCreateDouble, \
-    bool: BCNumberGetBool, \
-    default: BCNumberCreateInt32 \
-)(val)
-
-#else
-
 static inline BCBoolRef ___BCBoolSelect(bool val) { return val ? kBCTrue : kBCFalse; }
 
+#ifdef WIN32
+#define ___BC___PLATFORM_EXTRA_NUM_CREA_MACRO
+#else
+#define ___BC___PLATFORM_EXTRA_NUM_CREA_MACRO long long: BCNumberCreateInt64,
+#endif
+
 #define BCNumberCreate(val) _Generic((val), \
     int8_t: BCNumberCreateInt8, \
     int16_t: BCNumberCreateInt16, \
     int32_t: BCNumberCreateInt32, \
-    long long: BCNumberCreateInt64, \
+    ___BC___PLATFORM_EXTRA_NUM_CREA_MACRO \
     int64_t: BCNumberCreateInt64, \
     uint8_t: BCNumberCreateUInt8, \
     uint16_t: BCNumberCreateUInt16, \
@@ -68,8 +55,6 @@ static inline BCBoolRef ___BCBoolSelect(bool val) { return val ? kBCTrue : kBCFa
     bool: ___BCBoolSelect, \
     default: BCNumberCreateInt32 \
 )(val)
-
-#endif
 
 void BCNumberGetValueExplicit(BCNumberRef num, void* value, BCNumberType dstType);
 BCNumberType BCNumberGetTypeID(BCNumberRef num);

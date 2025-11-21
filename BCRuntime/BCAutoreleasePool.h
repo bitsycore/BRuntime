@@ -5,8 +5,8 @@
 #include <stdio.h>
 #include "BCObject.h"
 
-void BCPoolPush(void);
-void BCPoolPop(void);
+void BCAutoreleasePoolPush(void);
+void BCAutoreleasePoolPop(void);
 BCObject* BCAutorelease(BCObject* obj);
 
 #endif //BCRUNTIME_BCAUTORELEASEPOOL_H

@@ -17,7 +17,7 @@ _Thread_local BCAutoreleasePool* _bcCurrentPool = NULL;
 // MARK: Public
 // =========================================================
 
-void BCPoolPush(void) {
+void BCAutoreleasePoolPush(void) {
 	BCAutoreleasePool* pool = calloc(1, sizeof(BCAutoreleasePool));
 	pool->capacity = 32;
 	pool->stack = calloc(pool->capacity, sizeof(BCObject*));
@@ -25,7 +25,7 @@ void BCPoolPush(void) {
 	_bcCurrentPool = pool;
 }
 
-void BCPoolPop(void) {
+void BCAutoreleasePoolPop(void) {
 	if (!_bcCurrentPool) return;
 	BCAutoreleasePool* pool = _bcCurrentPool;
 
@@ -53,10 +53,4 @@ BCObject* BCAutorelease(BCObject* obj) {
 	pool->stack[pool->count++] = obj;
 	return obj;
 
-}
-
-void BCAutoreleaseScope(void (^block)(void)) {
-	BCPoolPush();
-	block();
-	BCPoolPop();
 }

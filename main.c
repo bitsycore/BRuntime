@@ -55,24 +55,12 @@ void testArray() {
 	puts("");
 }
 
-#define BCAutoReleaseScope(_block_) BCAutoreleaseScopeImpl(__COUNTER__, _block_)
-#define BCAutoreleaseScopeImpl(_counter_, _block_) ({ BCPoolPush(); $VAR BC_M_CAT(___block_result_, _counter_) = _block_(); BCPoolPop(); BC_M_CAT(___block_result_, _counter_);})
-
 void testNumber() {
 	// ================================
 	SUB_TITLE("Test Number");
 	// ================================
 
-	BCAutoReleaseScope(^{
-		$VAR array = $ARR(0xFF, 0xFF, 0xFF, 0xFF);
-		$VAR num = $(12345);
-
-
-
-		return num;
-	});
-
-	BCNumberRef numInt = BCNumberCreate(42);
+	BCNumberRef numInt =  BCNumberCreate(42);
 	BCNumberRef numBool = BCNumberCreate(true);
 	BCNumberRef numFloat = BCNumberCreate(3.14f);
 	BCNumberRef numDouble = BCNumberCreate(3.14159);
@@ -157,12 +145,10 @@ void testDictionary() {
 
 	puts("");
 
-	$VAR nine = $(9);
-	BCAutorelease($OBJ nine);
-	$VAR three = $(1024);
-	BCAutorelease($OBJ three);
+	$VAR nine = $$(9);
+	$VAR three = $$(1024);
 
-	$VAR abc = $DIC(
+	$VAR abc = $$DIC(
 		"nine", nine,
 		"three", three,
 		"array", array,
@@ -175,6 +161,7 @@ void testDictionary() {
 		"version", "1.0.0",
 		"author", "Beej"
 	);
+	$ARR(1,2,3);
 	BCAutorelease($OBJ header);
 
 	BCDescription($OBJ header, 0);
@@ -182,8 +169,6 @@ void testDictionary() {
 	puts("");
 
 	BCDescription($OBJ abc, 0);
-
-	BCRelease($OBJ abc);
 
 	BCNumberGetTypeID(nine);
 	BCNumberGetTypeID(three);
@@ -196,7 +181,7 @@ int main() {
 
 	// ===========================
 	// Push Autorelease Pool
-	BCPoolPush();
+	BCAutoreleasePoolPush();
 
 	testString();
 	testArray();
@@ -205,7 +190,7 @@ int main() {
 
 	// ===========================
 	// Pop Autorelease Pool
-	BCPoolPop();
+	BCAutoreleasePoolPop();
 
 	BIG_TITLE("BC End");
 	return 0;
