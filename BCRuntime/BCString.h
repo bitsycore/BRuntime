@@ -5,10 +5,11 @@
 
 #include <stddef.h>
 
-#define BC_HASH_UNSET 0
+#define BC_HASH_UNSET 0xFFFFFFFF
 #define BC_LEN_UNSET SIZE_MAX
+#define BC_STRING_POOL_SIZE 16384
 
-static inline uint32_t ___BCINTERNAL___StringHasher(const char* s) {
+static uint32_t ___BCINTERNAL___StringHasher(const char* s) {
 	uint32_t hash = 2166136261u;
 	while (*s) {
 		hash ^= (uint8_t) *s++;
@@ -39,5 +40,7 @@ BCStringRef BCStringPooledWithInfo(const char* text, size_t len, uint32_t hash, 
 size_t BCStringLength(BCStringRef str);
 uint32_t BCStringHash(BCStringRef str);
 const char* BCStringCPtr(BCStringRef str);
+
+void BCStringPoolDebugDump(void);
 
 #endif //BCRUNTIME_BCSTRING_H

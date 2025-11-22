@@ -7,7 +7,10 @@ extern void ___BCINTERNAL___StringPoolDeinit();
 #ifdef _WIN32
 #include <Windows.h>
 static void PlatformSpecificInitialize() {
-	// Enable ANSI escape sequences
+	// For UTF-8 output
+	SetConsoleOutputCP(CP_UTF8);
+
+	// For ANSI escape sequences
 	const HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
 	if (hOut == INVALID_HANDLE_VALUE) return;
 	DWORD dwMode = 0;

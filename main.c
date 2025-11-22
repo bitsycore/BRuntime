@@ -1,10 +1,12 @@
-#include "BCRuntime/Array/BCArray.h"
+#include <time.h>
+
 #include "BCRuntime/BCAutoreleasePool.h"
-#include "BCRuntime/Map/BCMap.h"
 #include "BCRuntime/BCNumber.h"
 #include "BCRuntime/BCObject.h"
 #include "BCRuntime/BCRuntime.h"
 #include "BCRuntime/BCString.h"
+#include "BCRuntime/Array/BCArray.h"
+#include "BCRuntime/Map/BCMap.h"
 
 #define RESET   "\033[0m"
 #define RED     "\033[31m"
@@ -223,5 +225,7 @@ int main() {
 	}
 	
 	BIG_TITLE("BC End");
+
+	BCStringPoolDebugDump();
 	return 0;
 }

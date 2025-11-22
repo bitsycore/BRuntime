@@ -9,8 +9,6 @@
 
 #include "BCObject.h"
 
-#define POOL_SIZE 1024
-
 #define POOLED_FLAG 1 << 16
 
 // =========================================================
@@ -82,7 +80,7 @@ typedef struct StringPoolNode {
 
 static struct {
 	mtx_t lock;
-	StringPoolNode* buckets[POOL_SIZE];
+	StringPoolNode* buckets[BC_STRING_POOL_SIZE];
 } StringPool;
 
 void ___BCINTERNAL___StringPoolInit(void) {
@@ -92,7 +90,7 @@ void ___BCINTERNAL___StringPoolInit(void) {
 
 void ___BCINTERNAL___StringPoolDeinit(void) {
 	mtx_destroy(&StringPool.lock);
-	for (size_t i = 0; i < POOL_SIZE; i++) {
+	for (size_t i = 0; i < BC_STRING_POOL_SIZE; i++) {
 		const StringPoolNode* node = StringPool.buckets[i];
 		while (node) {
 			const StringPoolNode* next = node->next;
@@ -104,7 +102,7 @@ void ___BCINTERNAL___StringPoolDeinit(void) {
 }
 
 static BCStringRef StringPoolGetOrInsert(const char* text, const size_t len, const uint32_t hash, const bool static_string) {
-	const uint32_t idx = hash % POOL_SIZE;
+	const uint32_t idx = hash % BC_STRING_POOL_SIZE;
 
 	mtx_lock(&StringPool.lock);
 
@@ -220,4 +218,66 @@ uint32_t BCStringHash(const BCStringRef str) {
 
 const char* BCStringCPtr(const BCStringRef str) {
 	return str->buffer;
+}
+
+// =========================================================
+// MARK: Debug
+// =========================================================
+
+void BCStringPoolDebugDump(void) {
+	mtx_lock(&StringPool.lock);
+	const clock_t start = clock();
+
+	// --------------------------------------------------------------------------
+	// FOOTER
+	printf("\n"
+		"┌────────┬────────────────────────────────────────────────┬────────────┬────────┬──────────────────┐\n"
+		"│ Bucket │                     Value                      │    Hash    │ Length │       Next       │\n"
+		"├────────┼────────────────────────────────────────────────┼────────────┼────────┼──────────────────┤\n"
+	);
+
+	// Print entries
+	size_t count = 0;
+	for (size_t i = 0; i < BC_STRING_POOL_SIZE; i++) {
+		const StringPoolNode* node = StringPool.buckets[i];
+		while (node) {
+			const BCStringRef str = node->str;
+			const char* value = str->buffer;
+			const uint32_t hash = atomic_load(&str->hash);
+			const size_t length = BCStringLength(str);
+
+			// Truncate long strings for display
+			char displayValue[45];
+			if (strlen(value) > 43) {
+				snprintf(displayValue, sizeof(displayValue), "%.43s...", value);
+			} else {
+				snprintf(displayValue, sizeof(displayValue), "%s", value);
+			}
+
+			// Format next pointer
+			char nextPtr[18];
+			if (node->next) {
+				snprintf(nextPtr, sizeof(nextPtr), "%p", (void*)node->next);
+			} else {
+				snprintf(nextPtr, sizeof(nextPtr), "NULL");
+			}
+
+			printf("│ %-6zu │ %-46s │ 0x%08X │ %-6zu │ %-16s │\n", i, displayValue, hash, length, nextPtr);
+
+			count++;
+			node = node->next;
+		}
+	}
+
+	mtx_unlock(&StringPool.lock);
+
+	const clock_t end = clock();
+	const double elapsed = (double)(end - start) / CLOCKS_PER_SEC * 1000;
+
+	// --------------------------------------------------------------------------
+	// FOOTER
+	printf(
+		"└────────┴────────────────────────────────────────────────┴────────────┴────────┴──────────────────┘\n"
+		"%zu row%s in set (%fms)\n\n", count, count == 1 ? "" : "s", elapsed
+	);
 }
