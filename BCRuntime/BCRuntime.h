@@ -7,44 +7,48 @@
 #include "Utilities/BCMacro.h"
 
 // ================================================
-// MARK: BOXING
+// MARK: BOXING $
 // ================================================
 
 #ifdef WIN32
-#define ___BC___PLATFORM_EXTRA_$_MACRO
+#define ___BCINTERNAL___$_EXTRA
 #else
-#define ___BC___PLATFORM_EXTRA_$_MACRO long long: BCNumberCreateInt64,
+#define ___BCINTERNAL___$_EXTRA long long: BCNumberCreateInt64,
 #endif
 
-static inline BCObjectRef ___BCRetain(void* obj) { return BCRetain(obj); }
+static inline BCObjectRef ___BCINTERNAL___Retain(void* obj) { return BCRetain(obj); }
 
 #define $(...) _Generic((BC_ARG_FIRST(__VA_ARGS__)), \
-    int8_t: BCNumberCreateInt8,        \
-    int16_t: BCNumberCreateInt16,      \
-    int32_t: BCNumberCreateInt32,      \
-    int64_t: BCNumberCreateInt64,      \
-    uint8_t: BCNumberCreateUInt8,      \
-    uint16_t: BCNumberCreateUInt16,    \
-    uint32_t: BCNumberCreateUInt32,    \
-    uint64_t: BCNumberCreateUInt64,    \
-    ___BC___PLATFORM_EXTRA_$_MACRO     \
-    float: BCNumberCreateFloat,        \
-    double: BCNumberCreateDouble,      \
-    bool: ___BCBoolSelect,             \
-    char*: BCStringCreate,             \
-    const char*: BCStringCreate,       \
-    BCStringRef: ___BCRetain,          \
-    BCNumberRef: ___BCRetain,          \
-    BCArrayRef: ___BCRetain,           \
-    BCAllocatorRef: ___BCRetain,       \
-    BCMapRef: ___BCRetain,      \
-    BCObjectRef: ___BCRetain           \
+    int8_t: BCNumberCreateInt8,             \
+    int16_t: BCNumberCreateInt16,           \
+    int32_t: BCNumberCreateInt32,           \
+    int64_t: BCNumberCreateInt64,           \
+    uint8_t: BCNumberCreateUInt8,           \
+    uint16_t: BCNumberCreateUInt16,         \
+    uint32_t: BCNumberCreateUInt32,         \
+    uint64_t: BCNumberCreateUInt64,         \
+    ___BCINTERNAL___$_EXTRA                 \
+    float: BCNumberCreateFloat,             \
+    double: BCNumberCreateDouble,           \
+    bool: ___BCINTERNAL___BoolSelect,       \
+    char*: BCStringCreate,                  \
+    const char*: BCStringCreate,            \
+    BCStringRef: ___BCINTERNAL___Retain,    \
+    BCNumberRef: ___BCINTERNAL___Retain,    \
+    BCArrayRef: ___BCINTERNAL___Retain,     \
+    BCAllocatorRef: ___BCINTERNAL___Retain, \
+    BCMapRef: ___BCINTERNAL___Retain,       \
+    BCObjectRef: ___BCINTERNAL___Retain     \
 )(__VA_ARGS__)
 
-#define __BC_$$_IMPL(__result__, __type__ ) ( (__type__) BCAutorelease($OBJ (__result__)) )
-#define $$(...) __BC_$$_IMPL($(__VA_ARGS__), $TYPE ( $(__VA_ARGS__) ))
+#define ___BCINTERNAL___$$_IMPL(__result__, __type__ ) ( (__type__) BCAutorelease($OBJ (__result__)) )
+#define $$(...) ___BCINTERNAL___$$_IMPL($(__VA_ARGS__), $TYPE ( $(__VA_ARGS__) ))
 
-#define __BC_ARR_IMPL(_counter_, ...) ({ \
+// ================================================
+// MARK: ARRAY
+// ================================================
+
+#define ___BCINTERNAL___ARR_IMPL(_counter_, ...) ({ \
     BCAutoreleasePoolPush(); \
     BCArrayRef BC_M_CAT(___temp_arr_impl___,_counter_) = BCArrayCreateWithObjects( \
 		false, /*NO RETAIN*/ \
@@ -55,10 +59,14 @@ static inline BCObjectRef ___BCRetain(void* obj) { return BCRetain(obj); }
     BC_M_CAT(___temp_arr_impl___,_counter_); \
 })
 
-#define $ARR(...) __BC_ARR_IMPL(BC_M_CAT(___temp_arr_impl___,__COUNTER__), __VA_ARGS__)
+#define $ARR(...) ___BCINTERNAL___ARR_IMPL(BC_M_CAT(___temp_arr_impl___,__COUNTER__), __VA_ARGS__)
 #define $$ARR(...) ( (BCArrayRef) BCAutorelease( $OBJ $ARR(__VA_ARGS__) ) )
 
-#define __BC_DIC_IMPL(_name_, ...) ({ \
+// ================================================
+// MARK: MAP
+// ================================================
+
+#define ___BCINTERNAL___MAP_IMPL(_name_, ...) ({ \
     BCAutoreleasePoolPush();\
     _Static_assert(((BC_ARG_COUNT(__VA_ARGS__)) % 2) == 0, "DIC requires an even number of arguments"); \
     BCMapRef _name_ = BCMapCreateWithObjects( \
@@ -70,24 +78,20 @@ static inline BCObjectRef ___BCRetain(void* obj) { return BCRetain(obj); }
     _name_; \
 })
 
-#define $DIC(...) __BC_DIC_IMPL(BC_M_CAT(___temp_dic_impl___,__COUNTER__), __VA_ARGS__)
-#define $$DIC(...) ( (BCMapRef) BCAutorelease( $OBJ $DIC(__VA_ARGS__) ) )
+#define $MAP(...) ___BCINTERNAL___MAP_IMPL(BC_M_CAT(___temp_dic_impl___,__COUNTER__), __VA_ARGS__)
+#define $$MAP(...) ( (BCMapRef) BCAutorelease( $OBJ $MAP(__VA_ARGS__) ) )
 
 // ================================================
 // MARK: RUNTIME INITIALIZATION
 // ================================================
 
-void __internal_BCInitialize(void);
-void __internal_BCUninitialize(void);
+void ___BCINTERNAL___InitializeImpl(void);
+void ___BCINTERNAL___UninitializeImpl(void);
 
 BC_AUTOSTART
-static inline void __inline_BCInitialize(void) {
-	__internal_BCInitialize();
-}
+static inline void ___BCINTERNAL___Initialize(void) { ___BCINTERNAL___InitializeImpl(); }
 
 BC_AUTOSTOP
-static inline void __inline_BCUninitialize(void) {
-	__internal_BCUninitialize();
-}
+static inline void ___BCINTERNAL___Uninitialize(void) { ___BCINTERNAL___UninitializeImpl(); }
 
 #endif //BC_BCRUNTIME_H

@@ -18,9 +18,23 @@ typedef struct BCClass {
 
 typedef struct BCObject {
 	BCClassRef cls;
+	uint32_t flags;
 	atomic_int ref_count;
 	BCAllocatorRef allocator;
 } BCObject;
+
+// Flags 0 -> 15 Object
+#define BC_OBJECT_FLAG_REFCOUNT  1 << 0
+#define BC_OBJECT_FLAG_HEAP      1 << 1
+#define BC_OBJECT_FLAG_STATIC    1 << 2
+#define BC_OBJECT_FLAG_POOLED    1 << 3
+#define BC_OBJECT_FLAG_HAS_HASH  1 << 4
+// Flags 16 -> 31 Free usage for class
+
+#define BC_FLAG_IS(obj, flag) ((obj) & (flag))
+#define BC_FLAG_SET(obj, flag) ((obj) |= (flag))
+#define BC_FLAG_CLEAR(obj, flag) ((obj) &= ~(flag))
+#define BC_FLAG_TOGGLE(obj, flag) ((obj) ^= (flag))
 
 typedef struct BCAllocator {
 	void* (* alloc)(size_t size, const void* ctx);

@@ -1,6 +1,8 @@
 #include "BCRuntime.h"
 
-extern void _BCNumberInitialize();
+extern void ___BCINTERNAL___NumberInitialize();
+extern void StringPoolInit();
+extern void StringPoolDeinit();
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -17,11 +19,12 @@ static void PlatformSpecificInitialize() {
 #define PlatformSpecificInitialize()
 #endif
 
-void __internal_BCInitialize(void) {
+void ___BCINTERNAL___InitializeImpl(void) {
 	PlatformSpecificInitialize();
-	_BCNumberInitialize();
+	StringPoolInit();
+	___BCINTERNAL___NumberInitialize();
 }
 
-void __internal_BCUninitialize(void) {
-
+void ___BCINTERNAL___UninitializeImpl(void) {
+	StringPoolDeinit();
 }

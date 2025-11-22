@@ -221,18 +221,19 @@ static inline BCNumberType classToType(const BCClassRef cls) {
 BCBoolRef kBCTrue = (BCBoolRef) &kBCNumberBoolTrue;
 BCBoolRef kBCFalse = (BCBoolRef) &kBCNumberBoolFalse;
 
-void _BCNumberInitialize(void) {
+void ___BCINTERNAL___NumberInitialize(void) {
+	const uint32_t flags = BC_OBJECT_FLAG_STATIC;
 	kBCNumberBoolTrue = (BCNumberBool) {
 		.super = {
 			.cls = &kClassList[BCNumberTypeBool],
-			.ref_count = -1
+			.flags = flags
 		},
 		.value = true
 	};
 	kBCNumberBoolFalse = (BCNumberBool) {
 		.super = {
 			.cls = &kClassList[BCNumberTypeBool],
-			.ref_count = -1
+			.flags = flags,
 		},
 		.value = false,
 	};

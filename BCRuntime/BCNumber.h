@@ -32,21 +32,21 @@ BCNumberDoubleRef BCNumberCreateDouble(double value);
 extern BCBoolRef kBCTrue;
 extern BCBoolRef kBCFalse;
 
-static inline BCBoolRef ___BCBoolSelect(const bool val) { return val ? kBCTrue : kBCFalse; }
+static inline BCBoolRef ___BCINTERNAL___BoolSelect(const bool val) { return val ? kBCTrue : kBCFalse; }
 
-#define BCBool(_val_) ___BCBoolSelect(_val_)
+#define BCBool(_val_) ___BCINTERNAL___BoolSelect(_val_)
 
 #ifdef WIN32
-#define ___BC___PLATFORM_EXTRA_NUM_CREA_MACRO
+#define ___BCINTERNAL___NUMBER_CREATE_EXTRA
 #else
-#define ___BC___PLATFORM_EXTRA_NUM_CREA_MACRO long long: BCNumberCreateInt64,
+#define ___BCINTERNAL___NUMBER_CREATE_EXTRA long long: BCNumberCreateInt64,
 #endif
 
 #define BCNumberCreate(val) _Generic((val), \
     int8_t: BCNumberCreateInt8, \
     int16_t: BCNumberCreateInt16, \
     int32_t: BCNumberCreateInt32, \
-    ___BC___PLATFORM_EXTRA_NUM_CREA_MACRO \
+    ___BCINTERNAL___NUMBER_CREATE_EXTRA \
     int64_t: BCNumberCreateInt64, \
     uint8_t: BCNumberCreateUInt8, \
     uint16_t: BCNumberCreateUInt16, \
@@ -58,22 +58,22 @@ static inline BCBoolRef ___BCBoolSelect(const bool val) { return val ? kBCTrue :
 
 BCNumberType BCNumberGetType(BCNumberRef num);
 
-#define DECLARE_NUMBER_GET(Type, Name) \
+#define ___BCINTERNAL___DECLARE_NUMBER_GET(Type, Name) \
 	Type BCNumberGet##Name(BCNumberRef num);
 
-DECLARE_NUMBER_GET(int8_t, Int8)
-DECLARE_NUMBER_GET(int16_t, Int16)
-DECLARE_NUMBER_GET(int32_t, Int32)
-DECLARE_NUMBER_GET(int64_t, Int64)
-DECLARE_NUMBER_GET(uint8_t, UInt8)
-DECLARE_NUMBER_GET(uint16_t, UInt16)
-DECLARE_NUMBER_GET(uint32_t, UInt32)
-DECLARE_NUMBER_GET(uint64_t, UInt64)
-DECLARE_NUMBER_GET(float, Float)
-DECLARE_NUMBER_GET(double, Double)
-DECLARE_NUMBER_GET(bool, Bool)
+___BCINTERNAL___DECLARE_NUMBER_GET(int8_t, Int8)
+___BCINTERNAL___DECLARE_NUMBER_GET(int16_t, Int16)
+___BCINTERNAL___DECLARE_NUMBER_GET(int32_t, Int32)
+___BCINTERNAL___DECLARE_NUMBER_GET(int64_t, Int64)
+___BCINTERNAL___DECLARE_NUMBER_GET(uint8_t, UInt8)
+___BCINTERNAL___DECLARE_NUMBER_GET(uint16_t, UInt16)
+___BCINTERNAL___DECLARE_NUMBER_GET(uint32_t, UInt32)
+___BCINTERNAL___DECLARE_NUMBER_GET(uint64_t, UInt64)
+___BCINTERNAL___DECLARE_NUMBER_GET(float, Float)
+___BCINTERNAL___DECLARE_NUMBER_GET(double, Double)
+___BCINTERNAL___DECLARE_NUMBER_GET(bool, Bool)
 
-static inline void BCNumberGetExplicit(const BCNumberRef num, void* value, const BCNumberType dstType) {
+static void BCNumberGetExplicit(const BCNumberRef num, void* value, const BCNumberType dstType) {
 	if (!num || !value) return;
 	switch (dstType) {
 		case BCNumberTypeInt8: *(int8_t*)value = BCNumberGetInt8(num); break;

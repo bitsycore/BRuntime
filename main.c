@@ -193,18 +193,18 @@ void testMap() {
 	$VAR nine = $$(9);
 	$VAR three = $$(1024);
 
-	$LET autoDic = $$DIC(
+	$LET autoDic = $$MAP(
 		"nine", nine,
 		"three", three,
 		"array", array,
-		"innerDic", $$DIC("abc", nine),
+		"innerDic", $$MAP("abc", nine),
 		"innerArr", $$ARR(nine, three)
 	);
 	printf("%s\n", TO_STR(autoDic));
 
 	puts("------------------------");
 
-	$LET dic = $$DIC(
+	$LET dic = $$MAP(
 		"title", "Test Map",
 		"version", "1.0.0",
 		"author", "Beej"
@@ -221,7 +221,7 @@ int main() {
 		testNumber();
 		testMap();
 	}
-
+	
 	BIG_TITLE("BC End");
 	return 0;
 }

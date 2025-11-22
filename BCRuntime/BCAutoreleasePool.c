@@ -13,7 +13,7 @@ typedef struct BCAutoreleasePool {
 	struct BCAutoreleasePool* parent;
 } BCAutoreleasePool;
 
-$TLS BCAutoreleasePool* _bcCurrentPool = NULL;
+$TLS BCAutoreleasePool* CurrentAutoReleasePool = NULL;
 
 // =========================================================
 // MARK: Public
@@ -23,31 +23,31 @@ void BCAutoreleasePoolPush(void) {
 	BCAutoreleasePool* pool = calloc(1, sizeof(BCAutoreleasePool));
 	pool->capacity = 32;
 	pool->stack = calloc(pool->capacity, sizeof(BCObjectRef));
-	pool->parent = _bcCurrentPool;
-	_bcCurrentPool = pool;
+	pool->parent = CurrentAutoReleasePool;
+	CurrentAutoReleasePool = pool;
 }
 
 void BCAutoreleasePoolPop(void) {
-	if (!_bcCurrentPool) return;
-	BCAutoreleasePool* pool = _bcCurrentPool;
+	if (!CurrentAutoReleasePool) return;
+	BCAutoreleasePool* pool = CurrentAutoReleasePool;
 
 	for (size_t i = 0; i < pool->count; i++) {
 		BCRelease(pool->stack[i]);
 	}
 
-	_bcCurrentPool = pool->parent;
+	CurrentAutoReleasePool = pool->parent;
 	free(pool->stack);
 	free(pool);
 }
 
-BCObjectRef BCAutorelease(BCObjectRef obj) {
+BCObjectRef BCAutorelease(const BCObjectRef obj) {
 	if (!obj) return NULL;
-	if (!_bcCurrentPool) {
+	if (!CurrentAutoReleasePool) {
 		fprintf(stderr, "Warning: Autorelease with no pool. Leaking.\n");
 		return obj;
 	}
 
-	BCAutoreleasePool* pool = _bcCurrentPool;
+	BCAutoreleasePool* pool = CurrentAutoReleasePool;
 	if (pool->count == pool->capacity) {
 		pool->capacity *= 2;
 		pool->stack = realloc(pool->stack, pool->capacity * sizeof(BCObjectRef));
