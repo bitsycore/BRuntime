@@ -1,24 +1,25 @@
-add_library(
-		BCRuntime
-		BCObject.c
-		BCObject.h
-		BCTypes.h
-		BCString.c
-		BCString.h
-		Map/BCMap.c
-		Map/BCMap.h
-		BCAutoreleasePool.c
-		BCAutoreleasePool.h
+add_library(BCRuntime
 		Array/BCArray.c
 		Array/BCArray.h
-		BCNumber.c
-		BCNumber.h
-		BCRuntime.h
-		BCRuntime.c
-		Utilities/BCMacro.h
-		Utilities/BCKeywords.h
 		Array/BCBytesArray.c
 		Array/BCBytesArray.h
+		BCAutoreleasePool.c
+		BCAutoreleasePool.h
+		BCNumber.c
+		BCNumber.h
+		BCObject.c
+		BCObject.h
+		BCRuntime.c
+		BCRuntime.h
 		BCSettings.h
+		BCString.c
+		BCString.h
+		BCTypes.h
+		Map/BCMap.c
+		Map/BCMap.h
 		Utilities/BCAnsiEscape.h
+		Utilities/BCKeywords.h
+		Utilities/BCMacro.h
+		Utilities/BCMemInfo.c
+		Utilities/BCMemInfo.h
 )

@@ -8,6 +8,7 @@
 #include "BCRuntime/Array/BCArray.h"
 #include "BCRuntime/Map/BCMap.h"
 #include "BCRuntime/Utilities/BCAnsiEscape.h"
+#include "BCRuntime/Utilities/BCMemInfo.h"
 
 #define BIG_TITLE(_x_) printf( \
 	"\n" BC_AE_BG256(244) "=================================================================" BC_AE_RESET "\n" \
@@ -237,6 +238,8 @@ int main() {
 
 	BCObjectDebugDump();
 	BCStringPoolDebugDump();
+
+	BCMemoryInfoPrint();
 
 	return 0;
 }
