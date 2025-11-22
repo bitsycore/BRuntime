@@ -1,9 +1,9 @@
 #ifndef BC_BCRUNTIME_H
 #define BC_BCRUNTIME_H
 
-#include "BCMacroTools.h"
 #include "BCObject.h"
 #include "BCTypes.h"
+#include "Utilities/BCMacro.h"
 
 // ================================================
 // MARK: SHORTCUT
@@ -68,7 +68,8 @@ static inline BCObjectRef ___BCRetain(void* obj) { return BCRetain(obj); }
 #define __BC_DIC_IMPL(_counter_, ...) ({ \
     BCAutoreleasePoolPush();\
     _Static_assert(((BC_ARG_COUNT(__VA_ARGS__)) % 2) == 0, "DIC requires an even number of arguments"); \
-    BCDictionaryRef BC_M_CAT(___temp_dic_impl___,_counter_) = ___BCDictionaryCreateWithObjectsNoRetain( \
+    BCDictionaryRef BC_M_CAT(___temp_dic_impl___,_counter_) = BCDictionaryCreateWithObjects( \
+		false, /*NO RETAIN*/ \
         BC_ARG_COUNT(__VA_ARGS__), \
         BC_ARG_MAP($, __VA_ARGS__) \
     );                                   \

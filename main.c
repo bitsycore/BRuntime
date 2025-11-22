@@ -136,7 +136,10 @@ void testDictionary() {
 
 	// Get Value by Key
 	const BCObjectRef found = BCDictionaryGet( dictionary, $OBJ str2); // Look up using pooled string
-	if (found) printf("\"username\": %s\n", TO_STR(found));
+	if (found) {
+		printf("\"username\": %s\n", TO_STR(found));
+		BCRelease(found);
+	}
 
 	puts("------------------------");
 

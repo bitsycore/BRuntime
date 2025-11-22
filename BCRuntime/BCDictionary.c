@@ -90,7 +90,7 @@ BCMutableDictionaryRef BCMutableDictionaryCreate() {
 }
 
 void BCDictionarySet(const BCMutableDictionaryRef d, const BCObjectRef key, const BCObjectRef val) {
-	BCDictionary *dict = (BCDictionaryRef)d;
+	BCDictionary *dict = d;
 	if (!dict->isMutable) return;
 
 	// Resize Check
@@ -126,13 +126,13 @@ void BCDictionarySet(const BCMutableDictionaryRef d, const BCObjectRef key, cons
 	dict->count++;
 }
 
-BCObjectRef BCDictionaryGet(BCDictionaryRef d, BCObjectRef key) {
-	uint32_t hash = BCHash(key);
+BCObjectRef BCDictionaryGet(const BCDictionaryRef d, const BCObjectRef key) {
+	const uint32_t hash = BCHash(key);
 	size_t idx = hash % d->capacity;
-	size_t start = idx;
+	const size_t start = idx;
 	while (d->buckets[idx].key) {
 		if (BCEqual(d->buckets[idx].key, key)) {
-			return d->buckets[idx].value;
+			return BCRetain(d->buckets[idx].value);
 		}
 		idx = (idx + 1) % d->capacity;
 		if (idx == start) break;
@@ -140,8 +140,8 @@ BCObjectRef BCDictionaryGet(BCDictionaryRef d, BCObjectRef key) {
 	return NULL;
 }
 
-BCArrayRef BCDictionaryCopyKeys(BCDictionaryRef d) {
-	BCArrayRef arr = BCArrayCreate();
+BCArrayRef BCDictionaryKeys(const BCDictionaryRef d) {
+	const BCArrayRef arr = BCArrayCreate();
 	for (size_t i = 0; i < d->capacity; i++) {
 		if (d->buckets[i].key) {
 			BCArrayAdd(arr, d->buckets[i].key);
@@ -150,16 +150,28 @@ BCArrayRef BCDictionaryCopyKeys(BCDictionaryRef d) {
 	return arr;
 }
 
-BCDictionaryRef ___BCDictionaryCreateWithObjectsNoRetain(size_t count, ...) {
-	BCMutableDictionaryRef d = BCMutableDictionaryCreate();
+BCArrayRef BCDictionaryValues(const BCDictionaryRef d) {
+	const BCArrayRef arr = BCArrayCreate();
+	for (size_t i = 0; i < d->capacity; i++) {
+		if (d->buckets[i].key) {
+			BCArrayAdd(arr, d->buckets[i].value);
+		}
+	}
+	return arr;
+}
+
+BCDictionaryRef BCDictionaryCreateWithObjects(const bool retain, const size_t count, ...) {
+	const BCMutableDictionaryRef d = BCMutableDictionaryCreate();
 	va_list args;
 	va_start(args, count);
 	for (size_t i = 0; i < count/2; i++) {
-		BCObjectRef key = va_arg(args, BCObjectRef);
-		BCObjectRef val = va_arg(args, BCObjectRef);
+		const BCObjectRef key = va_arg(args, BCObjectRef);
+		const BCObjectRef val = va_arg(args, BCObjectRef);
 		BCDictionarySet(d, key, val);
-		BCRelease(key);
-		BCRelease(val);
+		if (!retain) {
+			BCRelease(key);
+			BCRelease(val);
+		}
 	}
 	va_end(args);
 	d->isMutable = false;

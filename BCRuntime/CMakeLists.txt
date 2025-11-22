@@ -15,5 +15,5 @@ add_library(
 		BCNumber.h
 		BCRuntime.h
 		BCRuntime.c
-		BCMacroTools.h
+		Utilities/BCMacro.h
 )
