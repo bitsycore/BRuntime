@@ -9,8 +9,6 @@
 
 #include "BCObject.h"
 
-#define POOLED_FLAG 1 << 16
-
 // =========================================================
 // MARK: Struct
 // =========================================================
@@ -35,7 +33,7 @@ bool StringEqualImpl(const BCObjectRef a, const BCObjectRef b) {
 	const BCStringRef s2 = (BCStringRef) b;
 
 	if (s1 == s2) return true;
-	if ( BC_FLAG_IS(s1->base.flags, POOLED_FLAG) && BC_FLAG_IS( s2->base.flags, POOLED_FLAG )) return false;
+	if ( BC_FLAG_HAS(s1->base.flags, BC_STRING_FLAG_POOLED) && BC_FLAG_HAS( s2->base.flags, BC_STRING_FLAG_POOLED )) return false;
 
 	// Check Hash Cache
 	const uint32_t h1 = atomic_load(&s1->hash);
@@ -68,6 +66,8 @@ static const BCClass kBCStringClass = {
 	.copy = StringCopyImpl,
 	.allocSize = sizeof(BCString)
 };
+
+const BCClassRef kBCStringClassRef = (BCClassRef) &kBCStringClass;
 
 // =========================================================
 // MARK: Pool
@@ -134,21 +134,23 @@ static BCStringRef StringPoolGetOrInsert(const char* text, const size_t len, con
 
 	// ============================================
 	// Insert
-	const size_t extraAlloc = !static_string ? sizeof(StringPoolNode) + (len + 1) : sizeof(StringPoolNode);
-	BCStringRef newStr = (BCStringRef) BCAllocObjectWithExtra((BCClassRef) &kBCStringClass, NULL, extraAlloc);
+	const size_t extraAlloc = static_string ? sizeof(StringPoolNode) : sizeof(StringPoolNode) + (len + 1);
+	const BCStringRef newStr = (BCStringRef)BCAllocObjectWithExtra(
+		(BCClassRef)&kBCStringClass,
+		NULL,
+		extraAlloc,
+		static_string ? BC_STRING_FLAG_POOLED | BC_STRING_FLAG_STATIC : BC_STRING_FLAG_POOLED
+	);
 
 	if (!static_string) {
 		newStr->buffer = (char*) ( &newStr->buffer + 1 );
 		memcpy(newStr->buffer, text, len + 1);
 	} else {
-		newStr = (BCStringRef) BCAllocObjectWithExtra((BCClassRef) &kBCStringClass, NULL, extraAlloc);
 		newStr->buffer = (char*)text;
 	}
 
 	newStr->length = len;
 	newStr->hash = hash;
-	BC_FLAG_SET(newStr->base.flags, POOLED_FLAG);
-	BC_FLAG_CLEAR(newStr->base.flags, BC_OBJECT_FLAG_REFCOUNT);
 
 	StringPoolNode* newNode = (StringPoolNode*) ( (char*)newStr + sizeof(BCString) + (static_string ? 0 : len + 1) );
 	newNode->str = newStr;
@@ -173,15 +175,13 @@ BCStringRef BCStringCreate(const char* fmt, ...) {
 	va_copy(copy, args);
 	const int len = vsnprintf(NULL, 0, fmt, copy);
 	va_end(copy);
-	const BCStringRef str = (BCStringRef) BCAllocObjectWithExtra((BCClassRef) &kBCStringClass, NULL, len + 1);
+	const BCStringRef str = (BCStringRef) BCAllocObjectWithExtra((BCClassRef) &kBCStringClass, NULL, len + 1, BC_OBJECT_FLAG_REFCOUNT);
 	str->buffer = (char*) ( &str->buffer + 1 );
 	vsnprintf(str->buffer, len + 1, fmt, args);
 	va_end(args);
 
 	str->length = BC_LEN_UNSET;
 	str->hash = BC_HASH_UNSET;
-
-	BC_FLAG_CLEAR(str->base.flags, POOLED_FLAG);
 
 	return str;
 }
@@ -224,6 +224,10 @@ const char* BCStringCPtr(const BCStringRef str) {
 // MARK: Debug
 // =========================================================
 
+#define DGRAY "\033[48;5;234m"
+#define BLACK "\033[48;5;235m"
+#define RESET "\033[0m"
+#define BOLD "\033[1m"
 void BCStringPoolDebugDump(void) {
 	mtx_lock(&StringPool.lock);
 	const clock_t start = clock();
@@ -231,9 +235,10 @@ void BCStringPoolDebugDump(void) {
 	// --------------------------------------------------------------------------
 	// FOOTER
 	printf("\n"
-		"┌────────┬────────────────────────────────────────────────┬────────────┬────────┬──────────────────┐\n"
-		"│ Bucket │                     Value                      │    Hash    │ Length │       Next       │\n"
-		"├────────┼────────────────────────────────────────────────┼────────────┼────────┼──────────────────┤\n"
+		"                                          "BOLD"String Pool Dump\n"
+		"┌"          "────────┬────────────────────────────────────────────────┬────────────┬────────┬──────────────────"     "┐\n"
+		"│"DGRAY BOLD" Bucket │                     Value                      │    Hash    │ Length │       Next       "RESET"│\n"
+		"├"BLACK     "────────┼────────────────────────────────────────────────┼────────────┼────────┼──────────────────"RESET"┤\n"
 	);
 
 	// Print entries
@@ -247,7 +252,7 @@ void BCStringPoolDebugDump(void) {
 			const size_t length = BCStringLength(str);
 
 			// Truncate long strings for display
-			char displayValue[45];
+			char displayValue[47];
 			if (strlen(value) > 43) {
 				snprintf(displayValue, sizeof(displayValue), "%.43s...", value);
 			} else {
@@ -262,7 +267,10 @@ void BCStringPoolDebugDump(void) {
 				snprintf(nextPtr, sizeof(nextPtr), "NULL");
 			}
 
-			printf("│ %-6zu │ %-46s │ 0x%08X │ %-6zu │ %-16s │\n", i, displayValue, hash, length, nextPtr);
+			if (count % 2 == 0)
+				printf( "│"BLACK" %-6zu │ %-46s │ 0x%08X │ %-6zu │ %-16s "RESET"│\n", i, displayValue, hash, length, nextPtr);
+			else
+				printf( "│"DGRAY" %-6zu │ %-46s │ 0x%08X │ %-6zu │ %-16s "RESET"│\n", i, displayValue, hash, length, nextPtr);
 
 			count++;
 			node = node->next;
@@ -278,6 +286,6 @@ void BCStringPoolDebugDump(void) {
 	// FOOTER
 	printf(
 		"└────────┴────────────────────────────────────────────────┴────────────┴────────┴──────────────────┘\n"
-		"%zu row%s in set (%fms)\n\n", count, count == 1 ? "" : "s", elapsed
+		"    %zu entr%s (%fms)\n\n", count, count == 1 ? "y" : "ies", elapsed
 	);
 }

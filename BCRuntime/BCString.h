@@ -9,6 +9,9 @@
 #define BC_LEN_UNSET SIZE_MAX
 #define BC_STRING_POOL_SIZE 16384
 
+#define BC_STRING_FLAG_POOLED (1 << 16)
+#define BC_STRING_FLAG_STATIC (1 << 17)
+
 static uint32_t ___BCINTERNAL___StringHasher(const char* s) {
 	uint32_t hash = 2166136261u;
 	while (*s) {

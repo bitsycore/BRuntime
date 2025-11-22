@@ -3,6 +3,8 @@
 extern void ___BCINTERNAL___NumberInitialize();
 extern void ___BCINTERNAL___StringPoolInit();
 extern void ___BCINTERNAL___StringPoolDeinit();
+extern void ___BCINTERNAL___ObjectDebugInit();
+extern void ___BCINTERNAL___ObjectDebugDeinit();
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -24,10 +26,12 @@ static void PlatformSpecificInitialize() {
 
 void ___BCINTERNAL___InitializeImpl(void) {
 	PlatformSpecificInitialize();
+	___BCINTERNAL___ObjectDebugInit();
 	___BCINTERNAL___StringPoolInit();
 	___BCINTERNAL___NumberInitialize();
 }
 
 void ___BCINTERNAL___UninitializeImpl(void) {
 	___BCINTERNAL___StringPoolDeinit();
+	___BCINTERNAL___ObjectDebugDeinit();
 }

@@ -19,4 +19,5 @@ add_library(
 		Utilities/BCKeywords.h
 		Array/BCBytesArray.c
 		Array/BCBytesArray.h
+		BCSettings.h
 )

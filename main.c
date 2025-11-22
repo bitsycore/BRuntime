@@ -89,7 +89,7 @@ void testNumber() {
 	FAIL_IF_NOT(BCNumberGetType(numInt64) == BCNumberTypeInt64);
 	$LET numUInt64 =  BCNumberCreate((uint64_t)0xFFFFFFFFFFFFFFFF);
 	FAIL_IF_NOT(BCNumberGetType(numUInt64) == BCNumberTypeUInt64);
-	
+
 	$LET numFloat =  BCNumberCreate(3.14f);
 	FAIL_IF_NOT(BCNumberGetType(numFloat) == BCNumberTypeFloat);
 	$LET numDouble =  BCNumberCreate(-5.123456789);
@@ -215,17 +215,23 @@ void testMap() {
 }
 
 int main() {
+
+	BCObjectDebugSetEnabled(true);
+	BCObjectDebugSetKeepFreed(true);
+
 	BIG_TITLE("BC Startup");
 
 	BCAutoreleaseScope() {
+		testNumber();
 		testString();
 		testArray();
-		testNumber();
 		testMap();
 	}
-	
+
 	BIG_TITLE("BC End");
 
+	BCObjectDebugDump();
 	BCStringPoolDebugDump();
+
 	return 0;
 }

@@ -39,14 +39,14 @@ static const BCClass kBCBytesArrayClass = {
 // =========================================================
 
 BCBytesArrayRef BCBytesArrayCreate(const size_t count) {
-	const BCBytesArrayRef arr = (BCBytesArrayRef) BCAllocObjectWithExtra((BCClassRef) &kBCBytesArrayClass, NULL, count * sizeof(uint8_t));
+	const BCBytesArrayRef arr = (BCBytesArrayRef) BCAllocObjectWithExtra((BCClassRef) &kBCBytesArrayClass, NULL, count * sizeof(uint8_t), BC_OBJECT_FLAG_REFCOUNT);
 	arr->count = count;
 	memset(arr->bytes, 0, count);
 	return arr;
 }
 
 BCBytesArrayRef BCBytesArrayCreateWithBytes(const size_t count, const uint8_t* bytes) {
-	const BCBytesArrayRef arr = (BCBytesArrayRef) BCAllocObjectWithExtra((BCClassRef) &kBCBytesArrayClass, NULL, count * sizeof(uint8_t));
+	const BCBytesArrayRef arr = (BCBytesArrayRef) BCAllocObjectWithExtra((BCClassRef) &kBCBytesArrayClass, NULL, count * sizeof(uint8_t), BC_OBJECT_FLAG_REFCOUNT);
 	arr->count = count;
 	memcpy(arr->bytes, bytes, count);
 	return arr;
