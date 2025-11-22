@@ -8,17 +8,17 @@
 // MARK: Allocator
 // =========================================================
 
-static void* DefaultAlloc(const size_t size, const void* ctx) {
+static void* AllocatorDefaultAlloc(const size_t size, const void* ctx) {
 	(void)ctx;
 	return malloc(size);
 }
 
-static void DefaultFree(void* ptr, const void* ctx) {
+static void AllocatorDefaultFree(void* ptr, const void* ctx) {
 	(void)ctx;
 	free(ptr);
 }
 
-static BCAllocator _kBCAllocatorDefault = {DefaultAlloc, DefaultFree, NULL};
+static BCAllocator _kBCAllocatorDefault = {AllocatorDefaultAlloc, AllocatorDefaultFree, NULL};
 BCAllocatorRef const kBCAllocatorDefault = &_kBCAllocatorDefault;
 
 // =========================================================

@@ -34,6 +34,8 @@ extern BCBoolRef kBCFalse;
 
 static inline BCBoolRef ___BCBoolSelect(const bool val) { return val ? kBCTrue : kBCFalse; }
 
+#define BCBool(_val_) ___BCBoolSelect(_val_)
+
 #ifdef WIN32
 #define ___BC___PLATFORM_EXTRA_NUM_CREA_MACRO
 #else
@@ -51,26 +53,56 @@ static inline BCBoolRef ___BCBoolSelect(const bool val) { return val ? kBCTrue :
     uint32_t: BCNumberCreateUInt32, \
     uint64_t: BCNumberCreateUInt64, \
     float: BCNumberCreateFloat, \
-    double: BCNumberCreateDouble, \
-    bool: ___BCBoolSelect, \
-    default: BCNumberCreateInt32 \
+    double: BCNumberCreateDouble \
 )(val)
 
-void BCNumberGetValueExplicit(BCNumberRef num, void* value, BCNumberType dstType);
 BCNumberType BCNumberGetType(BCNumberRef num);
 
+#define DECLARE_NUMBER_GET(Type, Name) \
+	Type BCNumberGet##Name(BCNumberRef num);
+
+DECLARE_NUMBER_GET(int8_t, Int8)
+DECLARE_NUMBER_GET(int16_t, Int16)
+DECLARE_NUMBER_GET(int32_t, Int32)
+DECLARE_NUMBER_GET(int64_t, Int64)
+DECLARE_NUMBER_GET(uint8_t, UInt8)
+DECLARE_NUMBER_GET(uint16_t, UInt16)
+DECLARE_NUMBER_GET(uint32_t, UInt32)
+DECLARE_NUMBER_GET(uint64_t, UInt64)
+DECLARE_NUMBER_GET(float, Float)
+DECLARE_NUMBER_GET(double, Double)
+DECLARE_NUMBER_GET(bool, Bool)
+
+static inline void BCNumberGetExplicit(const BCNumberRef num, void* value, const BCNumberType dstType) {
+	if (!num || !value) return;
+	switch (dstType) {
+		case BCNumberTypeInt8: *(int8_t*)value = BCNumberGetInt8(num); break;
+		case BCNumberTypeInt16: *(int16_t*)value = BCNumberGetInt16(num); break;
+		case BCNumberTypeInt32: *(int32_t*)value = BCNumberGetInt32(num); break;
+		case BCNumberTypeInt64: *(int64_t*)value = BCNumberGetInt64(num); break;
+		case BCNumberTypeUInt8: *(uint8_t*)value = BCNumberGetUInt8(num); break;
+		case BCNumberTypeUInt16: *(uint16_t*)value = BCNumberGetUInt16(num); break;
+		case BCNumberTypeUInt32: *(uint32_t*)value = BCNumberGetUInt32(num); break;
+		case BCNumberTypeUInt64: *(uint64_t*)value = BCNumberGetUInt64(num); break;
+		case BCNumberTypeFloat: *(float*)value = BCNumberGetFloat(num); break;
+		case BCNumberTypeDouble: *(double*)value = BCNumberGetDouble(num); break;
+		case BCNumberTypeBool: *(bool*)value = BCNumberGetBool(num); break;
+		default:break;
+	}
+}
+
 #define BCNumberGetValue(num, outPtr) _Generic( (outPtr), \
-    int8_t*		: BCNumberGetValueExplicit(num, outPtr, BCNumberTypeInt8), \
-    int16_t*	: BCNumberGetValueExplicit(num, outPtr, BCNumberTypeInt16), \
-    int32_t*	: BCNumberGetValueExplicit(num, outPtr, BCNumberTypeInt32), \
-    int64_t*	: BCNumberGetValueExplicit(num, outPtr, BCNumberTypeInt64), \
-    uint8_t*	: BCNumberGetValueExplicit(num, outPtr, BCNumberTypeUInt8), \
-    uint16_t*	: BCNumberGetValueExplicit(num, outPtr, BCNumberTypeUInt16), \
-    uint32_t*	: BCNumberGetValueExplicit(num, outPtr, BCNumberTypeUInt32), \
-    uint64_t*	: BCNumberGetValueExplicit(num, outPtr, BCNumberTypeUInt64), \
-    float*		: BCNumberGetValueExplicit(num, outPtr, BCNumberTypeFloat), \
-    double*		: BCNumberGetValueExplicit(num, outPtr, BCNumberTypeDouble), \
-    bool*		: BCNumberGetValueExplicit(num, outPtr, BCNumberTypeBool) \
+    int8_t*   : BCNumberGetExplicit(num, outPtr, BCNumberTypeInt8), \
+    int16_t*  : BCNumberGetExplicit(num, outPtr, BCNumberTypeInt16), \
+    int32_t*  : BCNumberGetExplicit(num, outPtr, BCNumberTypeInt32), \
+    int64_t*  : BCNumberGetExplicit(num, outPtr, BCNumberTypeInt64), \
+    uint8_t*  : BCNumberGetExplicit(num, outPtr, BCNumberTypeUInt8), \
+    uint16_t* : BCNumberGetExplicit(num, outPtr, BCNumberTypeUInt16), \
+    uint32_t* : BCNumberGetExplicit(num, outPtr, BCNumberTypeUInt32), \
+    uint64_t* : BCNumberGetExplicit(num, outPtr, BCNumberTypeUInt64), \
+    float*    : BCNumberGetExplicit(num, outPtr, BCNumberTypeFloat), \
+    double*   : BCNumberGetExplicit(num, outPtr, BCNumberTypeDouble), \
+    bool*     : BCNumberGetExplicit(num, outPtr, BCNumberTypeBool) \
 )
 
 #endif //BCRUNTIME_BCNUMBER_H

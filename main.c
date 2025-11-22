@@ -6,14 +6,22 @@
 #include "BCRuntime/BCRuntime.h"
 #include "BCRuntime/BCString.h"
 
-#define BIG_TITLE(_x_) printf("\n=================================================================\n                      " _x_ "\n=================================================================\n")
-#define SUB_TITLE(_x_) printf("\n-------------------------------\n        " _x_ "\n-------------------------------\n\n")
+#define RESET   "\033[0m"
+#define RED     "\033[31m"
+#define GREEN   "\033[32m"
+#define YELLOW  "\033[33m"
+#define BLUE    "\033[34m"
+#define LIGHT_RED "\033[91m"
+#define BIG_TITLE(_x_) printf(GREEN "\n=================================================================\n                      " _x_ "\n=================================================================\n" RESET)
+#define SUB_TITLE(_x_) printf(YELLOW "\n-------------------------------\n        " _x_ "\n-------------------------------\n\n" RESET)
 
 #define TO_STR(_x_) BCStringGetCString( \
 	(BCStringRef) ( BCAutorelease( \
 		$OBJ BCToString( $OBJ (_x_) ) \
 	) ) \
 )
+
+#define FAIL_IF_NOT(_cond_) if(!(_cond_)) { printf(RED "Assert failed: " LIGHT_RED #_cond_ RED " at: line %d\n" RESET, __LINE__); }
 
 void testString() {
 	// ================================
@@ -25,8 +33,8 @@ void testString() {
 	const BCStringRef str3 = BCStringCreate("username"); // New Instance
 	BCAutorelease($OBJ str3);
 
-	printf("Pool Test: s1=%p, s2=%p (SamePtr? %s)\n", str1, str2, str1 == str2 ? "YES" : "NO");
-	printf("Alloc Test: s1=%p, s3=%p (SamePtr? %s)\n", str1, str3, str1 == str3 ? "YES" : "NO");
+	printf("StringPool Test: s1=%p, s2=%p (SamePtr? %s)\n", str1, str2, str1 == str2 ? "YES" : "NO");
+	printf("StringAlloc Test: s1=%p, s3=%p (SamePtr? %s)\n", str1, str3, str1 == str3 ? "YES" : "NO");
 	printf("Equality Test (s1 vs s3): %s\n", BCEqual( $OBJ str1, $OBJ str3) ? "TRUE" : "FALSE");
 }
 
@@ -60,28 +68,62 @@ void testNumber() {
 	// ================================
 	SUB_TITLE("Test Number");
 	// ================================
+	$LET numInt8 =  BCNumberCreate((int8_t)-64);
+	FAIL_IF_NOT(BCNumberGetType(numInt8) == BCNumberTypeInt8);
+	$LET numUInt8 =  BCNumberCreate((uint8_t)255);
+	FAIL_IF_NOT(BCNumberGetType(numUInt8) == BCNumberTypeUInt8);
+
+	$LET numInt16 =  BCNumberCreate((int16_t)-4500);
+	FAIL_IF_NOT(BCNumberGetType(numInt16) == BCNumberTypeInt16);
+	$LET numUInt16 =  BCNumberCreate((uint16_t)255);
+	FAIL_IF_NOT(BCNumberGetType(numUInt16) == BCNumberTypeUInt16);
+
+	$LET numInt32 =  BCNumberCreate((int32_t)-15500);
+	FAIL_IF_NOT(BCNumberGetType(numInt32) == BCNumberTypeInt32);
+	$LET numUInt32 =  BCNumberCreate((uint32_t)135255);
+	FAIL_IF_NOT(BCNumberGetType(numUInt32) == BCNumberTypeUInt32);
+
+	$LET numInt64 =  BCNumberCreate((int64_t)-0x7FFFFFFFFFFFFFFF);
+	FAIL_IF_NOT(BCNumberGetType(numInt64) == BCNumberTypeInt64);
+	$LET numUInt64 =  BCNumberCreate((uint64_t)0xFFFFFFFFFFFFFFFF);
+	FAIL_IF_NOT(BCNumberGetType(numUInt64) == BCNumberTypeUInt64);
+	
+	$LET numFloat =  BCNumberCreate(3.14f);
+	FAIL_IF_NOT(BCNumberGetType(numFloat) == BCNumberTypeFloat);
+	$LET numDouble =  BCNumberCreate(-5.123456789);
+	FAIL_IF_NOT(BCNumberGetType(numDouble) == BCNumberTypeDouble);
 
 	$LET numInt =  BCNumberCreate(42);
-	$LET numBool = BCNumberCreate(true);
-	$LET numFloat = BCNumberCreate(3.14f);
-	$LET numDouble = BCNumberCreate(3.14159);
-	$LET numInt64 = BCNumberCreate(9223372036854775807);
-	$LET numUInt64 = BCNumberCreate(9223372036854775807u);
+	FAIL_IF_NOT(BCNumberGetType(numInt) == BCNumberTypeInt32);
+	$LET numBool = BCBool(true);
+	FAIL_IF_NOT(BCNumberGetType(numBool) == BCNumberTypeBool);
 
-	BCAutorelease($OBJ numInt);
-	BCAutorelease($OBJ numFloat);
-	BCAutorelease($OBJ numDouble);
+	BCAutorelease($OBJ numInt8);
+	BCAutorelease($OBJ numUInt8);
+	BCAutorelease($OBJ numInt16);
+	BCAutorelease($OBJ numUInt16);
+	BCAutorelease($OBJ numInt32);
+	BCAutorelease($OBJ numUInt32);
 	BCAutorelease($OBJ numInt64);
 	BCAutorelease($OBJ numUInt64);
+	BCAutorelease($OBJ numFloat);
+	BCAutorelease($OBJ numDouble);
+	BCAutorelease($OBJ numInt);
 	BCAutorelease($OBJ numBool);
 
 	printf("Numbers Dump: \n");
-	printf("%s\n", TO_STR(numInt));
-	printf("%s\n", TO_STR(numFloat));
-	printf("%s\n", TO_STR(numDouble));
-	printf("%s\n", TO_STR(numInt64));
-	printf("%s\n", TO_STR(numUInt64));
-	printf("%s\n", TO_STR(numBool));
+	printf("Int8: %s\n", TO_STR(numInt8));
+	printf("UInt8: %s\n", TO_STR(numUInt8));
+	printf("Int16: %s\n", TO_STR(numInt16));
+	printf("UInt16: %s\n", TO_STR(numUInt16));
+	printf("Int32: %s\n", TO_STR(numInt32));
+	printf("UInt32: %s\n", TO_STR(numUInt32));
+	printf("Int64: %s\n", TO_STR(numInt64));
+	printf("UInt64: %s\n", TO_STR(numUInt64));
+	printf("Float: %s\n", TO_STR(numFloat));
+	printf("Double: %s\n", TO_STR(numDouble));
+	printf("Int: %s\n", TO_STR(numInt));
+	printf("Bool: %s\n", TO_STR(numBool));
 
 	int32_t valInt = 0;
 	BCNumberGetValue(numInt, &valInt);
@@ -89,7 +131,15 @@ void testNumber() {
 
 	float valFloat = 0;
 	BCNumberGetValue(numInt, &valFloat);
-	printf("Extracted Float: %f\n", valFloat);
+	printf("Extracted float: %f\n", valFloat);
+
+	int64_t valInt64 = 0;
+	BCNumberGetValue(numDouble, &valInt64);
+	printf("Extracted int64_t: %zd\n", valInt64);
+
+	double valDouble = 0;
+	BCNumberGetValue(numDouble, &valDouble);
+	printf("Extracted double: %lf\n", valDouble);
 
 	// Equality
 	const BCNumberRef numInt2 = BCNumberCreate(42);

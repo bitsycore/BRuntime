@@ -11,7 +11,7 @@
 
 // Common Type
 // Same layout as BCObject
-typedef struct BCNumber {;
+typedef struct BCNumber {
 	BCObject super;
 } BCNumber;
 
@@ -75,15 +75,15 @@ static BCNumberBool kBCNumberBoolFalse;
 // MARK: Class Methods
 // =============================================================================
 
-static uint32_t NumberHashImpl(BCObjectRef obj) {
+static uint32_t NumberHashImpl(const BCObjectRef obj) {
 	if (!obj) return 0;
     const BCNumberType type = classToType(obj->cls);
     uint64_t v = 0;
-    BCNumberGetValueExplicit((BCNumberRef)obj, &v, type);
+    BCNumberGetExplicit((BCNumberRef)obj, &v, type);
     return (uint32_t)v;
 }
 
-static bool NumberEqualImpl(BCObjectRef a, BCObjectRef b) {
+static bool NumberEqualImpl(const BCObjectRef a, const BCObjectRef b) {
     if (a == b) return true;
 	if (!a || !b) return false;
     const BCNumberType typeA = classToType(a->cls);
@@ -96,8 +96,8 @@ static bool NumberEqualImpl(BCObjectRef a, BCObjectRef b) {
 
     if (isFloatA || isFloatB) {
         double valA, valB;
-        BCNumberGetValueExplicit((BCNumberRef)a, &valA, BCNumberTypeDouble);
-        BCNumberGetValueExplicit((BCNumberRef)b, &valB, BCNumberTypeDouble);
+        BCNumberGetExplicit((BCNumberRef)a, &valA, BCNumberTypeDouble);
+        BCNumberGetExplicit((BCNumberRef)b, &valB, BCNumberTypeDouble);
         return valA == valB; // Exact match for now
     }
 
@@ -105,8 +105,8 @@ static bool NumberEqualImpl(BCObjectRef a, BCObjectRef b) {
 	// Careful with UInt64 large values && Int64 negative values.
 	// If one is signed and one is unsigned...
 	int64_t valA, valB;
-	BCNumberGetValueExplicit((BCNumberRef)a, &valA, BCNumberTypeInt64);
-	BCNumberGetValueExplicit((BCNumberRef)b, &valB, BCNumberTypeInt64);
+	BCNumberGetExplicit((BCNumberRef)a, &valA, BCNumberTypeInt64);
+	BCNumberGetExplicit((BCNumberRef)b, &valB, BCNumberTypeInt64);
 	return valA == valB;
 }
 
@@ -192,56 +192,7 @@ DEFINE_NUMBER_GET(float, Float)
 DEFINE_NUMBER_GET(double, Double)
 DEFINE_NUMBER_GET(bool, Bool)
 
-void BCNumberGetValueExplicit(BCNumberRef num, void* value, BCNumberType dstType) {
-	if (!num || !value) return;
-	BCNumberType srcType = classToType(num->super.cls);
-	if (srcType == BCNumberTypeError) return;
-
-	// Read value as double (intermediate) to simplify conversion?
-	// Or use a massive switch? Massive switch is safer for precision.
-
-	// First, get the value from the object into a union the or largest type.
-	// Let's use double for floating point and int64/uint64 for integers.
-	// Actually, let's just read into a local variable of the correct source type, then cast.
-
-#define CONVERT_AND_STORE(SrcType, SrcName, DstType) { \
-    SrcType srcVal = ((BCNumber##SrcName*)num)->value; \
-    *(DstType*)value = (DstType)srcVal; \
-}
-
-#define DISPATCH_DEST(SrcType, SrcName) \
-    switch (dstType) { \
-        case BCNumberTypeInt8: CONVERT_AND_STORE(SrcType, SrcName, int8_t); break; \
-        case BCNumberTypeInt16: CONVERT_AND_STORE(SrcType, SrcName, int16_t); break; \
-        case BCNumberTypeInt32: CONVERT_AND_STORE(SrcType, SrcName, int32_t); break; \
-        case BCNumberTypeInt64: CONVERT_AND_STORE(SrcType, SrcName, int64_t); break; \
-        case BCNumberTypeUInt8: CONVERT_AND_STORE(SrcType, SrcName, uint8_t); break; \
-        case BCNumberTypeUInt16: CONVERT_AND_STORE(SrcType, SrcName, uint16_t); break; \
-        case BCNumberTypeUInt32: CONVERT_AND_STORE(SrcType, SrcName, uint32_t); break; \
-        case BCNumberTypeUInt64: CONVERT_AND_STORE(SrcType, SrcName, uint64_t); break; \
-        case BCNumberTypeFloat: CONVERT_AND_STORE(SrcType, SrcName, float); break; \
-        case BCNumberTypeDouble: CONVERT_AND_STORE(SrcType, SrcName, double); break; \
-        case BCNumberTypeBool: CONVERT_AND_STORE(SrcType, SrcName, bool); break;   \
-        default: return;\
-        }
-
-	switch (srcType) {
-		case BCNumberTypeInt8: DISPATCH_DEST(int8_t, Int8) break;
-		case BCNumberTypeInt16: DISPATCH_DEST(int16_t, Int16) break;
-		case BCNumberTypeInt32: DISPATCH_DEST(int32_t, Int32) break;
-		case BCNumberTypeInt64: DISPATCH_DEST(int64_t, Int64) break;
-		case BCNumberTypeUInt8: DISPATCH_DEST(uint8_t, UInt8) break;
-		case BCNumberTypeUInt16: DISPATCH_DEST(uint16_t, UInt16) break;
-		case BCNumberTypeUInt32: DISPATCH_DEST(uint32_t, UInt32) break;
-		case BCNumberTypeUInt64: DISPATCH_DEST(uint64_t, UInt64) break;
-		case BCNumberTypeFloat: DISPATCH_DEST(float, Float) break;
-		case BCNumberTypeDouble: DISPATCH_DEST(double, Double) break;
-		case BCNumberTypeBool: DISPATCH_DEST(bool, Bool) break;
-		default: break;
-	}
-}
-
-BCNumberType BCNumberGetType(BCNumberRef num) {
+BCNumberType BCNumberGetType(const BCNumberRef num) {
 	if (!num) return BCNumberTypeError;
 	return classToType(num->super.cls);
 }
