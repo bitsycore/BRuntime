@@ -42,14 +42,13 @@ BCObjectRef BCAllocObject(const BCClassRef cls, const BCAllocatorRef alloc) {
 }
 
 BCObjectRef BCRetain(const BCObjectRef obj) {
-	if (!obj || BC_FLAG_IS(obj->flags, BC_OBJECT_FLAG_REFCOUNT)) return obj;
+	if (!obj || !BC_FLAG_IS(obj->flags, BC_OBJECT_FLAG_REFCOUNT)) return obj;
 	atomic_fetch_add_explicit(&obj->ref_count, 1, memory_order_relaxed);
 	return obj;
 }
 
 void BCRelease(const BCObjectRef obj) {
-	if (!obj) return;
-	if (BC_FLAG_IS(obj->flags, BC_OBJECT_FLAG_REFCOUNT)) return;
+	if (!obj || !BC_FLAG_IS(obj->flags, BC_OBJECT_FLAG_REFCOUNT)) return;
 	const atomic_int old_count = atomic_fetch_sub(&obj->ref_count, 1);
 	if (old_count == 1) {
 		if (obj->cls->dealloc) obj->cls->dealloc(obj);
