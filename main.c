@@ -113,9 +113,7 @@ void testDictionary() {
 	const BCStringRef str1 = BCStringConst("username");
 	const BCStringRef str2 = BCStringConst("username");
 
-	$LET numInt2 = $(42);
-	BCAutorelease($OBJ numInt2);
-
+	$LET numInt2 = $$("%d", 10);
 	const BCMutableDictionaryRef dictionary = BCMutableDictionaryCreate();
 	BCAutorelease($OBJ dictionary);
 

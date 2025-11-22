@@ -41,4 +41,7 @@
 #define ___BC___ARG_COUNT_INNER(...) ___BC___ARG_COUNT_SELECT(__VA_ARGS__)
 #define ___BC___ARG_COUNT_SELECT(_1,_2,_3,_4,_5,_6,_7,_8,_9,_10,_11,_12,_13,_14,_15,_16,_17,_18,_19,_20,N, ...) N
 
+#define BC_ARG_FIRST(...) ___BC___ARG_FIRST_IMPL(__VA_ARGS__, dummy)
+#define ___BC___ARG_FIRST_IMPL(first, ...) first
+
 #endif //BC_BCMACROTOOLS_H

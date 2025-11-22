@@ -18,7 +18,7 @@
 
 static inline BCObjectRef ___BCRetain(void* obj) { return BCRetain(obj); }
 
-#define $(__val__) _Generic((__val__), \
+#define $(...) _Generic((BC_ARG_FIRST(__VA_ARGS__)), \
     int8_t: BCNumberCreateInt8,        \
     int16_t: BCNumberCreateInt16,      \
     int32_t: BCNumberCreateInt32,      \
@@ -39,10 +39,10 @@ static inline BCObjectRef ___BCRetain(void* obj) { return BCRetain(obj); }
     BCAllocatorRef: ___BCRetain,       \
     BCDictionaryRef: ___BCRetain,      \
     BCObjectRef: ___BCRetain           \
-)(__val__)
+)(__VA_ARGS__)
 
-#define __BC_$$_IMPL(__result__, __type__) ( (__type__) BCAutorelease($OBJ (__result__)) )
-#define $$(__val__) __BC_$$_IMPL($(__val__), $TYPE ( $(__val__) ))
+#define __BC_$$_IMPL(__result__, __type__ ) ( (__type__) BCAutorelease($OBJ (__result__)) )
+#define $$(...) __BC_$$_IMPL($(__VA_ARGS__), $TYPE ( $(__VA_ARGS__) ))
 
 #define __BC_ARR_IMPL(_counter_, ...) ({ \
     BCAutoreleasePoolPush(); \

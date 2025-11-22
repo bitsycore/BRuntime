@@ -3,7 +3,7 @@
 
 #define $VAR __auto_type
 #define $LET const __auto_type
-#define $TYPE(_type_) typeof(_type_)
+#define $TYPE(_type_) __typeof__(_type_)
 #define $TLS _Thread_local
 
 #define $PROCESS_DESTRUCTOR __attribute__((destructor))
