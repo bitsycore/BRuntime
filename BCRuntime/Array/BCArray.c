@@ -1,10 +1,10 @@
-#include <malloc.h>
-#include <stdio.h>
-#include <stdarg.h>
-
 #include "BCArray.h"
 
-#include "BCString.h"
+#include "../BCString.h"
+
+#include <malloc.h>
+#include <stdarg.h>
+#include <stdio.h>
 
 // =========================================================
 // MARK: Struct
@@ -12,9 +12,9 @@
 
 typedef struct BCArray {
 	BCObject base;
-	BCObjectRef* items;
 	size_t count;
 	size_t capacity;
+	BCObjectRef* items;
 } BCArray;
 
 // =========================================================
@@ -55,7 +55,7 @@ static const BCClass kBCArrayClass = {
 // =========================================================
 
 BCArrayRef BCArrayCreate(void) {
-	const BCArrayRef arr = (BCArrayRef) BCObjectAlloc((BCClassRef) &kBCArrayClass, NULL);
+	const BCArrayRef arr = (BCArrayRef) BCAllocObject((BCClassRef) &kBCArrayClass, NULL);
 	arr->capacity = 8;
 	arr->count = 0;
 	arr->items = calloc(arr->capacity, sizeof(BCObjectRef));

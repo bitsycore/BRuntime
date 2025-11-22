@@ -25,15 +25,19 @@ BCAllocatorRef const kBCAllocatorDefault = &_kBCAllocatorDefault;
 // MARK: Public
 // =========================================================
 
-BCObjectRef BCObjectAlloc(const BCClassRef cls, BCAllocatorRef alloc) {
+BCObjectRef BCAllocObjectWithExtra(const BCClassRef cls, BCAllocatorRef alloc, const size_t extraBytes) {
 	if (!alloc) alloc = kBCAllocatorDefault;
 
-	const BCObjectRef obj = alloc->alloc(cls->allocSize, alloc->context);
+	const BCObjectRef obj = alloc->alloc(cls->allocSize + extraBytes, alloc->context);
 	obj->cls = cls;
 	obj->allocator = alloc;
 	obj->ref_count = 1;
 
 	return obj;
+}
+
+BCObjectRef BCAllocObject(const BCClassRef cls, const BCAllocatorRef alloc) {
+	return BCAllocObjectWithExtra(cls, alloc, 0);
 }
 
 BCObjectRef BCRetain(const BCObjectRef obj) {

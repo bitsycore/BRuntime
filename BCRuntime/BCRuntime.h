@@ -37,7 +37,7 @@ static inline BCObjectRef ___BCRetain(void* obj) { return BCRetain(obj); }
     BCNumberRef: ___BCRetain,          \
     BCArrayRef: ___BCRetain,           \
     BCAllocatorRef: ___BCRetain,       \
-    BCDictionaryRef: ___BCRetain,      \
+    BCMapRef: ___BCRetain,      \
     BCObjectRef: ___BCRetain           \
 )(__VA_ARGS__)
 
@@ -61,7 +61,7 @@ static inline BCObjectRef ___BCRetain(void* obj) { return BCRetain(obj); }
 #define __BC_DIC_IMPL(_name_, ...) ({ \
     BCAutoreleasePoolPush();\
     _Static_assert(((BC_ARG_COUNT(__VA_ARGS__)) % 2) == 0, "DIC requires an even number of arguments"); \
-    BCDictionaryRef _name_ = BCDictionaryCreateWithObjects( \
+    BCMapRef _name_ = BCMapCreateWithObjects( \
 		false, /*NO RETAIN*/ \
         BC_ARG_COUNT(__VA_ARGS__), \
         BC_ARG_MAP($, __VA_ARGS__) \
@@ -71,7 +71,7 @@ static inline BCObjectRef ___BCRetain(void* obj) { return BCRetain(obj); }
 })
 
 #define $DIC(...) __BC_DIC_IMPL(BC_M_CAT(___temp_dic_impl___,__COUNTER__), __VA_ARGS__)
-#define $$DIC(...) ( (BCDictionaryRef) BCAutorelease( $OBJ $DIC(__VA_ARGS__) ) )
+#define $$DIC(...) ( (BCMapRef) BCAutorelease( $OBJ $DIC(__VA_ARGS__) ) )
 
 // ================================================
 // MARK: RUNTIME INITIALIZATION

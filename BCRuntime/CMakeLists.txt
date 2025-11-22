@@ -5,16 +5,18 @@ add_library(
 		BCTypes.h
 		BCString.c
 		BCString.h
-		BCDictionary.c
-		BCDictionary.h
+		Map/BCMap.c
+		Map/BCMap.h
 		BCAutoreleasePool.c
 		BCAutoreleasePool.h
-		BCArray.c
-		BCArray.h
+		Array/BCArray.c
+		Array/BCArray.h
 		BCNumber.c
 		BCNumber.h
 		BCRuntime.h
 		BCRuntime.c
 		Utilities/BCMacro.h
 		Utilities/BCKeywords.h
+		Array/BCBytesArray.c
+		Array/BCBytesArray.h
 )

@@ -131,7 +131,7 @@ static BCStringRef StringPoolGetOrInsert(const char* text, const size_t len, con
 	}
 
 	// Insert
-	const BCStringRef newStr = (BCStringRef) BCObjectAlloc((BCClassRef) &kBCStringClass, NULL);
+	const BCStringRef newStr = (BCStringRef) BCAllocObject((BCClassRef) &kBCStringClass, NULL);
 	newStr->buffer = malloc(len + 1);
 	memcpy(newStr->buffer, text, len + 1);
 	newStr->_length = len;
@@ -159,7 +159,7 @@ BCStringRef BCStringCreate(const char* fmt, ...) {
 	va_copy(copy, args);
 	const int len = vsnprintf(NULL, 0, fmt, copy);
 	va_end(copy);
-	const BCStringRef str = (BCStringRef) BCObjectAlloc((BCClassRef) &kBCStringClass, NULL);
+	const BCStringRef str = (BCStringRef) BCAllocObject((BCClassRef) &kBCStringClass, NULL);
 	str->buffer = malloc(len + 1);
 	vsnprintf(str->buffer, len + 1, fmt, args);
 	va_end(args);

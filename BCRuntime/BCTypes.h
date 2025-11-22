@@ -42,8 +42,9 @@ typedef struct BCNumber* BCBoolRef;
 // =========================================================
 
 typedef struct BCArray* BCArrayRef;
-typedef struct BCDictionary* BCDictionaryRef;
-typedef struct BCDictionary* BCMutableDictionaryRef;
+typedef struct BCBytesArray* BCBytesArrayRef;
+typedef struct BCMap* BCMapRef;
+typedef struct BCMap* BCMutableMapRef;
 
 // =========================================================
 // MARK: Function Types

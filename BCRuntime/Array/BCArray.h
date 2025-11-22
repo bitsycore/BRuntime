@@ -1,7 +1,7 @@
 #ifndef BCRUNTIME_BCARRAY_H
 #define BCRUNTIME_BCARRAY_H
 
-#include "BCObject.h"
+#include "../BCObject.h"
 
 BCArrayRef BCArrayCreate(void);
 BCArrayRef BCArrayCreateWithObjects(bool retain, size_t count, ...);

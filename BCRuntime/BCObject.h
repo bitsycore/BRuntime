@@ -30,7 +30,8 @@ typedef struct BCAllocator {
 
 extern BCAllocatorRef const kBCAllocatorDefault;
 
-BCObjectRef BCObjectAlloc(BCClassRef cls, BCAllocatorRef alloc);
+BCObjectRef BCAllocObject(BCClassRef cls, BCAllocatorRef alloc);
+BCObjectRef BCAllocObjectWithExtra(BCClassRef cls, BCAllocatorRef alloc, size_t extraBytes);
 
 BCObjectRef BCRetain(BCObjectRef obj);
 void BCRelease(BCObjectRef obj);

@@ -1,0 +1,65 @@
+#include "BCBytesArray.h"
+
+#include <string.h>
+
+#include "../BCObject.h"
+
+// =========================================================
+// MARK: Struct
+// =========================================================
+
+typedef struct BCBytesArray {
+	BCObjectRef base;
+	size_t count;
+	uint8_t bytes[];
+} BCBytesArray;
+
+// =========================================================
+// MARK: Methods
+// =========================================================
+
+
+
+// =========================================================
+// MARK: Class
+// =========================================================
+
+static const BCClass kBCBytesArrayClass = {
+	.name = "BCBytesArray",
+	.dealloc = NULL,
+	.hash =	NULL,
+	.equal = NULL,
+	.toString = NULL,
+	.copy = NULL,
+	.allocSize = sizeof(BCBytesArray)
+};
+
+// =========================================================
+// MARK: Public
+// =========================================================
+
+BCBytesArrayRef BCBytesArrayCreate(const size_t count) {
+	const BCBytesArrayRef arr = (BCBytesArrayRef) BCAllocObjectWithExtra((BCClassRef) &kBCBytesArrayClass, NULL, count * sizeof(uint8_t));
+	arr->count = count;
+	memset(arr->bytes, 0, count);
+	return arr;
+}
+
+BCBytesArrayRef BCBytesArrayCreateWithBytes(const size_t count, const uint8_t* bytes) {
+	const BCBytesArrayRef arr = (BCBytesArrayRef) BCAllocObjectWithExtra((BCClassRef) &kBCBytesArrayClass, NULL, count * sizeof(uint8_t));
+	arr->count = count;
+	memcpy(arr->bytes, bytes, count);
+	return arr;
+}
+
+uint8_t BCBytesArrayGet(const BCBytesArrayRef arr, const size_t idx) {
+	return arr->bytes[idx];
+}
+
+size_t BCBytesArrayCount(const BCBytesArrayRef arr) {
+	return arr->count;
+}
+
+uint8_t* BCBytesArrayBytes(const BCBytesArrayRef arr) {
+	return arr->bytes;
+}

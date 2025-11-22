@@ -1,6 +1,6 @@
-#include "BCRuntime/BCArray.h"
+#include "BCRuntime/Array/BCArray.h"
 #include "BCRuntime/BCAutoreleasePool.h"
-#include "BCRuntime/BCDictionary.h"
+#include "BCRuntime/Map/BCMap.h"
 #include "BCRuntime/BCNumber.h"
 #include "BCRuntime/BCObject.h"
 #include "BCRuntime/BCRuntime.h"
@@ -152,9 +152,9 @@ void testNumber() {
 	printf("42 (Int) == 3.14 (Float): %s\n", BCEqual($OBJ numInt, $OBJ numFloat) ? "YES" : "NO");
 }
 
-void testDictionary() {
+void testMap() {
 	// ================================
-	SUB_TITLE("Test Dictionary");
+	SUB_TITLE("Test Map");
 	// ================================
 
 	$VAR array = $ARR("username", "password");
@@ -164,7 +164,7 @@ void testDictionary() {
 	const BCStringRef str2 = BCStringConst("username");
 
 	$LET numInt2 = $$("%d", 10);
-	const BCMutableDictionaryRef dictionary = BCMutableDictionaryCreate();
+	const BCMutableMapRef dictionary = BCMutableMapCreate();
 	BCAutorelease($OBJ dictionary);
 
 	const BCStringRef key = BCStringCreate("id");
@@ -172,17 +172,17 @@ void testDictionary() {
 	const BCStringRef value = BCStringCreate("10%d", 1);
 	BCAutorelease($OBJ value);
 
-	BCDictionarySet(dictionary, $OBJ str1, $OBJ array);
-	BCDictionarySet(dictionary, $OBJ BCStringConst("test"), $OBJ numInt2);
-	BCDictionarySet(dictionary, $OBJ key, $OBJ value);
+	BCMapSet(dictionary, $OBJ str1, $OBJ array);
+	BCMapSet(dictionary, $OBJ BCStringConst("test"), $OBJ numInt2);
+	BCMapSet(dictionary, $OBJ key, $OBJ value);
 
-	// Description of Dictionary
+	// Description of Map
 	printf("%s\n", TO_STR(dictionary));
 
 	puts("------------------------");
 
 	// Get Value by Key
-	const BCObjectRef found = BCDictionaryGet( dictionary, $OBJ str2); // Look up using pooled string
+	const BCObjectRef found = BCMapGet( dictionary, $OBJ str2); // Look up using pooled string
 	if (found) {
 		printf("\"username\": %s\n", TO_STR(found));
 		BCRelease(found);
@@ -205,7 +205,7 @@ void testDictionary() {
 	puts("------------------------");
 
 	$LET dic = $$DIC(
-		"title", "Test Dictionary",
+		"title", "Test Map",
 		"version", "1.0.0",
 		"author", "Beej"
 	);
@@ -219,7 +219,7 @@ int main() {
 		testString();
 		testArray();
 		testNumber();
-		testDictionary();
+		testMap();
 	}
 
 	BIG_TITLE("BC End");

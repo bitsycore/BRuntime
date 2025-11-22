@@ -49,7 +49,7 @@ static BCNumberType classToType(BCClassRef cls);
 
 #define IMPLEMENT_CREATE(Type, _Name_) \
     BCNumber##_Name_##Ref BCNumberCreate##_Name_(Type value) { \
-        BCNumber##_Name_* obj = (BCNumber##_Name_*)BCObjectAlloc( (BCClassRef) &kClassList[BCNumberType##_Name_], NULL); \
+        BCNumber##_Name_* obj = (BCNumber##_Name_*)BCAllocObject( (BCClassRef) &kClassList[BCNumberType##_Name_], NULL); \
         if (obj) { \
             obj->value = value; \
         } \

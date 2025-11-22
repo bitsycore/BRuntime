@@ -1,7 +1,7 @@
-#include "BCDictionary.h"
+#include "BCMap.h"
 
-#include "BCArray.h"
-#include "BCString.h"
+#include "../BCString.h"
+#include "../Array/BCArray.h"
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -14,28 +14,28 @@
 typedef struct {
 	BCObjectRef key;
 	BCObjectRef value;
-} BCDictionaryEntry;
+} BCMapEntry;
 
-typedef struct BCDictionary {
+typedef struct BCMap {
 	BCObject base;
-	BCDictionaryEntry* buckets;
+	bool isMutable;
 	size_t capacity;
 	size_t count;
-	bool isMutable;
-} BCDictionary;
+	BCMapEntry* buckets;
+} BCMap;
 
 // =========================================================
 // MARK: Forward
 // =========================================================
 
-static void _DicPutInternal(BCDictionaryEntry* buckets, size_t cap, BCObjectRef key, BCObjectRef val);
+static void _DicPutInternal(BCMapEntry* buckets, size_t cap, BCObjectRef key, BCObjectRef val);
 
 // =========================================================
 // MARK: Class
 // =========================================================
 
-static void DictionaryDeallocImpl(const BCObjectRef obj) {
-	const BCDictionaryRef d = (BCDictionaryRef) obj;
+static void MapDeallocImpl(const BCObjectRef obj) {
+	const BCMapRef d = (BCMapRef) obj;
 	for (size_t i = 0; i < d->capacity; i++) {
 		if (d->buckets[i].key) {
 			BCRelease(d->buckets[i].key);
@@ -45,9 +45,9 @@ static void DictionaryDeallocImpl(const BCObjectRef obj) {
 	free(d->buckets);
 }
 
-BCStringRef DictionaryToStringImpl(const BCObjectRef obj) {
-	const BCDictionaryRef d = (BCDictionaryRef) obj;
-	return BCStringCreate("BCDictionary(count: %zu)", d->count);
+BCStringRef MapToStringImpl(const BCObjectRef obj) {
+	const BCMapRef d = (BCMapRef) obj;
+	return BCStringCreate("BCMap(count: %zu)", d->count);
 	printf("{\n");
 	for (size_t i = 0; i < d->capacity; i++) {
 		if (d->buckets[i].key) {
@@ -61,42 +61,42 @@ BCStringRef DictionaryToStringImpl(const BCObjectRef obj) {
 }
 
 static const BCClass kBCDictClass = {
-	"BCDictionary",
-	DictionaryDeallocImpl,
+	"BCMap",
+	MapDeallocImpl,
 	NULL,
 	NULL,
-	DictionaryToStringImpl,
+	MapToStringImpl,
 	NULL,
-	sizeof(BCDictionary)
+	sizeof(BCMap)
 };
 
 // =========================================================
 // MARK: Public
 // =========================================================
 
-BCDictionaryRef BCDictionaryCreate() {
-	const BCMutableDictionaryRef dic = BCMutableDictionaryCreate();
+BCMapRef BCMapCreate() {
+	const BCMutableMapRef dic = BCMutableMapCreate();
 	dic->isMutable = false;
 	return  dic;
 }
 
-BCMutableDictionaryRef BCMutableDictionaryCreate() {
-	const BCDictionaryRef d = (BCDictionaryRef) BCObjectAlloc((BCClassRef)&kBCDictClass, NULL);
+BCMutableMapRef BCMutableMapCreate() {
+	const BCMapRef d = (BCMapRef) BCAllocObject((BCClassRef)&kBCDictClass, NULL);
 	d->isMutable = true;
 	d->capacity = 8;
 	d->count = 0;
-	d->buckets = calloc(d->capacity, sizeof(BCDictionaryEntry));
+	d->buckets = calloc(d->capacity, sizeof(BCMapEntry));
 	return d;
 }
 
-void BCDictionarySet(const BCMutableDictionaryRef d, const BCObjectRef key, const BCObjectRef val) {
-	BCDictionary *dict = d;
+void BCMapSet(const BCMutableMapRef d, const BCObjectRef key, const BCObjectRef val) {
+	BCMap *dict = d;
 	if (!dict->isMutable) return;
 
 	// Resize Check
 	if (dict->count >= (size_t) ((double) dict->capacity * 0.75)) {
 		const size_t newCap = dict->capacity * 2;
-		BCDictionaryEntry* newBuckets = calloc(newCap, sizeof(BCDictionaryEntry));
+		BCMapEntry* newBuckets = calloc(newCap, sizeof(BCMapEntry));
 		if (!newBuckets) return;
 		for (size_t i = 0; i < dict->capacity; i++) {
 			if (dict->buckets[i].key) {
@@ -126,7 +126,7 @@ void BCDictionarySet(const BCMutableDictionaryRef d, const BCObjectRef key, cons
 	dict->count++;
 }
 
-BCObjectRef BCDictionaryGet(const BCDictionaryRef d, const BCObjectRef key) {
+BCObjectRef BCMapGet(const BCMapRef d, const BCObjectRef key) {
 	const uint32_t hash = BCHash(key);
 	size_t idx = hash % d->capacity;
 	const size_t start = idx;
@@ -140,7 +140,7 @@ BCObjectRef BCDictionaryGet(const BCDictionaryRef d, const BCObjectRef key) {
 	return NULL;
 }
 
-BCArrayRef BCDictionaryKeys(const BCDictionaryRef d) {
+BCArrayRef BCMapKeys(const BCMapRef d) {
 	const BCArrayRef arr = BCArrayCreate();
 	for (size_t i = 0; i < d->capacity; i++) {
 		if (d->buckets[i].key) {
@@ -150,7 +150,7 @@ BCArrayRef BCDictionaryKeys(const BCDictionaryRef d) {
 	return arr;
 }
 
-BCArrayRef BCDictionaryValues(const BCDictionaryRef d) {
+BCArrayRef BCMapValues(const BCMapRef d) {
 	const BCArrayRef arr = BCArrayCreate();
 	for (size_t i = 0; i < d->capacity; i++) {
 		if (d->buckets[i].key) {
@@ -160,14 +160,14 @@ BCArrayRef BCDictionaryValues(const BCDictionaryRef d) {
 	return arr;
 }
 
-BCDictionaryRef BCDictionaryCreateWithObjects(const bool retain, const size_t count, ...) {
-	const BCMutableDictionaryRef d = BCMutableDictionaryCreate();
+BCMapRef BCMapCreateWithObjects(const bool retain, const size_t count, ...) {
+	const BCMutableMapRef d = BCMutableMapCreate();
 	va_list args;
 	va_start(args, count);
 	for (size_t i = 0; i < count/2; i++) {
 		const BCObjectRef key = va_arg(args, BCObjectRef);
 		const BCObjectRef val = va_arg(args, BCObjectRef);
-		BCDictionarySet(d, key, val);
+		BCMapSet(d, key, val);
 		if (!retain) {
 			BCRelease(key);
 			BCRelease(val);
@@ -182,7 +182,7 @@ BCDictionaryRef BCDictionaryCreateWithObjects(const bool retain, const size_t co
 // MARK: Internal
 // =========================================================
 
-static void _DicPutInternal(BCDictionaryEntry* buckets, const size_t cap, const BCObjectRef key, const BCObjectRef val) {
+static void _DicPutInternal(BCMapEntry* buckets, const size_t cap, const BCObjectRef key, const BCObjectRef val) {
 	const uint32_t hash = BCHash(key);
 	size_t idx = hash % cap;
 	while (buckets[idx].key) {
