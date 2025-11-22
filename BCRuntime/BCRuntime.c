@@ -2,12 +2,10 @@
 
 extern void _BCNumberInitialize();
 
-__attribute__((constructor))
-void BCInitialize(void) {
+void __internal_BCInitialize(void) {
 	_BCNumberInitialize();
 }
 
-__attribute__((destructor))
-void BCUninitialize(void) {
+void __internal_BCUninitialize(void) {
 
 }

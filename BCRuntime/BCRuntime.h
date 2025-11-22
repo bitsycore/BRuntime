@@ -79,4 +79,21 @@ static inline BCObjectRef ___BCRetain(void* obj) { return BCRetain(obj); }
 #define $DIC(...) __BC_DIC_IMPL(__COUNTER__, __VA_ARGS__)
 #define $$DIC(...) ( (BCDictionaryRef) BCAutorelease($OBJ __BC_DIC_IMPL(__COUNTER__, __VA_ARGS__)) )
 
+// ================================================
+// MARK: RUNTIME INITIALIZATION
+// ================================================
+
+void __internal_BCInitialize(void);
+void __internal_BCUninitialize(void);
+
+__attribute__((constructor))
+static inline void __inline_BCInitialize(void) {
+	__internal_BCInitialize();
+}
+
+__attribute__((destructor))
+static inline void __inline_BCUninitialize(void) {
+	__internal_BCUninitialize();
+}
+
 #endif //BC_BCRUNTIME_H

@@ -1,0 +1,19 @@
+add_library(
+		BCRuntime
+		BCObject.c
+		BCObject.h
+		BCTypes.h
+		BCString.c
+		BCString.h
+		BCDictionary.c
+		BCDictionary.h
+		BCAutoreleasePool.c
+		BCAutoreleasePool.h
+		BCArray.c
+		BCArray.h
+		BCNumber.c
+		BCNumber.h
+		BCRuntime.h
+		BCRuntime.c
+		BCMacroTools.h
+)
