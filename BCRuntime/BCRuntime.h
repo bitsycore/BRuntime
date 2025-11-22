@@ -80,12 +80,12 @@ static inline BCObjectRef ___BCRetain(void* obj) { return BCRetain(obj); }
 void __internal_BCInitialize(void);
 void __internal_BCUninitialize(void);
 
-$CONSTRUCTOR
+$PROCESS_CONSTRUCTOR
 static inline void __inline_BCInitialize(void) {
 	__internal_BCInitialize();
 }
 
-$DESTRUCTOR
+$PROCESS_DESTRUCTOR
 static inline void __inline_BCUninitialize(void) {
 	__internal_BCUninitialize();
 }
