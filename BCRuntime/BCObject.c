@@ -84,9 +84,9 @@ bool BCEqual(const BCObjectRef a, const BCObjectRef b) {
 }
 
 BCStringRef BCToString(const BCObjectRef obj) {
-	if (obj == NULL) return BCStringConst("<null>");
+	if (obj == NULL) return BCStringPooledLiteral("<null>");
 	if (obj->cls->toString) return obj->cls->toString(obj);
-	return BCStringCreate("<%s@%d>", BCStringGetCString(BCClassName(obj->cls)), BCHash(obj));
+	return BCStringCreate("<%s@%d>", BCStringCPtr(BCClassName(obj->cls)), BCHash(obj));
 }
 
 bool BCObjectIsClass(const BCObjectRef obj, const BCClassRef cls) {
@@ -95,5 +95,5 @@ bool BCObjectIsClass(const BCObjectRef obj, const BCClassRef cls) {
 }
 
 BCStringRef BCClassName(const BCClassRef cls) {
-	return BCStringConst(cls->name);
+	return BCStringPooled(cls->name);
 }

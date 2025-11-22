@@ -15,7 +15,7 @@
 #define BIG_TITLE(_x_) printf(GREEN "\n=================================================================\n                      " _x_ "\n=================================================================\n" RESET)
 #define SUB_TITLE(_x_) printf(YELLOW "\n-------------------------------\n        " _x_ "\n-------------------------------\n\n" RESET)
 
-#define TO_STR(_x_) BCStringGetCString( \
+#define TO_STR(_x_) BCStringCPtr( \
 	(BCStringRef) ( BCAutorelease( \
 		$OBJ BCToString( $OBJ (_x_) ) \
 	) ) \
@@ -28,8 +28,8 @@ void testString() {
 	SUB_TITLE("Test String");
 	// ================================
 
-	const BCStringRef str1 = BCStringConst("username"); // Pooled
-	const BCStringRef str2 = BCStringConst("username"); // Same Instance
+	const BCStringRef str1 = BCStringPooledLiteral("username"); // Pooled
+	const BCStringRef str2 = BCStringPooledLiteral("username"); // Same Instance
 	const BCStringRef str3 = BCStringCreate("username"); // New Instance
 	BCAutorelease($OBJ str3);
 
@@ -55,8 +55,8 @@ void testArray() {
 	const BCArrayRef array = BCArrayCreate();
 	BCAutorelease($OBJ array);
 
-	BCArrayAdd(array, $OBJ BCStringConst("Admin"));
-	BCArrayAdd(array, $OBJ BCStringConst("Editor"));
+	BCArrayAdd(array, $OBJ BCStringPooledLiteral("Admin") );
+	BCArrayAdd(array, $OBJ BCStringPooledLiteral("Editor") );
 	BCArrayAdd(array, $OBJ kBCTrue);
 
 	printf("Array Dump: %s\n", TO_STR(array));
@@ -160,8 +160,8 @@ void testMap() {
 	$VAR array = $ARR("username", "password");
 	BCAutorelease($OBJ array);
 
-	const BCStringRef str1 = BCStringConst("username");
-	const BCStringRef str2 = BCStringConst("username");
+	const BCStringRef str1 = BCStringPooledLiteral("username");
+	const BCStringRef str2 = BCStringPooledLiteral("username");
 
 	$LET numInt2 = $$("%d", 10);
 	const BCMutableMapRef dictionary = BCMutableMapCreate();
@@ -173,7 +173,7 @@ void testMap() {
 	BCAutorelease($OBJ value);
 
 	BCMapSet(dictionary, $OBJ str1, $OBJ array);
-	BCMapSet(dictionary, $OBJ BCStringConst("test"), $OBJ numInt2);
+	BCMapSet(dictionary, $OBJ BCStringPooledLiteral("test"), $OBJ numInt2);
 	BCMapSet(dictionary, $OBJ key, $OBJ value);
 
 	// Description of Map
@@ -193,7 +193,7 @@ void testMap() {
 	$VAR nine = $$(9);
 	$VAR three = $$(1024);
 
-	const $VAR autoDic = $$DIC(
+	$LET autoDic = $$DIC(
 		"nine", nine,
 		"three", three,
 		"array", array,
