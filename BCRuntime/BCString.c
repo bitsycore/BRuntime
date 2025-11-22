@@ -85,12 +85,12 @@ static struct {
 	StringPoolNode* buckets[POOL_SIZE];
 } StringPool;
 
-void StringPoolInit(void) {
+void ___BCINTERNAL___StringPoolInit(void) {
 	mtx_init(&StringPool.lock, mtx_plain);
 	memset(StringPool.buckets, 0, sizeof(StringPool.buckets));
 }
 
-void StringPoolDeinit(void) {
+void ___BCINTERNAL___StringPoolDeinit(void) {
 	mtx_destroy(&StringPool.lock);
 	for (size_t i = 0; i < POOL_SIZE; i++) {
 		const StringPoolNode* node = StringPool.buckets[i];
