@@ -3,6 +3,9 @@ project(BCRuntime C)
 
 set(CMAKE_C_STANDARD 23)
 
+if (CMAKE_CXX_COMPILER)
+endif()
+
 add_subdirectory(BCRuntime)
 
 add_executable(
