@@ -3,15 +3,8 @@
 
 #include "BCObject.h"
 #include "BCTypes.h"
+#include "Utilities/BCKeywords.h"
 #include "Utilities/BCMacro.h"
-
-// ================================================
-// MARK: SHORTCUT
-// ================================================
-
-#define $OBJ (BCObjectRef)
-#define $VAR __auto_type
-#define $CONST const __auto_type
 
 // ================================================
 // MARK: BOXING
@@ -49,7 +42,7 @@ static inline BCObjectRef ___BCRetain(void* obj) { return BCRetain(obj); }
 )(__val__)
 
 #define __BC_$$_IMPL(__result__, __type__) ( (__type__) BCAutorelease($OBJ (__result__)) )
-#define $$(__val__) __BC_$$_IMPL($(__val__), __typeof__ ( $(__val__) ))
+#define $$(__val__) __BC_$$_IMPL($(__val__), $TYPE ( $(__val__) ))
 
 #define __BC_ARR_IMPL(_counter_, ...) ({ \
     BCAutoreleasePoolPush(); \
@@ -62,23 +55,23 @@ static inline BCObjectRef ___BCRetain(void* obj) { return BCRetain(obj); }
     BC_M_CAT(___temp_arr_impl___,_counter_); \
 })
 
-#define $ARR(...) __BC_ARR_IMPL(__COUNTER__, __VA_ARGS__)
-#define $$ARR(...) ( (BCArrayRef) BCAutorelease($OBJ __BC_ARR_IMPL(__COUNTER__, __VA_ARGS__)) )
+#define $ARR(...) __BC_ARR_IMPL(BC_M_CAT(___temp_arr_impl___,__COUNTER__), __VA_ARGS__)
+#define $$ARR(...) ( (BCArrayRef) BCAutorelease( $OBJ $ARR(__VA_ARGS__) ) )
 
-#define __BC_DIC_IMPL(_counter_, ...) ({ \
+#define __BC_DIC_IMPL(_name_, ...) ({ \
     BCAutoreleasePoolPush();\
     _Static_assert(((BC_ARG_COUNT(__VA_ARGS__)) % 2) == 0, "DIC requires an even number of arguments"); \
-    BCDictionaryRef BC_M_CAT(___temp_dic_impl___,_counter_) = BCDictionaryCreateWithObjects( \
+    BCDictionaryRef _name_ = BCDictionaryCreateWithObjects( \
 		false, /*NO RETAIN*/ \
         BC_ARG_COUNT(__VA_ARGS__), \
         BC_ARG_MAP($, __VA_ARGS__) \
-    );                                   \
-    BCAutoreleasePoolPop();                                     \
-    BC_M_CAT(___temp_dic_impl___,_counter_);      \
+    ); \
+    BCAutoreleasePoolPop(); \
+    _name_; \
 })
 
-#define $DIC(...) __BC_DIC_IMPL(__COUNTER__, __VA_ARGS__)
-#define $$DIC(...) ( (BCDictionaryRef) BCAutorelease($OBJ __BC_DIC_IMPL(__COUNTER__, __VA_ARGS__)) )
+#define $DIC(...) __BC_DIC_IMPL(BC_M_CAT(___temp_dic_impl___,__COUNTER__), __VA_ARGS__)
+#define $$DIC(...) ( (BCDictionaryRef) BCAutorelease( $OBJ $DIC(__VA_ARGS__) ) )
 
 // ================================================
 // MARK: RUNTIME INITIALIZATION

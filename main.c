@@ -56,18 +56,17 @@ void testArray() {
 	printf("Get Element 1: %s\n", TO_STR(BCArrayGet(array, 1)));
 }
 
-
 void testNumber() {
 	// ================================
 	SUB_TITLE("Test Number");
 	// ================================
 
-	$CONST numInt =  BCNumberCreate(42);
-	$CONST numBool = BCNumberCreate(true);
-	$CONST numFloat = BCNumberCreate(3.14f);
-	$CONST numDouble = BCNumberCreate(3.14159);
-	$CONST numInt64 = BCNumberCreate(9223372036854775807);
-	$CONST numUInt64 = BCNumberCreate(9223372036854775807u);
+	$LET numInt =  BCNumberCreate(42);
+	$LET numBool = BCNumberCreate(true);
+	$LET numFloat = BCNumberCreate(3.14f);
+	$LET numDouble = BCNumberCreate(3.14159);
+	$LET numInt64 = BCNumberCreate(9223372036854775807);
+	$LET numUInt64 = BCNumberCreate(9223372036854775807u);
 
 	BCAutorelease($OBJ numInt);
 	BCAutorelease($OBJ numFloat);
@@ -114,7 +113,7 @@ void testDictionary() {
 	const BCStringRef str1 = BCStringConst("username");
 	const BCStringRef str2 = BCStringConst("username");
 
-	$CONST numInt2 = $(42);
+	$LET numInt2 = $(42);
 	BCAutorelease($OBJ numInt2);
 
 	const BCMutableDictionaryRef dictionary = BCMutableDictionaryCreate();
@@ -157,7 +156,7 @@ void testDictionary() {
 
 	puts("------------------------");
 
-	$CONST dic = $$DIC(
+	$LET dic = $$DIC(
 		"title", "Test Dictionary",
 		"version", "1.0.0",
 		"author", "Beej"

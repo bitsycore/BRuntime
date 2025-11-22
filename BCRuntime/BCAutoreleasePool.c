@@ -1,5 +1,7 @@
 #include "BCAutoreleasePool.h"
 
+#include "Utilities/BCKeywords.h"
+
 // =========================================================
 // MARK: Struct
 // =========================================================
@@ -11,7 +13,7 @@ typedef struct BCAutoreleasePool {
 	struct BCAutoreleasePool* parent;
 } BCAutoreleasePool;
 
-_Thread_local BCAutoreleasePool* _bcCurrentPool = NULL;
+$TLS BCAutoreleasePool* _bcCurrentPool = NULL;
 
 // =========================================================
 // MARK: Public

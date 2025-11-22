@@ -12,6 +12,8 @@ typedef struct BCClass* BCClassRef;
 typedef struct BCObject* BCObjectRef;
 typedef struct BCAllocator* BCAllocatorRef;
 
+#define $OBJ (BCObjectRef)
+
 // =========================================================
 // MARK: Basic Types
 // =========================================================
