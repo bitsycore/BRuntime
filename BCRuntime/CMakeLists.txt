@@ -20,4 +20,5 @@ add_library(
 		Array/BCBytesArray.c
 		Array/BCBytesArray.h
 		BCSettings.h
+		Utilities/BCAnsiEscape.h
 )

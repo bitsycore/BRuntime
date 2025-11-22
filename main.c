@@ -7,15 +7,17 @@
 #include "BCRuntime/BCString.h"
 #include "BCRuntime/Array/BCArray.h"
 #include "BCRuntime/Map/BCMap.h"
+#include "BCRuntime/Utilities/BCAnsiEscape.h"
 
-#define RESET   "\033[0m"
-#define RED     "\033[31m"
-#define GREEN   "\033[32m"
-#define YELLOW  "\033[33m"
-#define BLUE    "\033[34m"
-#define LIGHT_RED "\033[91m"
-#define BIG_TITLE(_x_) printf(GREEN "\n=================================================================\n                      " _x_ "\n=================================================================\n" RESET)
-#define SUB_TITLE(_x_) printf(YELLOW "\n-------------------------------\n        " _x_ "\n-------------------------------\n\n" RESET)
+#define BIG_TITLE(_x_) printf( \
+	"\n" BC_AE_BG256(244) "=================================================================" BC_AE_RESET "\n" \
+	"    " _x_ \
+	"\n" BC_AE_BG256(244) "=================================================================" BC_AE_RESET "\n" )
+
+#define SUB_TITLE(_x_) printf( \
+	"\n" BC_AE_BG_BLUE "-------------------------------" BC_AE_RESET "\n" \
+	"        " _x_ \
+	"\n" BC_AE_BG_BLUE "-------------------------------" BC_AE_RESET "\n\n" )
 
 #define TO_STR(_x_) BCStringCPtr( \
 	(BCStringRef) ( BCAutorelease( \
@@ -23,7 +25,7 @@
 	) ) \
 )
 
-#define FAIL_IF_NOT(_cond_) if(!(_cond_)) { printf(RED "Assert failed: " LIGHT_RED #_cond_ RED " at: line %d\n" RESET, __LINE__); }
+#define FAIL_IF_NOT(_cond_) if(!(_cond_)) { printf(BC_AE_RED "Assert failed: " BC_AE_BRED #_cond_ BC_AE_RED " at: line %d\n" BC_AE_RESET, __LINE__); }
 
 void testString() {
 	// ================================
@@ -34,6 +36,9 @@ void testString() {
 	const BCStringRef str2 = BCStringPooledLiteral("username"); // Same Instance
 	const BCStringRef str3 = BCStringCreate("username"); // New Instance
 	BCAutorelease($OBJ str3);
+
+	$LET name = BCClassName(($OBJ(str1))->cls);
+	printf("Class Name: %s\n", TO_STR(name));
 
 	printf("StringPool Test: s1=%p, s2=%p (SamePtr? %s)\n", str1, str2, str1 == str2 ? "YES" : "NO");
 	printf("StringAlloc Test: s1=%p, s3=%p (SamePtr? %s)\n", str1, str3, str1 == str3 ? "YES" : "NO");
