@@ -18,6 +18,20 @@ typedef struct BCArray {
 } BCArray;
 
 // =========================================================
+// MARK: Private
+// =========================================================
+
+static void ArrayAdd(const BCArrayRef arr, const BCObjectRef item, const bool retain) {
+	if (arr->count == arr->capacity) {
+		arr->capacity *= 2;
+		void* newBuff = realloc(arr->items, arr->capacity * sizeof(BCObjectRef));
+		if (!newBuff) return;
+		arr->items = newBuff;
+	}
+	arr->items[arr->count++] = retain ? BCRetain(item) : item;
+}
+
+// =========================================================
 // MARK: Class
 // =========================================================
 
@@ -62,32 +76,22 @@ BCArrayRef BCArrayCreate(void) {
 	return arr;
 }
 
-void ___BCArrayAdd(const BCArrayRef arr, const BCObjectRef item, const bool retain) {
-	if (arr->count == arr->capacity) {
-		arr->capacity *= 2;
-		void* newBuff = realloc(arr->items, arr->capacity * sizeof(BCObjectRef));
-		if (!newBuff) return;
-		arr->items = newBuff;
-	}
-	arr->items[arr->count++] = retain ? BCRetain(item) : item;
-}
-
 void BCArrayAdd(const BCArrayRef arr, const BCObjectRef item) {
-	___BCArrayAdd(arr, item, true);
+	ArrayAdd(arr, item, true);
 }
 
-BCObjectRef BCArrayGet(BCArrayRef arr, size_t idx) {
+BCObjectRef BCArrayGet(const BCArrayRef arr, const size_t idx) {
 	if (idx >= arr->count) return NULL;
 	return arr->items[idx];
 }
 
 BCArrayRef BCArrayCreateWithObjects(const bool retain, const size_t count, ...) {
-	BCArrayRef arr = BCArrayCreate();
+	const BCArrayRef arr = BCArrayCreate();
 	va_list args;
 	va_start(args, count);
 	for (size_t i = 0; i < count; i++) {
-		BCObjectRef item = va_arg(args, BCObjectRef);
-		___BCArrayAdd(arr, item, retain);
+		const BCObjectRef item = va_arg(args, BCObjectRef);
+		ArrayAdd(arr, item, retain);
 	}
 	va_end(args);
 	return arr;
