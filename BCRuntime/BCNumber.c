@@ -75,7 +75,7 @@ static BCNumberBool kBCNumberBoolFalse;
 // MARK: Class Methods
 // =============================================================================
 
-static uint32_t NumberHash(BCObjectRef obj) {
+static uint32_t NumberHashImpl(BCObjectRef obj) {
 	if (!obj) return 0;
     const BCNumberType type = classToType(obj->cls);
     uint64_t v = 0;
@@ -83,7 +83,7 @@ static uint32_t NumberHash(BCObjectRef obj) {
     return (uint32_t)v;
 }
 
-static bool NumberEqual(BCObjectRef a, BCObjectRef b) {
+static bool NumberEqualImpl(BCObjectRef a, BCObjectRef b) {
     if (a == b) return true;
 	if (!a || !b) return false;
     const BCNumberType typeA = classToType(a->cls);
@@ -110,7 +110,7 @@ static bool NumberEqual(BCObjectRef a, BCObjectRef b) {
 	return valA == valB;
 }
 
-static BCStringRef NumberDesc(const BCObjectRef obj) {
+static BCStringRef NumberToStringImpl(const BCObjectRef obj) {
 	switch (classToType(obj->cls)) {
 		case BCNumberTypeInt8: return BCStringCreate("%d", ((BCNumberInt8*)obj)->value);
 		case BCNumberTypeInt16: return BCStringCreate("%d", ((BCNumberInt16*)obj)->value);
@@ -127,7 +127,7 @@ static BCStringRef NumberDesc(const BCObjectRef obj) {
 	}
 }
 
-static BCObjectRef NumberCopy(const BCObjectRef obj) { return BCRetain(obj); }
+static BCObjectRef NumberCopyImpl(const BCObjectRef obj) { return BCRetain(obj); }
 
 // =============================================================================
 // MARK: Class
@@ -136,10 +136,10 @@ static BCObjectRef NumberCopy(const BCObjectRef obj) { return BCRetain(obj); }
 #define INIT_CLASS(StrName) { \
     .name = "BCNumber" #StrName, \
     .dealloc = NULL, \
-    .hash = NumberHash, \
-    .equal = NumberEqual, \
-    .toString = NumberDesc, \
-    .copy = NumberCopy, \
+    .hash = NumberHashImpl, \
+    .equal = NumberEqualImpl, \
+    .toString = NumberToStringImpl, \
+    .copy = NumberCopyImpl, \
     .allocSize = sizeof(BCNumber##StrName) \
 }
 

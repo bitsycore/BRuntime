@@ -52,7 +52,7 @@ typedef struct BCDictionary* BCMutableDictionaryRef;
 typedef void (* BCDeallocFunc)(BCObjectRef obj);
 typedef uint32_t (* BCHashFunc)(BCObjectRef obj);
 typedef bool (* BCEqualFunc)(BCObjectRef a, BCObjectRef b);
-typedef BCStringRef (* BCDescriptionFunc)(BCObjectRef obj);
+typedef BCStringRef (* BCToStringFunc)(BCObjectRef obj);
 typedef BCObjectRef (* BCCopyFunc)(BCObjectRef);
 
 #endif //BCRUNTIME_BCTYPES_H

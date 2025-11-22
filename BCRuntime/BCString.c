@@ -62,7 +62,7 @@ BCStringRef StringToStringImpl(const BCObjectRef obj) {
 	return (BCStringRef)BCRetain(obj);
 }
 
-BCObject* StringCopyImpl(const BCObjectRef obj) {
+BCObjectRef StringCopyImpl(const BCObjectRef obj) {
 	return BCRetain(obj);
 }
 
@@ -122,7 +122,7 @@ static BCStringRef StringPoolGetOrInsert(const char* text, const size_t len, con
 		// Safe to read hash non-atomically inside lock as pooled strings are settled
 		if (atomic_load(&node->str->_hash) == hash) {
 			if (strcmp(node->str->buffer, text) == 0) {
-				const BCStringRef ret = (BCStringRef) BCRetain((BCObject*) node->str);
+				const BCStringRef ret = (BCStringRef) BCRetain((BCObjectRef) node->str);
 				mtx_unlock(&_BCStringPool.lock);
 				return ret;
 			}
@@ -145,7 +145,7 @@ static BCStringRef StringPoolGetOrInsert(const char* text, const size_t len, con
 
 	mtx_unlock(&_BCStringPool.lock);
 
-	return (BCStringRef) BCRetain((BCObject*) newStr); // Retain for caller
+	return (BCStringRef) BCRetain((BCObjectRef) newStr); // Retain for caller
 }
 
 // =========================================================

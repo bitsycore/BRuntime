@@ -6,4 +6,7 @@
 #define $TYPE(_type_) typeof(_type_)
 #define $TLS _Thread_local
 
+#define $DESTRUCTOR __attribute__((destructor))
+#define $CONSTRUCTOR __attribute__((constructor))
+
 #endif //BCRUNTIME_BCKEYWORDS_H

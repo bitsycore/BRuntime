@@ -8,7 +8,7 @@
 
 void BCAutoreleasePoolPush(void);
 void BCAutoreleasePoolPop(void);
-BCObject* BCAutorelease(BCObject* obj);
+BCObjectRef BCAutorelease(BCObjectRef obj);
 
 #define ____BCAutoreleaseScopeImpl(__name__) for ( \
     bool __name__ = (BCAutoreleasePoolPush(), true); \
