@@ -3,10 +3,10 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <threads.h>
 #include <time.h>
 
 #include "Utilities/BCMemory.h"
+#include "Utilities/BCThreads.h"
 
 // =========================================================
 // MARK: Debug Tracking
@@ -20,21 +20,21 @@ typedef struct BCObjectDebugNode {
 } BCObjectDebugNode;
 
 static struct {
-	mtx_t lock;
+	BCMutex lock;
 	BCObjectDebugNode* head;
 	bool enabled;
 	bool keepFreedObjects;
 } ObjectDebugTracker;
 
 void ___BCINTERNAL___ObjectDebugInitialize(void) {
-	mtx_init(&ObjectDebugTracker.lock, mtx_plain);
+	BCMutexInit(&ObjectDebugTracker.lock);
 	ObjectDebugTracker.head = NULL;
 	ObjectDebugTracker.enabled = false;
 	ObjectDebugTracker.keepFreedObjects = false;
 }
 
 void ___BCINTERNAL___ObjectDebugDeinitialize(void) {
-	mtx_lock(&ObjectDebugTracker.lock);
+	BCMutexLock(&ObjectDebugTracker.lock);
 
 	BCObjectDebugNode* node = ObjectDebugTracker.head;
 	while (node) {
@@ -44,14 +44,14 @@ void ___BCINTERNAL___ObjectDebugDeinitialize(void) {
 	}
 
 	ObjectDebugTracker.head = NULL;
-	mtx_unlock(&ObjectDebugTracker.lock);
-	mtx_destroy(&ObjectDebugTracker.lock);
+	BCMutexUnlock(&ObjectDebugTracker.lock);
+	BCMutexDestroy(&ObjectDebugTracker.lock);
 }
 
 static void ObjectDebugTrack(const BCObjectRef obj) {
 	if (!ObjectDebugTracker.enabled) return;
 
-	mtx_lock(&ObjectDebugTracker.lock);
+	BCMutexLock(&ObjectDebugTracker.lock);
 
 	BCObjectDebugNode* node = BCMalloc(sizeof(BCObjectDebugNode));
 	node->obj = obj;
@@ -60,13 +60,13 @@ static void ObjectDebugTrack(const BCObjectRef obj) {
 	node->next = ObjectDebugTracker.head;
 	ObjectDebugTracker.head = node;
 
-	mtx_unlock(&ObjectDebugTracker.lock);
+	BCMutexUnlock(&ObjectDebugTracker.lock);
 }
 
 static void ObjectDebugMarkFreed(const BCObjectRef obj) {
 	if (!ObjectDebugTracker.enabled) return;
 
-	mtx_lock(&ObjectDebugTracker.lock);
+	BCMutexLock(&ObjectDebugTracker.lock);
 
 	BCObjectDebugNode* node = ObjectDebugTracker.head;
 	while (node) {
@@ -96,7 +96,7 @@ static void ObjectDebugMarkFreed(const BCObjectRef obj) {
 		node = node->next;
 	}
 
-	mtx_unlock(&ObjectDebugTracker.lock);
+	BCMutexUnlock(&ObjectDebugTracker.lock);
 }
 
 // =========================================================
@@ -200,15 +200,15 @@ BCStringRef BCClassName(const BCClassRef cls) {
 #if BC_SETTINGS_DEBUG_OBJECT_DUMP == 1
 
 void BCObjectDebugSetEnabled(const bool enabled) {
-	mtx_lock(&ObjectDebugTracker.lock);
+	BCMutexLock(&ObjectDebugTracker.lock);
 	ObjectDebugTracker.enabled = enabled;
-	mtx_unlock(&ObjectDebugTracker.lock);
+	BCMutexUnlock(&ObjectDebugTracker.lock);
 }
 
 void BCObjectDebugSetKeepFreed(const bool keepFreed) {
-	mtx_lock(&ObjectDebugTracker.lock);
+	BCMutexLock(&ObjectDebugTracker.lock);
 	ObjectDebugTracker.keepFreedObjects = keepFreed;
-	mtx_unlock(&ObjectDebugTracker.lock);
+	BCMutexUnlock(&ObjectDebugTracker.lock);
 }
 
 extern const BCClassRef kBCStringClassRef;
@@ -250,7 +250,7 @@ static const char* FlagsToString(const BCClassRef cls, const uint32_t flags) {
 #define BOLD "\033[1m"
 
 void BCObjectDebugDump(void) {
-	mtx_lock(&ObjectDebugTracker.lock);
+	BCMutexLock(&ObjectDebugTracker.lock);
 	const clock_t start = clock();
 
 	// --------------------------------------------------------------------------
@@ -337,7 +337,7 @@ void BCObjectDebugDump(void) {
 		elapsed
 	);
 
-	mtx_unlock(&ObjectDebugTracker.lock);
+	BCMutexUnlock(&ObjectDebugTracker.lock);
 }
 
 #endif

@@ -10,7 +10,7 @@
 // MARK: BOXING $
 // ================================================
 
-#ifdef WIN32
+#if defined(WIN32) || defined(__APPLE__)
 #define ___BCINTERNAL___$_EXTRA
 #else
 #define ___BCINTERNAL___$_EXTRA long long: BCNumberCreateInt64,

@@ -24,4 +24,6 @@ add_library(BCRuntime
 		Utilities/BCMemInfo.h
 		Utilities/BCMemory.h
 		Utilities/BCMemory.c
+		Utilities/BCThreads.c
+		Utilities/BCThreads.h
 )

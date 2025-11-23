@@ -5,10 +5,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <threads.h>
 
 #include "BCObject.h"
 #include "Utilities/BCMemory.h"
+#include "Utilities/BCThreads.h"
 
 // =========================================================
 // MARK: Struct
@@ -80,17 +80,17 @@ typedef struct StringPoolNode {
 } StringPoolNode;
 
 static struct {
-	mtx_t lock;
+	BCMutex lock;
 	StringPoolNode* buckets[BC_STRING_POOL_SIZE];
 } StringPool;
 
 void ___BCINTERNAL___StringPoolInitialize(void) {
-	mtx_init(&StringPool.lock, mtx_plain);
+	BCMutexInit(&StringPool.lock);
 	memset(StringPool.buckets, 0, sizeof(StringPool.buckets));
 }
 
 void ___BCINTERNAL___StringPoolDeinitialize(void) {
-	mtx_destroy(&StringPool.lock);
+	BCMutexDestroy(&StringPool.lock);
 	for (size_t i = 0; i < BC_STRING_POOL_SIZE; i++) {
 		const StringPoolNode* node = StringPool.buckets[i];
 		while (node) {
@@ -105,7 +105,7 @@ void ___BCINTERNAL___StringPoolDeinitialize(void) {
 static BCStringRef StringPoolGetOrInsert(const char* text, const size_t len, const uint32_t hash, const bool static_string) {
 	const uint32_t idx = hash % BC_STRING_POOL_SIZE;
 
-	mtx_lock(&StringPool.lock);
+	BCMutexLock(&StringPool.lock);
 
 	// Lookup
 	const StringPoolNode* node = StringPool.buckets[idx];
@@ -114,7 +114,7 @@ static BCStringRef StringPoolGetOrInsert(const char* text, const size_t len, con
 		// Fast path for static literal strings
 		if (static_string && node->str->buffer == text) {
 			const BCStringRef ret = (BCStringRef) BCRetain((BCObjectRef) node->str);
-			mtx_unlock(&StringPool.lock);
+			BCMutexUnlock(&StringPool.lock);
 			return ret;
 		}
 
@@ -125,7 +125,7 @@ static BCStringRef StringPoolGetOrInsert(const char* text, const size_t len, con
 			}
 			if (strcmp(node->str->buffer, text) == 0) {
 				const BCStringRef ret = (BCStringRef) BCRetain((BCObjectRef) node->str);
-				mtx_unlock(&StringPool.lock);
+				BCMutexUnlock(&StringPool.lock);
 				return ret;
 			}
 		}
@@ -158,7 +158,7 @@ static BCStringRef StringPoolGetOrInsert(const char* text, const size_t len, con
 	newNode->next = StringPool.buckets[idx];
 	StringPool.buckets[idx] = newNode;
 
-	mtx_unlock(&StringPool.lock);
+	BCMutexUnlock(&StringPool.lock);
 
 	newStr->base.ref_count = 0;
 
@@ -230,7 +230,7 @@ const char* BCStringCPtr(const BCStringRef str) {
 #define RESET "\033[0m"
 #define BOLD "\033[1m"
 void BCStringPoolDebugDump(void) {
-	mtx_lock(&StringPool.lock);
+	BCMutexLock(&StringPool.lock);
 	const clock_t start = clock();
 
 	// --------------------------------------------------------------------------
@@ -278,7 +278,7 @@ void BCStringPoolDebugDump(void) {
 		}
 	}
 
-	mtx_unlock(&StringPool.lock);
+	BCMutexUnlock(&StringPool.lock);
 
 	const clock_t end = clock();
 	const double elapsed = (double)(end - start) / CLOCKS_PER_SEC * 1000;

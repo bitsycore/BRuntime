@@ -36,7 +36,7 @@ static inline BCBoolRef ___BCINTERNAL___BoolSelect(const bool val) { return val 
 
 #define BCBool(_val_) ___BCINTERNAL___BoolSelect(_val_)
 
-#ifdef WIN32
+#if defined(WIN32) || defined(__APPLE__)
 #define ___BCINTERNAL___NUMBER_CREATE_EXTRA
 #else
 #define ___BCINTERNAL___NUMBER_CREATE_EXTRA long long: BCNumberCreateInt64,

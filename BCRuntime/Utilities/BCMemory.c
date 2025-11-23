@@ -3,7 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <threads.h>
+
+#include "BCThreads.h"
 
 typedef struct {
     size_t totalAllocated;
@@ -13,9 +14,9 @@ typedef struct {
     size_t freeCount;
 } BCMemoryStats;
 
-static BCMemoryStats g_memoryStats = {0};
-static mtx_t g_memoryMutex;
-static once_flag g_memoryMutexInitFlag = ONCE_FLAG_INIT;
+static BCMemoryStats gMemoryStats = {0};
+static BCMutex gMemoryMutex;
+static BCOnceToken gMemoryMutexInitToken = BC_ONCE_INIT;
 
 typedef struct {
     size_t size;
@@ -23,7 +24,7 @@ typedef struct {
 } BCMemoryBlock;
 
 void ___BCINTERNAL___MemoryInitialize() {
-	mtx_init(&g_memoryMutex, mtx_plain);
+	BCMutexInit(&gMemoryMutex);
 }
 
 void* BCMalloc(const size_t size) {
@@ -35,15 +36,15 @@ void* BCMalloc(const size_t size) {
     block->size = size;
     block->data = (char*)block + sizeof(BCMemoryBlock);
 
-    mtx_lock(&g_memoryMutex);
-    g_memoryStats.totalAllocated += size;
-    g_memoryStats.currentUsage += size;
-    g_memoryStats.allocationCount++;
+    BCMutexLock(&gMemoryMutex);
+    gMemoryStats.totalAllocated += size;
+    gMemoryStats.currentUsage += size;
+    gMemoryStats.allocationCount++;
 
-    if (g_memoryStats.currentUsage > g_memoryStats.peakUsage) {
-        g_memoryStats.peakUsage = g_memoryStats.currentUsage;
+    if (gMemoryStats.currentUsage > gMemoryStats.peakUsage) {
+        gMemoryStats.peakUsage = gMemoryStats.currentUsage;
     }
-    mtx_unlock(&g_memoryMutex);
+    BCMutexUnlock(&gMemoryMutex);
 
     return block->data;
 }
@@ -75,14 +76,14 @@ void* BCRealloc(void* ptr, const size_t newSize) {
     newBlock->size = newSize;
     newBlock->data = (char*)newBlock + sizeof(BCMemoryBlock);
 
-    mtx_lock(&g_memoryMutex);
-    g_memoryStats.currentUsage = g_memoryStats.currentUsage - oldSize + newSize;
-    g_memoryStats.totalAllocated += (newSize > oldSize) ? (newSize - oldSize) : 0;
+    BCMutexLock(&gMemoryMutex);
+    gMemoryStats.currentUsage = gMemoryStats.currentUsage - oldSize + newSize;
+    gMemoryStats.totalAllocated += (newSize > oldSize) ? (newSize - oldSize) : 0;
 
-    if (g_memoryStats.currentUsage > g_memoryStats.peakUsage) {
-        g_memoryStats.peakUsage = g_memoryStats.currentUsage;
+    if (gMemoryStats.currentUsage > gMemoryStats.peakUsage) {
+        gMemoryStats.peakUsage = gMemoryStats.currentUsage;
     }
-    mtx_unlock(&g_memoryMutex);
+    BCMutexUnlock(&gMemoryMutex);
 
     return newBlock->data;
 }
@@ -92,20 +93,20 @@ void BCFree(void* ptr) {
 
     BCMemoryBlock* block = (BCMemoryBlock*)((char*)ptr - sizeof(BCMemoryBlock));
 
-    mtx_lock(&g_memoryMutex);
-    g_memoryStats.currentUsage -= block->size;
-    g_memoryStats.freeCount++;
-    mtx_unlock(&g_memoryMutex);
+    BCMutexLock(&gMemoryMutex);
+    gMemoryStats.currentUsage -= block->size;
+    gMemoryStats.freeCount++;
+    BCMutexUnlock(&gMemoryMutex);
 
     free(block);
 }
 
 void BCGetMemoryStats(size_t* totalAllocated, size_t* currentUsage, size_t* peakUsage) {
-	mtx_lock(&g_memoryMutex);
-    if (totalAllocated) *totalAllocated = g_memoryStats.totalAllocated;
-    if (currentUsage) *currentUsage = g_memoryStats.currentUsage;
-    if (peakUsage) *peakUsage = g_memoryStats.peakUsage;
-    mtx_unlock(&g_memoryMutex);
+	BCMutexLock(&gMemoryMutex);
+    if (totalAllocated) *totalAllocated = gMemoryStats.totalAllocated;
+    if (currentUsage) *currentUsage = gMemoryStats.currentUsage;
+    if (peakUsage) *peakUsage = gMemoryStats.peakUsage;
+    BCMutexUnlock(&gMemoryMutex);
 }
 
 #if defined(_WIN32) || defined(_WIN64)
@@ -120,13 +121,13 @@ void BCGetMemoryStats(size_t* totalAllocated, size_t* currentUsage, size_t* peak
 #endif
 
 void BCMemoryInfoHeapReset(void) {
-	mtx_lock(&g_memoryMutex);
-	g_memoryStats.totalAllocated = 0;
-	g_memoryStats.currentUsage = 0;
-	g_memoryStats.peakUsage = 0;
-	g_memoryStats.allocationCount = 0;
-	g_memoryStats.freeCount = 0;
-	mtx_unlock(&g_memoryMutex);
+	BCMutexLock(&gMemoryMutex);
+	gMemoryStats.totalAllocated = 0;
+	gMemoryStats.currentUsage = 0;
+	gMemoryStats.peakUsage = 0;
+	gMemoryStats.allocationCount = 0;
+	gMemoryStats.freeCount = 0;
+	BCMutexUnlock(&gMemoryMutex);
 }
 
 int BCMemoryInfoGet(BCMemoryInfo* info) {
@@ -135,13 +136,13 @@ int BCMemoryInfoGet(BCMemoryInfo* info) {
 	info->system_current_rss = 0;
 	info->system_peak_rss = 0;
 
-	mtx_lock(&g_memoryMutex);
-	info->freeCount = g_memoryStats.freeCount;
-	info->allocationCount = g_memoryStats.allocationCount;
-	info->totalAllocated = g_memoryStats.totalAllocated;
-	info->currentAllocUsage = g_memoryStats.currentUsage;
-	info->peakAllocUsage = g_memoryStats.peakUsage;
-	mtx_unlock(&g_memoryMutex);
+	BCMutexLock(&gMemoryMutex);
+	info->freeCount = gMemoryStats.freeCount;
+	info->allocationCount = gMemoryStats.allocationCount;
+	info->totalAllocated = gMemoryStats.totalAllocated;
+	info->currentAllocUsage = gMemoryStats.currentUsage;
+	info->peakAllocUsage = gMemoryStats.peakUsage;
+	BCMutexUnlock(&gMemoryMutex);
 
 #if defined(_WIN32) || defined(_WIN64)
 	PROCESS_MEMORY_COUNTERS pmc;
