@@ -11,15 +11,23 @@
 #include "BCRuntime/Utilities/BCMemInfo.h"
 #include "BCRuntime/Utilities/BCMemory.h"
 
-#define BIG_TITLE(_x_) printf( \
-	"\n" BC_AE_BG256(244) "=================================================================" BC_AE_RESET "\n" \
-	"    " _x_ \
-	"\n" BC_AE_BG256(244) "=================================================================" BC_AE_RESET "\n" )
+void BIG_TITLE(const char* _x_) {
+	printf("\n"
+		BC_AE_BGREEN "┌───────────────────────────────────────────────────────────────┐" BC_AE_RESET "\n"
+		BC_AE_BGREEN "│"BC_AE_BOLD"                 %-45s "BC_AE_RESET BC_AE_BGREEN"│"BC_AE_RESET"\n"
+		BC_AE_BGREEN "└───────────────────────────────────────────────────────────────┘" BC_AE_RESET "\n",
+		_x_
+	);
+}
 
-#define SUB_TITLE(_x_) printf( \
-	"\n" BC_AE_BG_BLUE "-------------------------------" BC_AE_RESET "\n" \
-	"        " _x_ \
-	"\n" BC_AE_BG_BLUE "-------------------------------" BC_AE_RESET "\n\n" )
+void SUB_TITLE(const char* _x_) {
+	printf("\n"
+		BC_AE_BYELLOW "╭┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄╮" BC_AE_RESET "\n"
+		BC_AE_BYELLOW "┊"BC_AE_ITALIC"   %-47s "BC_AE_RESET BC_AE_BYELLOW"┊"BC_AE_RESET"\n"
+		BC_AE_BYELLOW "╰┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄╯" BC_AE_RESET "\n\n",
+		_x_
+	);
+}
 
 #define TO_STR(_x_) BCStringCPtr( \
 	(BCStringRef) ( BCAutorelease( \
@@ -33,8 +41,6 @@ void testString() {
 	// ================================
 	SUB_TITLE("Test String");
 	// ================================
-	#define $LSTR()
-	#define $STR(_x_) _x_
 
 	const BCStringRef str1 = BCStringPooledLiteral("username"); // Pooled
 	const BCStringRef str2 = BCStringPooledLiteral("username"); // Same Instance
@@ -190,16 +196,12 @@ void testMap() {
 	// Description of Map
 	printf("%s\n", TO_STR(dictionary));
 
-	puts("------------------------");
-
 	// Get Value by Key
 	const BCObjectRef found = BCMapGet( dictionary, $OBJ str2); // Look up using pooled string
 	if (found) {
 		printf("\"username\": %s\n", TO_STR(found));
 		BCRelease(found);
 	}
-
-	puts("------------------------");
 
 	$VAR nine = $$(9);
 	$VAR three = $$(1024);
@@ -212,8 +214,6 @@ void testMap() {
 		"innerArr", $$ARR(nine, three)
 	);
 	printf("%s\n", TO_STR(autoDic));
-
-	puts("------------------------");
 
 	$LET dic = $$MAP(
 		"title", "Test Map",
