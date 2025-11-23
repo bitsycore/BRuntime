@@ -8,14 +8,12 @@
 #include "BCRuntime/Array/BCArray.h"
 #include "BCRuntime/Map/BCMap.h"
 #include "BCRuntime/Utilities/BCAnsiEscape.h"
-#include "BCRuntime/Utilities/BCMemInfo.h"
-#include "BCRuntime/Utilities/BCMemory.h"
 
 void BIG_TITLE(const char* _x_) {
 	printf("\n"
-		BC_AE_BGREEN "┌───────────────────────────────────────────────────────────────┐" BC_AE_RESET "\n"
+		BC_AE_BGREEN "╭───────────────────────────────────────────────────────────────╮" BC_AE_RESET "\n"
 		BC_AE_BGREEN "│"BC_AE_BOLD"                 %-45s "BC_AE_RESET BC_AE_BGREEN"│"BC_AE_RESET"\n"
-		BC_AE_BGREEN "└───────────────────────────────────────────────────────────────┘" BC_AE_RESET "\n",
+		BC_AE_BGREEN "╰───────────────────────────────────────────────────────────────╯" BC_AE_RESET "\n",
 		_x_
 	);
 }
