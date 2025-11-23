@@ -113,18 +113,20 @@ void testNumber() {
 	$LET numBool = BCBool(true);
 	FAIL_IF_NOT(BCNumberGetType(numBool) == BCNumberTypeBool);
 
-	BCAutorelease($OBJ numInt8);
-	BCAutorelease($OBJ numUInt8);
-	BCAutorelease($OBJ numInt16);
-	BCAutorelease($OBJ numUInt16);
-	BCAutorelease($OBJ numInt32);
-	BCAutorelease($OBJ numUInt32);
-	BCAutorelease($OBJ numInt64);
-	BCAutorelease($OBJ numUInt64);
-	BCAutorelease($OBJ numFloat);
-	BCAutorelease($OBJ numDouble);
-	BCAutorelease($OBJ numInt);
-	BCAutorelease($OBJ numBool);
+	BCAutoreleaseAll(
+		$OBJ numInt8,
+		$OBJ numUInt8,
+		$OBJ numInt16,
+		$OBJ numUInt16,
+		$OBJ numInt32,
+		$OBJ numUInt32,
+		$OBJ numInt64,
+		$OBJ numUInt64,
+		$OBJ numFloat,
+		$OBJ numDouble,
+		$OBJ numInt,
+		$OBJ numBool
+	);
 
 	printf("Numbers Dump: \n");
 	printf("Int8: %s, Expect: -64\n", TO_STR(numInt8));
@@ -221,24 +223,30 @@ void testMap() {
 	printf("%s\n", TO_STR(dic));
 }
 
+int RETRY = 1;
+
 int main() {
 
 	BCObjectDebugSetEnabled(true);
-	BCObjectDebugSetKeepFreed(true);
+	BCObjectDebugSetKeepFreed(false);
 
-	BIG_TITLE("BC Startup");
+	for (int i = 0; i < RETRY; i++) {
 
-	BCAutoreleaseScope() {
-		testNumber();
-		testString();
-		testArray();
-		testMap();
+		BIG_TITLE("BC Startup");
+
+		BCAutoreleaseScope() {
+			testNumber();
+			testString();
+			testArray();
+			testMap();
+		}
+
+		BIG_TITLE("BC End");
+
 	}
 
-	BIG_TITLE("BC End");
-
-	BCObjectDebugDump();
 	BCStringPoolDebugDump();
+	BCObjectDebugDump();
 
 	return 0;
 }

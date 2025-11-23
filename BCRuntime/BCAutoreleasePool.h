@@ -2,13 +2,18 @@
 #define BCRUNTIME_BCAUTORELEASEPOOL_H
 
 #include "BCObject.h"
+#include "Utilities/BCMacro.h"
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 void BCAutoreleasePoolPush(void);
 void BCAutoreleasePoolPop(void);
 BCObjectRef BCAutorelease(BCObjectRef obj);
+
+#define ___BCINTERNAL___AutoreleaseImpl(...) BC_ARG_MAP(BCAutorelease, __VA_ARGS__)
+#define BCAutoreleaseAll(first, ...) ___BCINTERNAL___AutoreleaseImpl(first, __VA_ARGS__)
 
 #define ___BCINTERNAL___AutoreleaseScopeImpl(__name__) for ( \
     bool __name__ = (BCAutoreleasePoolPush(), true); \
