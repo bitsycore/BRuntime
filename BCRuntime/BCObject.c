@@ -2,11 +2,11 @@
 #include "BCString.h"
 
 #include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
 #include <string.h>
 #include <threads.h>
 #include <time.h>
+
+#include "Utilities/BCMemory.h"
 
 // =========================================================
 // MARK: Debug Tracking
@@ -26,20 +26,20 @@ static struct {
 	bool keepFreedObjects;
 } ObjectDebugTracker;
 
-void ___BCINTERNAL___ObjectDebugInit(void) {
+void ___BCINTERNAL___ObjectDebugInitialize(void) {
 	mtx_init(&ObjectDebugTracker.lock, mtx_plain);
 	ObjectDebugTracker.head = NULL;
 	ObjectDebugTracker.enabled = false;
 	ObjectDebugTracker.keepFreedObjects = false;
 }
 
-void ___BCINTERNAL___ObjectDebugDeinit(void) {
+void ___BCINTERNAL___ObjectDebugDeinitialize(void) {
 	mtx_lock(&ObjectDebugTracker.lock);
 
 	BCObjectDebugNode* node = ObjectDebugTracker.head;
 	while (node) {
 		BCObjectDebugNode* next = node->next;
-		free(node);
+		BCFree(node);
 		node = next;
 	}
 
@@ -53,7 +53,7 @@ static void ObjectDebugTrack(const BCObjectRef obj) {
 
 	mtx_lock(&ObjectDebugTracker.lock);
 
-	BCObjectDebugNode* node = malloc(sizeof(BCObjectDebugNode));
+	BCObjectDebugNode* node = BCMalloc(sizeof(BCObjectDebugNode));
 	node->obj = obj;
 	node->copy = *obj;
 	node->isFreed = false;
@@ -84,7 +84,7 @@ static void ObjectDebugMarkFreed(const BCObjectRef obj) {
 						} else {
 							ObjectDebugTracker.head = curr->next;
 						}
-						free(curr);
+						BCFree(curr);
 						break;
 					}
 					prev = curr;
@@ -105,12 +105,12 @@ static void ObjectDebugMarkFreed(const BCObjectRef obj) {
 
 static void* AllocatorDefaultAlloc(const size_t size, const void* ctx) {
 	(void)ctx;
-	return malloc(size);
+	return BCMalloc(size);
 }
 
 static void AllocatorDefaultFree(void* ptr, const void* ctx) {
 	(void)ctx;
-	free(ptr);
+	BCFree(ptr);
 }
 
 static BCAllocator _kBCAllocatorDefault = {AllocatorDefaultAlloc, AllocatorDefaultFree, NULL};

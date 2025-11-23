@@ -1,6 +1,7 @@
 #include "BCAutoreleasePool.h"
 
 #include "Utilities/BCKeywords.h"
+#include "Utilities/BCMemory.h"
 
 // =========================================================
 // MARK: Struct
@@ -20,9 +21,9 @@ $TLS BCAutoreleasePool* CurrentAutoReleasePool = NULL;
 // =========================================================
 
 void BCAutoreleasePoolPush(void) {
-	BCAutoreleasePool* pool = calloc(1, sizeof(BCAutoreleasePool));
+	BCAutoreleasePool* pool = BCCalloc(1, sizeof(BCAutoreleasePool));
 	pool->capacity = 32;
-	pool->stack = calloc(pool->capacity, sizeof(BCObjectRef));
+	pool->stack = BCCalloc(pool->capacity, sizeof(BCObjectRef));
 	pool->parent = CurrentAutoReleasePool;
 	CurrentAutoReleasePool = pool;
 }
@@ -36,8 +37,8 @@ void BCAutoreleasePoolPop(void) {
 	}
 
 	CurrentAutoReleasePool = pool->parent;
-	free(pool->stack);
-	free(pool);
+	BCFree(pool->stack);
+	BCFree(pool);
 }
 
 BCObjectRef BCAutorelease(const BCObjectRef obj) {
@@ -50,7 +51,7 @@ BCObjectRef BCAutorelease(const BCObjectRef obj) {
 	BCAutoreleasePool* pool = CurrentAutoReleasePool;
 	if (pool->count == pool->capacity) {
 		pool->capacity *= 2;
-		pool->stack = realloc(pool->stack, pool->capacity * sizeof(BCObjectRef));
+		pool->stack = BCRealloc(pool->stack, pool->capacity * sizeof(BCObjectRef));
 	}
 
 	pool->stack[pool->count++] = obj;

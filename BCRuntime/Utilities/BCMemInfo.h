@@ -4,12 +4,6 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-typedef struct {
-	size_t current_rss;
-	size_t peak_rss;
-} BCMemoryInfo;
 
-bool BCMemoryInfoGet(BCMemoryInfo* info);
-void BCMemoryInfoPrint();
 
 #endif //BCRUNTIME_BCMEMINFO_H

@@ -8,6 +8,7 @@
 #include <threads.h>
 
 #include "BCObject.h"
+#include "Utilities/BCMemory.h"
 
 // =========================================================
 // MARK: Struct
@@ -83,18 +84,18 @@ static struct {
 	StringPoolNode* buckets[BC_STRING_POOL_SIZE];
 } StringPool;
 
-void ___BCINTERNAL___StringPoolInit(void) {
+void ___BCINTERNAL___StringPoolInitialize(void) {
 	mtx_init(&StringPool.lock, mtx_plain);
 	memset(StringPool.buckets, 0, sizeof(StringPool.buckets));
 }
 
-void ___BCINTERNAL___StringPoolDeinit(void) {
+void ___BCINTERNAL___StringPoolDeinitialize(void) {
 	mtx_destroy(&StringPool.lock);
 	for (size_t i = 0; i < BC_STRING_POOL_SIZE; i++) {
 		const StringPoolNode* node = StringPool.buckets[i];
 		while (node) {
 			const StringPoolNode* next = node->next;
-			free( node->str );
+			BCFree( node->str );
 			node = next;
 			if (next == NULL) StringPool.buckets[i] = NULL;
 		}

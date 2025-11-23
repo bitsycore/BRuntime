@@ -1,8 +1,8 @@
 #include "BCArray.h"
 
 #include "../BCString.h"
+#include "../Utilities/BCMemory.h"
 
-#include <malloc.h>
 #include <stdarg.h>
 #include <stdio.h>
 
@@ -24,7 +24,7 @@ typedef struct BCArray {
 static void ArrayAdd(const BCArrayRef arr, const BCObjectRef item, const bool retain) {
 	if (arr->count == arr->capacity) {
 		arr->capacity *= 2;
-		void* newBuff = realloc(arr->items, arr->capacity * sizeof(BCObjectRef));
+		void* newBuff = BCRealloc(arr->items, arr->capacity * sizeof(BCObjectRef));
 		if (!newBuff) return;
 		arr->items = newBuff;
 	}
@@ -38,7 +38,7 @@ static void ArrayAdd(const BCArrayRef arr, const BCObjectRef item, const bool re
 static void ArrayDeallocImpl(const BCObjectRef obj) {
 	const BCArrayRef arr = (BCArrayRef) obj;
 	for (size_t i = 0; i < arr->count; i++) BCRelease(arr->items[i]);
-	free(arr->items);
+	BCFree(arr->items);
 }
 
 static BCStringRef ArrayToStringImpl(const BCObjectRef obj) {
@@ -72,7 +72,7 @@ BCArrayRef BCArrayCreate(void) {
 	const BCArrayRef arr = (BCArrayRef) BCAllocObject((BCClassRef) &kBCArrayClass, NULL);
 	arr->capacity = 8;
 	arr->count = 0;
-	arr->items = calloc(arr->capacity, sizeof(BCObjectRef));
+	arr->items = BCCalloc(arr->capacity, sizeof(BCObjectRef));
 	return arr;
 }
 

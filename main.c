@@ -9,6 +9,7 @@
 #include "BCRuntime/Map/BCMap.h"
 #include "BCRuntime/Utilities/BCAnsiEscape.h"
 #include "BCRuntime/Utilities/BCMemInfo.h"
+#include "BCRuntime/Utilities/BCMemory.h"
 
 #define BIG_TITLE(_x_) printf( \
 	"\n" BC_AE_BG256(244) "=================================================================" BC_AE_RESET "\n" \
@@ -32,6 +33,8 @@ void testString() {
 	// ================================
 	SUB_TITLE("Test String");
 	// ================================
+	#define $LSTR()
+	#define $STR(_x_) _x_
 
 	const BCStringRef str1 = BCStringPooledLiteral("username"); // Pooled
 	const BCStringRef str2 = BCStringPooledLiteral("username"); // Same Instance
@@ -238,8 +241,6 @@ int main() {
 
 	BCObjectDebugDump();
 	BCStringPoolDebugDump();
-
-	BCMemoryInfoPrint();
 
 	return 0;
 }

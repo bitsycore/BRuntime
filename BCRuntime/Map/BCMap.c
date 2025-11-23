@@ -2,6 +2,7 @@
 
 #include "../BCString.h"
 #include "../Array/BCArray.h"
+#include "../Utilities/BCMemory.h"
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -42,7 +43,7 @@ static void MapDeallocImpl(const BCObjectRef obj) {
 			BCRelease(d->buckets[i].value);
 		}
 	}
-	free(d->buckets);
+	BCFree(d->buckets);
 }
 
 BCStringRef MapToStringImpl(const BCObjectRef obj) {
@@ -85,7 +86,7 @@ BCMutableMapRef BCMutableMapCreate() {
 	d->isMutable = true;
 	d->capacity = 8;
 	d->count = 0;
-	d->buckets = calloc(d->capacity, sizeof(BCMapEntry));
+	d->buckets = BCCalloc(d->capacity, sizeof(BCMapEntry));
 	return d;
 }
 
@@ -96,14 +97,14 @@ void BCMapSet(const BCMutableMapRef d, const BCObjectRef key, const BCObjectRef 
 	// Resize Check
 	if (dict->count >= (size_t) ((double) dict->capacity * 0.75)) {
 		const size_t newCap = dict->capacity * 2;
-		BCMapEntry* newBuckets = calloc(newCap, sizeof(BCMapEntry));
+		BCMapEntry* newBuckets = BCCalloc(newCap, sizeof(BCMapEntry));
 		if (!newBuckets) return;
 		for (size_t i = 0; i < dict->capacity; i++) {
 			if (dict->buckets[i].key) {
 				_DicPutInternal(newBuckets, newCap, dict->buckets[i].key, dict->buckets[i].value);
 			}
 		}
-		free(dict->buckets);
+		BCFree(dict->buckets);
 		dict->buckets = newBuckets;
 		dict->capacity = newCap;
 	}

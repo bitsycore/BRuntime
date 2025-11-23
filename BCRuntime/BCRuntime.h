@@ -84,14 +84,17 @@ static inline BCObjectRef ___BCINTERNAL___Retain(void* obj) { return BCRetain(ob
 // ================================================
 // MARK: RUNTIME INITIALIZATION
 // ================================================
-
 void ___BCINTERNAL___InitializeImpl(void);
-void ___BCINTERNAL___UninitializeImpl(void);
+void ___BCINTERNAL___DeinitializeImpl(void);
 
 BC_AUTOSTART
-static inline void ___BCINTERNAL___Initialize(void) { ___BCINTERNAL___InitializeImpl(); }
+static void ___BCINTERNAL___Initialize(void) {
+	___BCINTERNAL___InitializeImpl();
+}
 
 BC_AUTOSTOP
-static inline void ___BCINTERNAL___Uninitialize(void) { ___BCINTERNAL___UninitializeImpl(); }
+static void ___BCINTERNAL___Deinitialize(void) {
+	___BCINTERNAL___DeinitializeImpl();
+}
 
 #endif //BC_BCRUNTIME_H

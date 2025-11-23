@@ -1,10 +1,16 @@
 #include "BCRuntime.h"
 
+#include <stdio.h>
+
+#include "Utilities/BCMemory.h"
+
+extern void ___BCINTERNAL___MemoryInitialize();
 extern void ___BCINTERNAL___NumberInitialize();
-extern void ___BCINTERNAL___StringPoolInit();
-extern void ___BCINTERNAL___StringPoolDeinit();
-extern void ___BCINTERNAL___ObjectDebugInit();
-extern void ___BCINTERNAL___ObjectDebugDeinit();
+extern void ___BCINTERNAL___StringPoolInitialize();
+extern void ___BCINTERNAL___ObjectDebugInitialize();
+
+extern void ___BCINTERNAL___StringPoolDeinitialize();
+extern void ___BCINTERNAL___ObjectDebugDeinitialize();
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -24,14 +30,23 @@ static void PlatformSpecificInitialize() {
 #define PlatformSpecificInitialize()
 #endif
 
+bool ___BCINTERNAL___Initialized = false;
+bool ___BCINTERNAL___Deinitialized = false;
+
 void ___BCINTERNAL___InitializeImpl(void) {
+	if (___BCINTERNAL___Initialized) return;
 	PlatformSpecificInitialize();
-	___BCINTERNAL___ObjectDebugInit();
-	___BCINTERNAL___StringPoolInit();
+	___BCINTERNAL___MemoryInitialize();
 	___BCINTERNAL___NumberInitialize();
+	___BCINTERNAL___ObjectDebugInitialize();
+	___BCINTERNAL___StringPoolInitialize();
+	___BCINTERNAL___Initialized = true;
 }
 
-void ___BCINTERNAL___UninitializeImpl(void) {
-	___BCINTERNAL___StringPoolDeinit();
-	___BCINTERNAL___ObjectDebugDeinit();
+void ___BCINTERNAL___DeinitializeImpl(void) {
+	if (___BCINTERNAL___Deinitialized) return;
+	___BCINTERNAL___StringPoolDeinitialize();
+	___BCINTERNAL___ObjectDebugDeinitialize();
+	BCMemoryInfoPrint();
+	___BCINTERNAL___Deinitialized = true;
 }

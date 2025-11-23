@@ -22,4 +22,6 @@ add_library(BCRuntime
 		Utilities/BCMacro.h
 		Utilities/BCMemInfo.c
 		Utilities/BCMemInfo.h
+		Utilities/BCMemory.h
+		Utilities/BCMemory.c
 )
