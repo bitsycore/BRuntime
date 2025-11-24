@@ -19,19 +19,19 @@ typedef struct BCClass {
 
 typedef struct BCObject {
 	BCClassRef cls;
-	uint32_t flags;
-	BC_atomic_int ref_count;
-	BCAllocatorRef allocator;
+	uint16_t flags;
+	BC_atomic_uint16 ref_count;
 } BCObject;
 
-// Flags 0 -> 15 Object
-#define BC_OBJECT_FLAG_REFCOUNT  1 << 0
-#define BC_OBJECT_FLAG_HEAP      1 << 1
-#define BC_OBJECT_FLAG_STATIC    1 << 2
-#define BC_OBJECT_FLAG_POOLED    1 << 3
-#define BC_OBJECT_FLAG_HAS_HASH  1 << 4
-// Flags 16 -> 31 Free usage for class
-#define BC_OBJECT_FLAG_CLASS_MASK 0xFFFF0000
+// Flags 0 -> 7 Object
+// Use BC refcounting mechanism
+#define BC_OBJECT_FLAG_REFCOUNT 1 << 0
+// Object is constant and ignore free
+#define BC_OBJECT_FLAG_CONSTANT 1 << 1
+// Object uses non-default allocator meaning it use extended layout
+#define BC_OBJECT_FLAG_NON_DEFAULT_ALLOCATOR 1 << 2
+// Flags 8 -> 15 Free usage for class
+#define BC_OBJECT_FLAG_CLASS_MASK 0xFF00
 
 #define BC_FLAG_HAS(obj, flag) ((obj) & (flag))
 #define BC_FLAG_SET(obj, flag) ((obj) |= (flag))
@@ -47,7 +47,7 @@ typedef struct BCAllocator {
 extern BCAllocatorRef const kBCAllocatorDefault;
 
 BCObjectRef BCAllocObject(BCClassRef cls, BCAllocatorRef alloc);
-BCObjectRef BCAllocObjectWithExtra(BCClassRef cls, BCAllocatorRef alloc, size_t extraBytes, uint32_t flags);
+BCObjectRef BCAllocObjectWithExtra(BCClassRef cls, BCAllocatorRef alloc, size_t extraBytes, uint16_t flags);
 
 BCObjectRef BCRetain(BCObjectRef obj);
 void BCRelease(BCObjectRef obj);
@@ -67,13 +67,17 @@ bool BCObjectIsClass(BCObjectRef obj, BCClassRef cls);
 // =========================================================
 
 #if BC_SETTINGS_DEBUG_OBJECT_DUMP == 1
+
 void BCObjectDebugSetEnabled(bool enabled);
 void BCObjectDebugSetKeepFreed(bool keepFreed);
 void BCObjectDebugDump(void);
+
 #else
+
 #define BCObjectDebugSetEnabled(...)
 #define BCObjectDebugSetKeepFreed(...)
 #define BCObjectDebugDump(...)
+
 #endif
 
 #endif //BCRUNTIME_BCOBJECT_H

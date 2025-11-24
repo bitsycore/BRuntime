@@ -222,7 +222,7 @@ BCBoolRef kBCTrue = (BCBoolRef) &kBCNumberBoolTrue;
 BCBoolRef kBCFalse = (BCBoolRef) &kBCNumberBoolFalse;
 
 void ___BCINTERNAL___NumberInitialize(void) {
-	const uint32_t flags = BC_OBJECT_FLAG_STATIC;
+	const uint32_t flags = BC_OBJECT_FLAG_CONSTANT;
 	kBCNumberBoolTrue = (BCNumberBool) {
 		.super = {
 			.cls = &kClassList[BCNumberTypeBool],
