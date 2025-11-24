@@ -23,11 +23,6 @@ typedef struct BCObject {
 // Flags 8 -> 15 Free usage for class
 #define BC_OBJECT_FLAG_CLASS_MASK 0xFF00
 
-#define BC_FLAG_HAS(obj, flag) ((obj) & (flag))
-#define BC_FLAG_SET(obj, flag) ((obj) |= (flag))
-#define BC_FLAG_CLEAR(obj, flag) ((obj) &= ~(flag))
-#define BC_FLAG_TOGGLE(obj, flag) ((obj) ^= (flag))
-
 BCObjectRef BCObjectAlloc(BCClassRef cls, BCAllocatorRef alloc);
 BCObjectRef BCObjectAllocWithConfig(BCClassRef cls, BCAllocatorRef alloc, size_t extraBytes, uint16_t flags);
 
@@ -36,11 +31,11 @@ void BCRelease(BCObjectRef obj);
 
 BCObjectRef BCObjectCopy(BCObjectRef obj);
 uint32_t BCHash(BCObjectRef obj);
-bool BCEqual(BCObjectRef a, BCObjectRef b);
+BC_bool BCEqual(BCObjectRef a, BCObjectRef b);
 BCStringRef BCToString(BCObjectRef obj);
 
 BCClassRef BCObjectClass(BCObjectRef obj);
-bool BCObjectIsClass(BCObjectRef obj, BCClassRef cls);
+BC_bool BCObjectIsClass(BCObjectRef obj, BCClassRef cls);
 
 // =========================================================
 // MARK: Debug
@@ -48,8 +43,8 @@ bool BCObjectIsClass(BCObjectRef obj, BCClassRef cls);
 
 #if BC_SETTINGS_DEBUG_OBJECT_DUMP == 1
 
-void BCObjectDebugSetEnabled(bool enabled);
-void BCObjectDebugSetKeepFreed(bool keepFreed);
+void BCObjectDebugSetEnabled(BC_bool enabled);
+void BCObjectDebugSetKeepFreed(BC_bool keepFreed);
 void BCObjectDebugDump(void);
 
 #else

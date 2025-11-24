@@ -60,10 +60,9 @@ void testArray() {
 	// ================================
 	SUB_TITLE("Test Array");
 	// ================================
-
 	const $VAR numIntAuto = $(5);
 	BCAutorelease($OBJ numIntAuto);
-	$("Hello world %d", 1);
+
 	$VAR a = $("Hello");
 	BCAutorelease($OBJ a);
 
@@ -235,6 +234,7 @@ int BCMain() {
 	BCObjectDebugSetKeepFreed(false);
 
 	for (int i = 0; i < RETRY; i++) {
+
 		BIG_TITLE("BC Startup");
 
 		BCAutoreleaseScope() {
@@ -242,13 +242,13 @@ int BCMain() {
 			testString();
 			testArray();
 			testMap();
+
+			BCStringPoolDebugDump();
+			BCObjectDebugDump();
 		}
 
 		BIG_TITLE("BC End");
 	}
-
-	BCStringPoolDebugDump();
-	BCObjectDebugDump();
 
 	return 0;
 }

@@ -52,13 +52,18 @@
 #ifdef __RESHARPER__
 #define ___BCINTERNAL___REQUIRE_LITERAL_ASSERT(x)
 #else
-#define ___BCINTERNAL___REQUIRE_LITERAL_ASSERT(x) _Static_assert(__builtin_constant_p(x), "Must be a literal")
+#define ___BCINTERNAL___REQUIRE_LITERAL_ASSERT(x) _Static_assert(__builtin_constant_p(x), "Must be a literal");
 #endif
 
 #define BC_REQUIRE_LITERAL(x) ({ \
-	___BCINTERNAL___REQUIRE_LITERAL_ASSERT(x); \
+	___BCINTERNAL___REQUIRE_LITERAL_ASSERT(x) \
 	("" x ""); \
 	(x); \
 })
+
+#define BC_FLAG_HAS(obj, flag) ((obj) & (flag))
+#define BC_FLAG_SET(obj, flag) ((obj) |= (flag))
+#define BC_FLAG_CLEAR(obj, flag) ((obj) &= ~(flag))
+#define BC_FLAG_TOGGLE(obj, flag) ((obj) ^= (flag))
 
 #endif //BC_BCMACROTOOLS_H

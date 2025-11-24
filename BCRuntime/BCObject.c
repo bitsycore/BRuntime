@@ -78,7 +78,6 @@ void BCRelease(const BCObjectRef obj) {
 	) return;
 	const BC_atomic_uint16 old_count = BC_atomic_fetch_sub(&obj->ref_count, 1);
 	if (old_count == 1) {
-		ObjectDebugMarkFreed(obj);
 		if (obj->cls->dealloc) obj->cls->dealloc(obj);
 		if (BC_FLAG_HAS(obj->flags, BC_OBJECT_FLAG_NON_DEFAULT_ALLOCATOR)) {
 			const BCAllocatorRef allocator = (BCAllocatorRef)(char*)obj - sizeof(BCAllocatorRef);
@@ -86,6 +85,7 @@ void BCRelease(const BCObjectRef obj) {
 		} else {
 			kBCAllocatorDefault->free(obj, kBCAllocatorDefault->context);
 		}
+		ObjectDebugMarkFreed(obj);
 	}
 }
 
@@ -105,7 +105,7 @@ uint32_t BCHash(const BCObjectRef obj) {
 	return (uint32_t)(uintptr_t)obj;
 }
 
-bool BCEqual(const BCObjectRef a, const BCObjectRef b) {
+BC_bool BCEqual(const BCObjectRef a, const BCObjectRef b) {
 	if (a == b) return true;
 	if (!a || !b) return false;
 	if (a->cls != b->cls) return false;
@@ -119,7 +119,7 @@ BCStringRef BCToString(const BCObjectRef obj) {
 	return BCStringCreate("<%s@%d>", BCStringCPtr(BCClassName(obj->cls)), BCHash(obj));
 }
 
-bool BCObjectIsClass(const BCObjectRef obj, const BCClassRef cls) {
+BC_bool BCObjectIsClass(const BCObjectRef obj, const BCClassRef cls) {
 	if (!obj || !cls) return false;
 	return obj->cls == cls;
 }
@@ -139,8 +139,8 @@ typedef struct BCObjectDebugNode {
 static struct {
 	BC_MUTEX_MAYBE(lock)
 	BCObjectDebugNode* head;
-	bool enabled;
-	bool keepFreedObjects;
+	BC_atomic_bool enabled;
+	BC_atomic_bool keepFreedObjects;
 } ObjectDebugTracker;
 
 void ___BCINTERNAL___ObjectDebugInitialize(void) {
@@ -213,14 +213,14 @@ static const char* FlagsToString(const BCClassRef cls, const uint16_t flags) {
 	buffer[0] = '\0';
 
 	if (BC_FLAG_HAS(flags, BC_OBJECT_FLAG_REFCOUNT)) strcat(buffer, "REF ");
-	if (BC_FLAG_HAS(flags, BC_OBJECT_FLAG_CONSTANT)) strcat(buffer, "CONSTANT ");
+	if (BC_FLAG_HAS(flags, BC_OBJECT_FLAG_CONSTANT)) strcat(buffer, "CST ");
 
 	if (cls == kBCStringClassRef) {
 		if (flags & BC_OBJECT_FLAG_CLASS_MASK) {
 			strcat(buffer, "STR(");
 		}
 		if (BC_FLAG_HAS(flags, BC_STRING_FLAG_POOLED)) strcat(buffer, " POOL");
-		if (BC_FLAG_HAS(flags, BC_STRING_FLAG_STATIC)) strcat(buffer, " STATIC");
+		if (BC_FLAG_HAS(flags, BC_STRING_FLAG_STATIC)) strcat(buffer, " CST");
 		if (flags & BC_OBJECT_FLAG_CLASS_MASK) {
 			strcat(buffer, " ) ");
 		}
@@ -240,16 +240,12 @@ static const char* FlagsToString(const BCClassRef cls, const uint16_t flags) {
 // MARK: Public Object Debug
 // =========================================================
 
-void BCObjectDebugSetEnabled(const bool enabled) {
-	BCMutexLock(&ObjectDebugTracker.lock);
-	ObjectDebugTracker.enabled = enabled;
-	BCMutexUnlock(&ObjectDebugTracker.lock);
+void BCObjectDebugSetEnabled(const BC_bool enabled) {
+	BC_atomic_store(&ObjectDebugTracker.enabled, enabled);
 }
 
-void BCObjectDebugSetKeepFreed(const bool keepFreed) {
-	BCMutexLock(&ObjectDebugTracker.lock);
-	ObjectDebugTracker.keepFreedObjects = keepFreed;
-	BCMutexUnlock(&ObjectDebugTracker.lock);
+void BCObjectDebugSetKeepFreed(const BC_bool keepFreed) {
+	BC_atomic_store(&ObjectDebugTracker.keepFreedObjects, keepFreed);
 }
 
 #define DGRAY "\033[48;5;234m"
@@ -265,9 +261,9 @@ void BCObjectDebugDump(void) {
 	// HEADER
 	printf("\n"
 		"                                                      "BOLD"Object Dump"RESET"\n"
-		"┌"          "──────────────────"           "┬"    "────────────────────────"           "┬"    "──────────────────────────────"           "┬"    "──────────"           "┬"    "──────────────────"           "┬"    "─────────"     "┐\n"
-		"│"DGRAY BOLD"     Address      "RESET DGRAY"│"BOLD"      Class Type        "RESET DGRAY"│"BOLD"             Flags            "RESET DGRAY"│"BOLD" RefCount "RESET DGRAY"│"BOLD"    Allocator     "RESET DGRAY"│"BOLD"  Freed  "RESET"│\n"
-		"├"BLACK     "──────────────────"           "┼"    "────────────────────────"           "┼"    "──────────────────────────────"           "┼"    "──────────"           "┼"    "──────────────────"           "┼"    "─────────"RESET"┤\n"
+		"┌"          "──────────────────"           "┬"    "──────────────────"           "┬"    "──────────────────────"           "┬"    "──────────"           "┬"    "───────────"           "┬"    "──────────────────────────────"     "┐\n"
+		"│"DGRAY BOLD"     Address      "RESET DGRAY"│"BOLD"      Class       "RESET DGRAY"│"BOLD"         Flags        "RESET DGRAY"│"BOLD" RefCount "RESET DGRAY"│"BOLD" Allocator "RESET DGRAY"│"BOLD"          Description         "RESET"│\n"
+		"├"BLACK     "──────────────────"           "┼"    "──────────────────"           "┼"    "──────────────────────"           "┼"    "──────────"           "┼"    "───────────"           "┼"    "──────────────────────────────"RESET"┤\n"
 	);
 
 	// Print entries
@@ -307,25 +303,30 @@ void BCObjectDebugDump(void) {
 		}
 		const char* color = count % 2 == 0 ? DGRAY : BLACK;
 		if (node->obj == NULL) {
-			printf("│%s %-16s │ %-22s │ %-28s │ %-8d │ %-16s │ %s "RESET"│\n",
+			printf("│%s %-16s │ %-16s │ %-20s │ %-8d │ %-9s │ %-28s "RESET"│\n",
 				color,
-				"       -       ",
+				"       -        ",
 				classDisplay,
 				flagsDisplay,
 				0,
 				allocatorPtr,
-				" FREED "
+				""
 			);
 		} else {
-			printf("│%s %-16p │ %-22s │ %-28s │ %-8d │ %-16s │ %s "RESET"│\n",
+			const BC_bool enabledOld = BC_atomic_load(&ObjectDebugTracker.enabled);
+			BCObjectDebugSetEnabled(false);
+			const BCStringRef description = BCToString(node->obj);
+			printf("│%s %-16p │ %-16s │ %-20s │ %-8d │ %-9s │ %-28s "RESET"│\n",
 				color,
 				(void *)node->obj,
 				classDisplay,
 				flagsDisplay,
 				refCount,
 				allocatorPtr,
-				"       "
+				BCStringCPtr(description)
 			);
+			BCRelease($OBJ description);
+			BCObjectDebugSetEnabled(enabledOld);
 		}
 		count++;
 		node = node->next;
@@ -337,7 +338,7 @@ void BCObjectDebugDump(void) {
 	// --------------------------------------------------------------------------
 	// FOOTER
 	printf(
-		"└──────────────────┴────────────────────────┴──────────────────────────────┴──────────┴──────────────────┴─────────┘\n"
+		"└──────────────────┴──────────────────┴──────────────────────┴──────────┴───────────┴──────────────────────────────┘\n"
 		"    %zu entr%s (%zu freed, %fms)\n\n",
 		count,
 		count == 1 ? "y" : "ies",
