@@ -66,7 +66,7 @@ bool BCObjectIsClass(BCObjectRef obj, BCClassRef cls);
 // MARK: Debug
 // =========================================================
 
-#ifdef BC_SETTINGS_DEBUG_OBJECT_DUMP
+#if BC_SETTINGS_DEBUG_OBJECT_DUMP == 1
 void BCObjectDebugSetEnabled(bool enabled);
 void BCObjectDebugSetKeepFreed(bool keepFreed);
 void BCObjectDebugDump(void);

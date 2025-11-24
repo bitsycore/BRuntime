@@ -225,7 +225,7 @@ void testMap() {
 	printf("%s\n", TO_STR(dic));
 }
 
-int RETRY = 10;
+int RETRY = 1;
 
 int BCMain() {
 

@@ -20,7 +20,7 @@ $TLS BCAutoreleasePool gRootPool = {
 	.next = NULL,
 	.parent = NULL,
 	.count = 0,
-	.stack = { NULL },
+	.stack = 0,
 };
 
 $TLS BCAutoreleasePool* CurrentAutoReleasePool = NULL;

@@ -66,33 +66,25 @@ static void ObjectDebugMarkFreed(const BCObjectRef obj) {
 
 	BCMutexLock(&ObjectDebugTracker.lock);
 
-	BCObjectDebugNode* node = ObjectDebugTracker.head;
-	while (node) {
-		if (node->obj == obj) {
-			if (ObjectDebugTracker.keepFreedObjects) {
-				node->obj = NULL;
-			} else {
-				// Remove from list
-				BCObjectDebugNode* prev = NULL;
-				BCObjectDebugNode* curr = ObjectDebugTracker.head;
-				while (curr) {
-					if (curr == node) {
-						if (prev) {
-							prev->next = curr->next;
-						} else {
-							ObjectDebugTracker.head = curr->next;
-						}
-						BCFree(curr);
-						break;
-					}
-					prev = curr;
-					curr = curr->next;
+	BCObjectDebugNode* prev = NULL;
+	BCObjectDebugNode* curr = ObjectDebugTracker.head;
+
+	while (curr) {
+		if (curr->obj == obj) {
+			curr->obj = NULL;
+
+			if (!ObjectDebugTracker.keepFreedObjects) {
+				if (prev) {
+					prev->next = curr->next;
+				} else {
+					ObjectDebugTracker.head = curr->next;
 				}
-				node->obj = NULL;
+				BCFree(curr);
 			}
 			break;
 		}
-		node = node->next;
+		prev = curr;
+		curr = curr->next;
 	}
 
 	BCMutexUnlock(&ObjectDebugTracker.lock);
@@ -257,7 +249,7 @@ void BCObjectDebugDump(void) {
 	printf("\n"
 		"                                                      "BOLD"Object Dump"RESET"\n"
 		"┌"          "──────────────────┬────────────────────────┬──────────────────────────────┬──────────┬──────────────────┬─────────"     "┐\n"
-		"│"DGRAY BOLD"     Address      │      Class Type        │             Flags            │ RefCount │    Allocator     │  Freed  "RESET"│\n"
+		"│"DGRAY BOLD"     Address      "RESET DGRAY"│"BOLD"      Class Type        "RESET DGRAY"│"BOLD"             Flags            "RESET DGRAY"│"BOLD" RefCount "RESET DGRAY"│"BOLD"    Allocator     "RESET DGRAY"│"BOLD"  Freed  "RESET"│\n"
 		"├"BLACK     "──────────────────┼────────────────────────┼──────────────────────────────┼──────────┼──────────────────┼─────────"RESET"┤\n"
 	);
 
@@ -297,25 +289,26 @@ void BCObjectDebugDump(void) {
 		} else {
 			snprintf(allocatorPtr, sizeof(allocatorPtr), "NULL");
 		}
-
-		if (count % 2 == 0) {
-			printf("│"DGRAY" %-16p │ %-22s │ %-28s │ %-8d │ %-16s │ %s "RESET"│\n",
-				   (void*)node->obj,
-				   classDisplay,
-				   flagsDisplay,
-				   node->obj == NULL ? 0 : refCount,
-				   allocatorPtr,
-				   node->obj == NULL ? " FREED " : "       "
+		const char* color = count % 2 == 0 ? DGRAY : BLACK;
+		if (node->obj == NULL) {
+			printf("│%s %-16s │ %-22s │ %-28s │ %-8d │ %-16s │ %s "RESET"│\n",
+				color,
+				"        -      ",
+				classDisplay,
+				flagsDisplay,
+				0,
+				allocatorPtr,
+				" FREED "
 			);
-		}
-		else {
-			printf("│"BLACK" %-16p │ %-22s │ %-28s │ %-8d │ %-16s │ %s "RESET"│\n",
-				   (void*)node->obj,
-				   classDisplay,
-				   flagsDisplay,
-				   node->obj == NULL ? 0 : refCount,
-				   allocatorPtr,
-				   node->obj == NULL ? " FREED " : "       "
+		} else {
+			printf("│%s %-16p │ %-22s │ %-28s │ %-8d │ %-16s │ %s "RESET"│\n",
+				color,
+				(void *)node->obj,
+				classDisplay,
+				flagsDisplay,
+				refCount,
+				allocatorPtr,
+				"       "
 			);
 		}
 		count++;

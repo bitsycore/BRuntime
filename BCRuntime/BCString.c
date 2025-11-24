@@ -239,8 +239,9 @@ void BCStringPoolDebugDump(void) {
 	printf("\n"
 		"                                          "BOLD"String Pool Dump"RESET"\n"
 		"┌"          "────────┬────────────────────────────────────────────────┬────────────┬────────┬──────────────────"     "┐\n"
-		"│"DGRAY BOLD" Bucket │                     Value                      │    Hash    │ Length │       Next       "RESET"│\n"
-		"├"BLACK     "────────┼────────────────────────────────────────────────┼────────────┼────────┼──────────────────"RESET"┤\n"
+		"│"BLACK BOLD" Bucket "RESET BLACK"│"BOLD"                     Value                      "RESET BLACK"│"
+		BOLD"    Hash    "RESET BLACK"│"BOLD" Length "RESET BLACK"│"BOLD"       Next       "RESET"│\n"
+		"├"DGRAY     "────────┼────────────────────────────────────────────────┼────────────┼────────┼──────────────────"RESET"┤\n"
 	);
 
 	// Print entries

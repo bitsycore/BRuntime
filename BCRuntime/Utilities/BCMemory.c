@@ -6,15 +6,17 @@
 
 #include "BCThreads.h"
 
+#if BC_SETTINGS_DEBUG_ALLOCATION_TRACK == 1
+
 typedef struct {
     size_t totalAllocated;
     size_t currentUsage;
     size_t peakUsage;
     size_t allocationCount;
     size_t freeCount;
-} BCMemoryStats;
+} MemoryStats;
 
-static BCMemoryStats gMemoryStats = {0};
+static MemoryStats gMemoryStats = {0};
 BC_MUTEX_MAYBE(gMemoryMutex)
 
 typedef struct {
@@ -108,6 +110,19 @@ void BCGetMemoryStats(size_t* totalAllocated, size_t* currentUsage, size_t* peak
     BCMutexUnlock(&gMemoryMutex);
 }
 
+void BCMemoryInfoHeapReset(void) {
+	BCMutexLock(&gMemoryMutex);
+	gMemoryStats.totalAllocated = 0;
+	gMemoryStats.currentUsage = 0;
+	gMemoryStats.peakUsage = 0;
+	gMemoryStats.allocationCount = 0;
+	gMemoryStats.freeCount = 0;
+	BCMutexUnlock(&gMemoryMutex);
+}
+#else
+void ___BCINTERNAL___MemoryInitialize() {}
+#endif
+
 #if defined(_WIN32) || defined(_WIN64)
 #include <windows.h>
 #include <psapi.h>
@@ -119,21 +134,13 @@ void BCGetMemoryStats(size_t* totalAllocated, size_t* currentUsage, size_t* peak
 #include <sys/resource.h>
 #endif
 
-void BCMemoryInfoHeapReset(void) {
-	BCMutexLock(&gMemoryMutex);
-	gMemoryStats.totalAllocated = 0;
-	gMemoryStats.currentUsage = 0;
-	gMemoryStats.peakUsage = 0;
-	gMemoryStats.allocationCount = 0;
-	gMemoryStats.freeCount = 0;
-	BCMutexUnlock(&gMemoryMutex);
-}
-
 int BCMemoryInfoGet(BCMemoryInfo* info) {
 	if (!info) return -1;
 
 	info->system_current_rss = 0;
 	info->system_peak_rss = 0;
+
+#if BC_SETTINGS_DEBUG_ALLOCATION_TRACK == 1
 
 	BCMutexLock(&gMemoryMutex);
 	info->freeCount = gMemoryStats.freeCount;
@@ -142,6 +149,8 @@ int BCMemoryInfoGet(BCMemoryInfo* info) {
 	info->currentAllocUsage = gMemoryStats.currentUsage;
 	info->peakAllocUsage = gMemoryStats.peakUsage;
 	BCMutexUnlock(&gMemoryMutex);
+
+#endif
 
 #if defined(_WIN32) || defined(_WIN64)
 	PROCESS_MEMORY_COUNTERS pmc;
@@ -170,7 +179,11 @@ int BCMemoryInfoGet(BCMemoryInfo* info) {
 	}
 #endif
 
+#if BC_SETTINGS_DEBUG_ALLOCATION_TRACK == 1
 	return 0;
+#else
+	return -1;
+#endif
 }
 
 #define DGRAY "\033[48;5;234m"
@@ -179,34 +192,40 @@ int BCMemoryInfoGet(BCMemoryInfo* info) {
 #define BOLD "\033[1m"
 
 void BCMemoryInfoPrint(void) {
-    BCMemoryInfo info;
-    const int result = BCMemoryInfoGet(&info);
+	BCMemoryInfo info;
+	const int result = BCMemoryInfoGet(&info);
 
-    // Header
-    printf("\n"
-        " "          "                        "BOLD"Memory Statistics"RESET"\n"
-        "┌"          "───────────────────────┬───────────────────────────────────────"     "┐\n"
-        "│"DGRAY BOLD"         Metric"RESET DGRAY"        │                 "BOLD"Value"RESET DGRAY"                 "RESET"│\n"
-        "├"BLACK     "───────────────────────┼───────────────────────────────────────"RESET"┤\n"
-    );
+	// Header
+	printf("\n"
+		" " "                        "BOLD"Memory Statistics"RESET"\n"
+		"┌" "───────────────────────┬───────────────────────────────────────" "┐\n"
+		"│"DGRAY BOLD"         Metric"RESET DGRAY"        │                 "BOLD"Value"RESET DGRAY"                 "
+		RESET"│\n"
+		"├"BLACK "───────────────────────┼───────────────────────────────────────"RESET"┤\n"
+	);
 
-    // System Memory (if available)
-    if (result >= 1) {
-    printf("│"DGRAY" System Current RSS    │ %34.2f MB "RESET"│\n", (double)info.system_current_rss / (1024.0 * 1024.0));
-    printf("│"BLACK" System Peak RSS       │ %34.2f MB "RESET"│\n", (double)info.system_peak_rss / (1024.0 * 1024.0));
-    printf("├"DGRAY"───────────────────────┼───────────────────────────────────────"RESET"┤\n");
+	// System Memory (if available)
+	if (result >= 1) {
+		printf("│"DGRAY" System Current RSS    │ %34.2f MB "RESET"│\n",
+				(double) info.system_current_rss / (1024.0 * 1024.0));
+		printf("│"BLACK" System Peak RSS       │ %34.2f MB "RESET"│\n",
+				(double) info.system_peak_rss / (1024.0 * 1024.0));
+#if BC_SETTINGS_DEBUG_ALLOCATION_TRACK == 1
+		printf("├"DGRAY"───────────────────────┼───────────────────────────────────────"RESET"┤\n");
+	}
+
+	// Heap Statistics
+	printf("│"DGRAY" Current Heap Usage    │ %31zu bytes "RESET"│\n", info.currentAllocUsage);
+	printf("│"BLACK" Peak Heap Usage       │ %31zu bytes "RESET"│\n", info.peakAllocUsage);
+	printf("│"DGRAY" Total Heap Allocated  │ %31zu bytes "RESET"│\n", info.totalAllocated);
+	printf("├"BLACK"───────────────────────┼───────────────────────────────────────"RESET"┤\n");
+	printf("│"DGRAY" Number of Allocations │ %37zu "RESET"│\n", info.allocationCount);
+	printf("│"BLACK" Number of Frees       │ %37zu "RESET"│\n", info.freeCount);
+	printf("│"DGRAY" Active Allocations    │ %37zu "RESET"│\n",
+			info.allocationCount - info.freeCount);
+#else
     }
-
-    // Heap Statistics
-    printf("│"DGRAY" Current Heap Usage    │ %31zu bytes "RESET"│\n", info.currentAllocUsage);
-    printf("│"BLACK" Peak Heap Usage       │ %31zu bytes "RESET"│\n", info.peakAllocUsage);
-    printf("│"DGRAY" Total Heap Allocated  │ %31zu bytes "RESET"│\n", info.totalAllocated);
-    printf("├"BLACK"───────────────────────┼───────────────────────────────────────"RESET"┤\n");
-    printf("│"DGRAY" Number of Allocations │ %37zu "RESET"│\n", info.allocationCount);
-    printf("│"BLACK" Number of Frees       │ %37zu "RESET"│\n", info.freeCount);
-    printf("│"DGRAY" Active Allocations    │ %37zu "RESET"│\n",
-           info.allocationCount - info.freeCount);
-
-    // Footer
-    printf("└───────────────────────┴───────────────────────────────────────┘\n\n");
+#endif
+	// Footer
+	printf("└───────────────────────┴───────────────────────────────────────┘\n\n");
 }
