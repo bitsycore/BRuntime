@@ -66,7 +66,7 @@ void testArray() {
 	$VAR a = $("Hello");
 	BCAutorelease($OBJ a);
 
-	const $VAR arrayAuto = $ARR(a, 5, 6, 7, 8);
+	const $VAR arrayAuto = $VEC(a, 5, 6, 7, 8);
 	BCAutorelease($OBJ arrayAuto);
 
 	const BCArrayRef array = BCArrayCreate();
@@ -74,7 +74,7 @@ void testArray() {
 
 	BCArrayAdd(array, $OBJ BCStringPooledLiteral("Admin") );
 	BCArrayAdd(array, $OBJ BCStringPooledLiteral("Editor") );
-	BCArrayAdd(array, $OBJ kBCTrue);
+	BCArrayAdd(array, $OBJ $(BC_true));
 
 	printf("Array Dump: %s\n", TO_STR(array));
 	printf("Get Element 0: %s\n", TO_STR(BCArrayGet(array, 0)));
@@ -176,7 +176,7 @@ void testMap() {
 	SUB_TITLE("Test Map");
 	// ================================
 
-	$VAR array = $ARR("username", "password");
+	$VAR array = $VEC("username", "password");
 	BCAutorelease($OBJ array);
 
 	const BCStringRef str1 = BCStringPooledLiteral("username");
@@ -220,7 +220,8 @@ void testMap() {
 	$LET dic = $$MAP(
 		"title", "Test Map",
 		"version", "1.0.0",
-		"author", "Beej"
+		"author", "Beej",
+		"isActive", BC_true
 	);
 	printf("%s\n", TO_STR(dic));
 }
@@ -230,7 +231,7 @@ int RETRY = 1;
 int BCMain() {
 
 	BCObjectDebugSetEnabled(true);
-	BCObjectDebugSetKeepFreed(true);
+	BCObjectDebugSetKeepFreed(false);
 
 	for (int i = 0; i < RETRY; i++) {
 		BIG_TITLE("BC Startup");

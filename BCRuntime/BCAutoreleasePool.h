@@ -22,4 +22,6 @@ BCObjectRef BCAutorelease(BCObjectRef obj);
 )
 #define BCAutoreleaseScope() ___BCINTERNAL___AutoreleaseScopeImpl(BC_M_CAT(___temp_once_, __COUNTER__))
 
+#define $$AR(...) BCAutoreleaseAll( __VA_ARGS__ )
+
 #endif //BCRUNTIME_BCAUTORELEASEPOOL_H

@@ -78,8 +78,8 @@ static inline BCObjectRef ___BCINTERNAL___Retain(void* obj) { return BCRetain(ob
     BC_M_CAT(___temp_arr_impl___,_counter_); \
 })
 
-#define $ARR(...) ___BCINTERNAL___ARR_IMPL(BC_M_CAT(___temp_arr_impl___,__COUNTER__), __VA_ARGS__)
-#define $$ARR(...) ( (BCArrayRef) BCAutorelease( $OBJ $ARR(__VA_ARGS__) ) )
+#define $VEC(...) ___BCINTERNAL___ARR_IMPL(BC_M_CAT(___temp_arr_impl___,__COUNTER__), __VA_ARGS__)
+#define $$ARR(...) ( (BCArrayRef) BCAutorelease( $OBJ $VEC(__VA_ARGS__) ) )
 
 // ================================================
 // MARK: MAP
