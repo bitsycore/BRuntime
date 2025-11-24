@@ -81,7 +81,7 @@ typedef struct StringPoolNode {
 } StringPoolNode;
 
 static struct {
-	BCMutex lock;
+	BC_MUTEX_MAYBE(lock);
 	StringPoolNode* buckets[BC_STRING_POOL_SIZE];
 } StringPool;
 

@@ -15,8 +15,7 @@ typedef struct {
 } BCMemoryStats;
 
 static BCMemoryStats gMemoryStats = {0};
-static BCMutex gMemoryMutex;
-static BCOnceToken gMemoryMutexInitToken = BC_ONCE_INIT;
+BC_MUTEX_MAYBE(gMemoryMutex)
 
 typedef struct {
     size_t size;

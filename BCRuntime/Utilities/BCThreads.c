@@ -4,6 +4,8 @@
 // MARK: Mutex Implementation
 // =========================================================
 
+#if BC_SETTINGS_ENABLE_THREAD_SAFETY == 1
+
 void BCMutexInit(BCMutex* mutex) {
 #if defined(_WIN32)
     InitializeCriticalSection(mutex);
@@ -36,9 +38,13 @@ void BCMutexDestroy(BCMutex* mutex) {
 #endif
 }
 
+#endif
+
 // =========================================================
 // MARK: Run Once Implementation
 // =========================================================
+
+#if BC_SETTINGS_ENABLE_THREAD_SAFETY == 1
 
 #if defined(_WIN32)
 static BOOL CALLBACK WinInitOnceCallback(PINIT_ONCE InitOnce, const PVOID Parameter, PVOID *Context) {
@@ -57,3 +63,5 @@ void BCRunOnce(BCOnceToken* token, void (*func)(void)) {
     pthread_once(token, func);
 #endif
 }
+
+#endif

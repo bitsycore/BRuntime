@@ -14,13 +14,12 @@
 
 typedef struct BCObjectDebugNode {
 	BCObjectRef obj;
-	bool isFreed;
 	BCObject copy;
 	struct BCObjectDebugNode* next;
 } BCObjectDebugNode;
 
 static struct {
-	BCMutex lock;
+	BC_MUTEX_MAYBE(lock)
 	BCObjectDebugNode* head;
 	bool enabled;
 	bool keepFreedObjects;
@@ -56,7 +55,6 @@ static void ObjectDebugTrack(const BCObjectRef obj) {
 	BCObjectDebugNode* node = BCMalloc(sizeof(BCObjectDebugNode));
 	node->obj = obj;
 	node->copy = *obj;
-	node->isFreed = false;
 	node->next = ObjectDebugTracker.head;
 	ObjectDebugTracker.head = node;
 
@@ -72,7 +70,7 @@ static void ObjectDebugMarkFreed(const BCObjectRef obj) {
 	while (node) {
 		if (node->obj == obj) {
 			if (ObjectDebugTracker.keepFreedObjects) {
-				node->isFreed = true;
+				node->obj = NULL;
 			} else {
 				// Remove from list
 				BCObjectDebugNode* prev = NULL;
@@ -90,6 +88,7 @@ static void ObjectDebugMarkFreed(const BCObjectRef obj) {
 					prev = curr;
 					curr = curr->next;
 				}
+				node->obj = NULL;
 			}
 			break;
 		}
@@ -267,8 +266,8 @@ void BCObjectDebugDump(void) {
 	size_t freedCount = 0;
 	BCObjectDebugNode* node = ObjectDebugTracker.head;
 	while (node) {
-		const BCObjectRef obj = node->isFreed ? &node->copy : node->obj;
-		if (node->isFreed) freedCount++;
+		const BCObjectRef obj = node->obj == NULL ? &node->copy : node->obj;
+		if (node->obj == NULL) freedCount++;
 		const char* className = obj->cls->name;
 		const char* flags = FlagsToString(obj->cls, obj->flags);
 		const int refCount = atomic_load(&obj->ref_count);
@@ -304,9 +303,9 @@ void BCObjectDebugDump(void) {
 				   (void*)node->obj,
 				   classDisplay,
 				   flagsDisplay,
-				   node->isFreed ? 0 : refCount,
+				   node->obj == NULL ? 0 : refCount,
 				   allocatorPtr,
-				   node->isFreed ? " FREED " : "       "
+				   node->obj == NULL ? " FREED " : "       "
 			);
 		}
 		else {
@@ -314,9 +313,9 @@ void BCObjectDebugDump(void) {
 				   (void*)node->obj,
 				   classDisplay,
 				   flagsDisplay,
-				   node->isFreed ? 0 : refCount,
+				   node->obj == NULL ? 0 : refCount,
 				   allocatorPtr,
-				   node->isFreed ? " FREED " : "       "
+				   node->obj == NULL ? " FREED " : "       "
 			);
 		}
 		count++;

@@ -44,4 +44,9 @@
 #define ___BCINTERNAL___ARG_FIRST_IMPL(first, ...) first
 #define BC_ARG_FIRST(...) ___BCINTERNAL___ARG_FIRST_IMPL(__VA_ARGS__, X)
 
+
+#define BC_GB(_x_) (1024*1024*1024*(_x_))
+#define BC_MB(_x_) (1024*1024*(_x_))
+#define BC_KB(_x_) (1024*(_x_))
+
 #endif //BC_BCMACROTOOLS_H

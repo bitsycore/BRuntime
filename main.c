@@ -225,12 +225,12 @@ void testMap() {
 	printf("%s\n", TO_STR(dic));
 }
 
-int RETRY = 1;
+int RETRY = 10;
 
 int BCMain() {
 
 	BCObjectDebugSetEnabled(true);
-	BCObjectDebugSetKeepFreed(false);
+	BCObjectDebugSetKeepFreed(true);
 
 	for (int i = 0; i < RETRY; i++) {
 		BIG_TITLE("BC Startup");

@@ -20,9 +20,7 @@ add_library(BCRuntime
 		Utilities/BCAnsiEscape.h
 		Utilities/BCKeywords.h
 		Utilities/BCMacro.h
-		Utilities/BCMemInfo.c
-		Utilities/BCMemInfo.h
-		Utilities/BCMemory.h
+        Utilities/BCMemory.h
 		Utilities/BCMemory.c
 		Utilities/BCThreads.c
 		Utilities/BCThreads.h
