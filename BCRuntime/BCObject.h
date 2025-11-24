@@ -38,14 +38,6 @@ typedef struct BCObject {
 #define BC_FLAG_CLEAR(obj, flag) ((obj) &= ~(flag))
 #define BC_FLAG_TOGGLE(obj, flag) ((obj) ^= (flag))
 
-typedef struct BCAllocator {
-	void* (* alloc)(size_t size, const void* ctx);
-	void (* free)(void* ptr, const void* ctx);
-	void* context;
-} BCAllocator;
-
-extern BCAllocatorRef const kBCAllocatorDefault;
-
 BCObjectRef BCAllocObject(BCClassRef cls, BCAllocatorRef alloc);
 BCObjectRef BCAllocObjectWithExtra(BCClassRef cls, BCAllocatorRef alloc, size_t extraBytes, uint16_t flags);
 
@@ -57,9 +49,8 @@ uint32_t BCHash(BCObjectRef obj);
 bool BCEqual(BCObjectRef a, BCObjectRef b);
 BCStringRef BCToString(BCObjectRef obj);
 
-BCStringRef BCClassName(BCClassRef cls);
-
 BCClassRef BCObjectClass(BCObjectRef obj);
+BCStringRef BCClassName(BCClassRef cls);
 bool BCObjectIsClass(BCObjectRef obj, BCClassRef cls);
 
 // =========================================================

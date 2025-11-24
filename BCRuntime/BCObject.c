@@ -1,114 +1,25 @@
 #include "BCObject.h"
+
 #include "BCString.h"
+#include "BCAllocator.h"
+#include "Utilities/BCMemory.h"
+#include "Utilities/BCThreads.h"
 
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
 
-#include "Utilities/BCMemory.h"
-#include "Utilities/BCThreads.h"
-
-#define GET_ALLOCATOR(obj) ( BC_FLAG_HAS((obj)->flags, BC_OBJECT_FLAG_NON_DEFAULT_ALLOCATOR) ? (BCAllocatorRef)( (char*)(obj) - sizeof(BCAllocatorRef) ) : kBCAllocatorDefault )
-
 // =========================================================
-// MARK: Debug Tracking
+// MARK: Forward
 // =========================================================
 
-typedef struct BCObjectDebugNode {
-	BCObjectRef obj;
-	BCObject copy;
-	struct BCObjectDebugNode* next;
-} BCObjectDebugNode;
-
-static struct {
-	BC_MUTEX_MAYBE(lock)
-	BCObjectDebugNode* head;
-	bool enabled;
-	bool keepFreedObjects;
-} ObjectDebugTracker;
-
-void ___BCINTERNAL___ObjectDebugInitialize(void) {
-	BCMutexInit(&ObjectDebugTracker.lock);
-	ObjectDebugTracker.head = NULL;
-	ObjectDebugTracker.enabled = false;
-	ObjectDebugTracker.keepFreedObjects = false;
-}
-
-void ___BCINTERNAL___ObjectDebugDeinitialize(void) {
-	BCMutexLock(&ObjectDebugTracker.lock);
-
-	BCObjectDebugNode* node = ObjectDebugTracker.head;
-	while (node) {
-		BCObjectDebugNode* next = node->next;
-		BCFree(node);
-		node = next;
-	}
-
-	ObjectDebugTracker.head = NULL;
-	BCMutexUnlock(&ObjectDebugTracker.lock);
-	BCMutexDestroy(&ObjectDebugTracker.lock);
-}
-
-static void ObjectDebugTrack(const BCObjectRef obj) {
-	if (!ObjectDebugTracker.enabled) return;
-
-	BCMutexLock(&ObjectDebugTracker.lock);
-
-	BCObjectDebugNode* node = BCMalloc(sizeof(BCObjectDebugNode));
-	node->obj = obj;
-	node->copy = *obj;
-	node->next = ObjectDebugTracker.head;
-	ObjectDebugTracker.head = node;
-
-	BCMutexUnlock(&ObjectDebugTracker.lock);
-}
-
-static void ObjectDebugMarkFreed(const BCObjectRef obj) {
-	if (!ObjectDebugTracker.enabled) return;
-
-	BCMutexLock(&ObjectDebugTracker.lock);
-
-	BCObjectDebugNode* prev = NULL;
-	BCObjectDebugNode* curr = ObjectDebugTracker.head;
-
-	while (curr) {
-		if (curr->obj == obj) {
-			curr->obj = NULL;
-
-			if (!ObjectDebugTracker.keepFreedObjects) {
-				if (prev) {
-					prev->next = curr->next;
-				} else {
-					ObjectDebugTracker.head = curr->next;
-				}
-				BCFree(curr);
-			}
-			break;
-		}
-		prev = curr;
-		curr = curr->next;
-	}
-
-	BCMutexUnlock(&ObjectDebugTracker.lock);
-}
-
-// =========================================================
-// MARK: Allocator
-// =========================================================
-
-static void* AllocatorDefaultAlloc(const size_t size, const void* ctx) {
-	(void)ctx;
-	return BCMalloc(size);
-}
-
-static void AllocatorDefaultFree(void* ptr, const void* ctx) {
-	(void)ctx;
-	BCFree(ptr);
-}
-
-static BCAllocator _kBCAllocatorDefault = {AllocatorDefaultAlloc, AllocatorDefaultFree, NULL};
-BCAllocatorRef const kBCAllocatorDefault = &_kBCAllocatorDefault;
-
+#if BC_SETTINGS_DEBUG_OBJECT_DUMP == 1
+static void ObjectDebugTrack(BCObjectRef obj);
+static void ObjectDebugMarkFreed(BCObjectRef obj);
+#else
+#define ObjectDebugTrack(obj)
+#define ObjectDebugMarkFreed(obj)
+#endif
 // =========================================================
 // MARK: Public
 // =========================================================
@@ -216,20 +127,86 @@ BCStringRef BCClassName(const BCClassRef cls) {
 }
 
 // =========================================================
-// MARK: Debug Dump
+// MARK: Debug Tracking
 // =========================================================
 
 #if BC_SETTINGS_DEBUG_OBJECT_DUMP == 1
 
-void BCObjectDebugSetEnabled(const bool enabled) {
+typedef struct BCObjectDebugNode {
+	BCObjectRef obj;
+	BCObject copy;
+	struct BCObjectDebugNode* next;
+} BCObjectDebugNode;
+
+static struct {
+	BC_MUTEX_MAYBE(lock)
+	BCObjectDebugNode* head;
+	bool enabled;
+	bool keepFreedObjects;
+} ObjectDebugTracker;
+
+void ___BCINTERNAL___ObjectDebugInitialize(void) {
+	BCMutexInit(&ObjectDebugTracker.lock);
+	ObjectDebugTracker.head = NULL;
+	ObjectDebugTracker.enabled = false;
+	ObjectDebugTracker.keepFreedObjects = false;
+}
+
+void ___BCINTERNAL___ObjectDebugDeinitialize(void) {
 	BCMutexLock(&ObjectDebugTracker.lock);
-	ObjectDebugTracker.enabled = enabled;
+
+	BCObjectDebugNode* node = ObjectDebugTracker.head;
+	while (node) {
+		BCObjectDebugNode* next = node->next;
+		BCFree(node);
+		node = next;
+	}
+
+	ObjectDebugTracker.head = NULL;
+	BCMutexUnlock(&ObjectDebugTracker.lock);
+	BCMutexDestroy(&ObjectDebugTracker.lock);
+}
+
+static void ObjectDebugTrack(const BCObjectRef obj) {
+	if (!ObjectDebugTracker.enabled) return;
+
+	BCMutexLock(&ObjectDebugTracker.lock);
+
+	BCObjectDebugNode* node = BCMalloc(sizeof(BCObjectDebugNode));
+	node->obj = obj;
+	node->copy = *obj;
+	node->next = ObjectDebugTracker.head;
+	ObjectDebugTracker.head = node;
+
 	BCMutexUnlock(&ObjectDebugTracker.lock);
 }
 
-void BCObjectDebugSetKeepFreed(const bool keepFreed) {
+static void ObjectDebugMarkFreed(const BCObjectRef obj) {
+	if (!ObjectDebugTracker.enabled) return;
+
 	BCMutexLock(&ObjectDebugTracker.lock);
-	ObjectDebugTracker.keepFreedObjects = keepFreed;
+
+	BCObjectDebugNode* prev = NULL;
+	BCObjectDebugNode* curr = ObjectDebugTracker.head;
+
+	while (curr) {
+		if (curr->obj == obj) {
+			curr->obj = NULL;
+
+			if (!ObjectDebugTracker.keepFreedObjects) {
+				if (prev) {
+					prev->next = curr->next;
+				} else {
+					ObjectDebugTracker.head = curr->next;
+				}
+				BCFree(curr);
+			}
+			break;
+		}
+		prev = curr;
+		curr = curr->next;
+	}
+
 	BCMutexUnlock(&ObjectDebugTracker.lock);
 }
 
@@ -261,6 +238,22 @@ static const char* FlagsToString(const BCClassRef cls, const uint16_t flags) {
 	}
 
 	return buffer;
+}
+
+// =========================================================
+// MARK: Public Object Debug
+// =========================================================
+
+void BCObjectDebugSetEnabled(const bool enabled) {
+	BCMutexLock(&ObjectDebugTracker.lock);
+	ObjectDebugTracker.enabled = enabled;
+	BCMutexUnlock(&ObjectDebugTracker.lock);
+}
+
+void BCObjectDebugSetKeepFreed(const bool keepFreed) {
+	BCMutexLock(&ObjectDebugTracker.lock);
+	ObjectDebugTracker.keepFreedObjects = keepFreed;
+	BCMutexUnlock(&ObjectDebugTracker.lock);
 }
 
 #define DGRAY "\033[48;5;234m"
@@ -313,7 +306,7 @@ void BCObjectDebugDump(void) {
 		if (!BC_FLAG_HAS(obj->flags, BC_OBJECT_FLAG_NON_DEFAULT_ALLOCATOR)) {
 			snprintf(allocatorPtr, sizeof(allocatorPtr), "DEFAULT");
 		} else {
-			const BCAllocatorRef allocator = GET_ALLOCATOR(obj);
+			const BCAllocatorRef allocator = BC_OBJECT_GET_ALLOCATOR(obj);
 			snprintf(allocatorPtr, sizeof(allocatorPtr), "%p", (void*)allocator);
 		}
 		const char* color = count % 2 == 0 ? DGRAY : BLACK;
@@ -358,5 +351,7 @@ void BCObjectDebugDump(void) {
 
 	BCMutexUnlock(&ObjectDebugTracker.lock);
 }
-
+#else
+void ___BCINTERNAL___ObjectDebugInitialize() {}
+void ___BCINTERNAL___ObjectDebugDeinitialize() {}
 #endif

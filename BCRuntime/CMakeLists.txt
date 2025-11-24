@@ -1,6 +1,6 @@
 add_library(BCRuntime
-		Array/BCArray.c
-		Array/BCArray.h
+		Array/BCVector.c
+		Array/BCVector.h
 		Array/BCBytesArray.c
 		Array/BCBytesArray.h
 		BCAutoreleasePool.c
@@ -25,4 +25,6 @@ add_library(BCRuntime
 		Utilities/BCThreads.c
 		Utilities/BCThreads.h
 		Utilities/BCAtomics.h
+		BCAllocator.c
+        BCAllocator.h
 )

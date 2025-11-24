@@ -49,7 +49,7 @@ typedef struct BCNumber* BCBoolRef;
 // MARK: Containers
 // =========================================================
 
-typedef struct BCArray* BCArrayRef;
+typedef struct BCVector* BCVectorRef;
 typedef struct BCBytesArray* BCBytesArrayRef;
 typedef struct BCMap* BCMapRef;
 typedef struct BCMap* BCMutableMapRef;

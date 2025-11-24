@@ -1,7 +1,7 @@
 #include "BCMap.h"
 
 #include "../BCString.h"
-#include "../Array/BCArray.h"
+#include "../Array/BCVector.h"
 #include "../Utilities/BCMemory.h"
 
 #include <stdarg.h>
@@ -141,21 +141,21 @@ BCObjectRef BCMapGet(const BCMapRef d, const BCObjectRef key) {
 	return NULL;
 }
 
-BCArrayRef BCMapKeys(const BCMapRef d) {
-	const BCArrayRef arr = BCArrayCreate();
+BCVectorRef BCMapKeys(const BCMapRef d) {
+	const BCVectorRef arr = BCVectorCreate();
 	for (size_t i = 0; i < d->capacity; i++) {
 		if (d->buckets[i].key) {
-			BCArrayAdd(arr, d->buckets[i].key);
+			BCVectorAdd(arr, d->buckets[i].key);
 		}
 	}
 	return arr;
 }
 
-BCArrayRef BCMapValues(const BCMapRef d) {
-	const BCArrayRef arr = BCArrayCreate();
+BCVectorRef BCMapValues(const BCMapRef d) {
+	const BCVectorRef arr = BCVectorCreate();
 	for (size_t i = 0; i < d->capacity; i++) {
 		if (d->buckets[i].key) {
-			BCArrayAdd(arr, d->buckets[i].value);
+			BCVectorAdd(arr, d->buckets[i].value);
 		}
 	}
 	return arr;

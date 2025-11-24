@@ -12,7 +12,7 @@ BCMutableMapRef BCMutableMapCreate();
 BCMapRef BCMapCreateWithObjects(bool retain, size_t count, ...);
 void BCMapSet(BCMutableMapRef d, BCObjectRef key, BCObjectRef val);
 BCObjectRef BCMapGet(BCMapRef d, BCObjectRef key);
-BCArrayRef BCMapKeys(BCMapRef d);
-BCArrayRef BCMapValues(BCMapRef d);
+BCVectorRef BCMapKeys(BCMapRef d);
+BCVectorRef BCMapValues(BCMapRef d);
 
 #endif //BCRUNTIME_BCDICTIONARY_H
