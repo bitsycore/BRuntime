@@ -25,7 +25,8 @@
 // MARK: Internal
 // =========================================================
 
-static uint32_t ___BCINTERNAL___StringHasher(const char* s) {
+__attribute__((const, always_inline))
+static inline uint32_t ___BCINTERNAL___StringHasher(const char* s) {
 	uint32_t hash = 2166136261u;
 	while (*s) {
 		hash ^= (uint8_t) *s++;
@@ -45,8 +46,8 @@ BCStringRef BCStringCreate(const char* fmt, ...);
 
 BCStringPooledRef BCStringPooled(const char* text);
 BCStringPooledRef BCStringPooledWithInfo(const char* text, size_t len, uint32_t hash, BC_bool static_string);
-#define		BCStringPooledLiteral(__text__) \
-	BCStringPooledWithInfo( BC_REQUIRE_LITERAL(__text__), sizeof(__text__) / sizeof((__text__)[0]) - 1, ___BCINTERNAL___StringHasher((__text__)), BC_true )
+#define           BCStringPooledLiteral(__text__) \
+    BCStringPooledWithInfo( BC_REQUIRE_LITERAL(__text__), sizeof(__text__) / sizeof((__text__)[0]) - 1, ___BCINTERNAL___StringHasher((__text__)), BC_true )
 
 size_t BCStringLength(BCStringRef str);
 uint32_t BCStringHash(BCStringRef str);
