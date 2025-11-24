@@ -1,5 +1,6 @@
 #include "BCMap.h"
 
+#include "../BCClass.h"
 #include "../BCString.h"
 #include "../Array/BCVector.h"
 #include "../Utilities/BCMemory.h"
@@ -82,7 +83,7 @@ BCMapRef BCMapCreate() {
 }
 
 BCMutableMapRef BCMutableMapCreate() {
-	const BCMapRef d = (BCMapRef) BCAllocObject((BCClassRef)&kBCDictClass, NULL);
+	const BCMapRef d = (BCMapRef) BCObjectAlloc((BCClassRef)&kBCDictClass, NULL);
 	d->isMutable = true;
 	d->capacity = 8;
 	d->count = 0;

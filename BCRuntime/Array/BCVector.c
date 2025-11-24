@@ -1,5 +1,6 @@
 #include "BCVector.h"
 
+#include "../BCClass.h"
 #include "../BCString.h"
 #include "../Utilities/BCMemory.h"
 
@@ -21,7 +22,7 @@ typedef struct BCVector {
 // MARK: Private
 // =========================================================
 
-static void ArrayAdd(const BCVectorRef arr, const BCObjectRef item, const bool retain) {
+static void ListAdd(const BCVectorRef arr, const BCObjectRef item, const bool retain) {
 	if (arr->count == arr->capacity) {
 		arr->capacity *= 2;
 		void* newBuff = BCRealloc(arr->items, arr->capacity * sizeof(BCObjectRef));
@@ -69,7 +70,7 @@ static const BCClass kBCVectorClass = {
 // =========================================================
 
 BCVectorRef BCVectorCreate(void) {
-	const BCVectorRef arr = (BCVectorRef) BCAllocObject((BCClassRef) &kBCVectorClass, NULL);
+	const BCVectorRef arr = (BCVectorRef) BCObjectAlloc((BCClassRef) &kBCVectorClass, NULL);
 	arr->capacity = 8;
 	arr->count = 0;
 	arr->items = BCCalloc(arr->capacity, sizeof(BCObjectRef));
@@ -77,7 +78,7 @@ BCVectorRef BCVectorCreate(void) {
 }
 
 void BCVectorAdd(const BCVectorRef arr, const BCObjectRef item) {
-	ArrayAdd(arr, item, true);
+	ListAdd(arr, item, true);
 }
 
 BCObjectRef BCVectorGet(const BCVectorRef arr, const size_t idx) {
@@ -91,7 +92,7 @@ BCVectorRef BCVectorCreateWithObjects(const bool retain, const size_t count, ...
 	va_start(args, count);
 	for (size_t i = 0; i < count; i++) {
 		const BCObjectRef item = va_arg(args, BCObjectRef);
-		ArrayAdd(arr, item, retain);
+		ListAdd(arr, item, retain);
 	}
 	va_end(args);
 	return arr;

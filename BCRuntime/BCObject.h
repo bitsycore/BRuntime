@@ -7,16 +7,6 @@
 
 #include <stddef.h>
 
-typedef struct BCClass {
-	const char* name;
-	BCDeallocFunc dealloc;
-	BCHashFunc hash;
-	BCEqualFunc equal;
-	BCToStringFunc toString;
-	BCCopyFunc copy;
-	size_t allocSize;
-} BCClass;
-
 typedef struct BCObject {
 	BCClassRef cls;
 	uint16_t flags;
@@ -38,8 +28,8 @@ typedef struct BCObject {
 #define BC_FLAG_CLEAR(obj, flag) ((obj) &= ~(flag))
 #define BC_FLAG_TOGGLE(obj, flag) ((obj) ^= (flag))
 
-BCObjectRef BCAllocObject(BCClassRef cls, BCAllocatorRef alloc);
-BCObjectRef BCAllocObjectWithExtra(BCClassRef cls, BCAllocatorRef alloc, size_t extraBytes, uint16_t flags);
+BCObjectRef BCObjectAlloc(BCClassRef cls, BCAllocatorRef alloc);
+BCObjectRef BCObjectAllocWithConfig(BCClassRef cls, BCAllocatorRef alloc, size_t extraBytes, uint16_t flags);
 
 BCObjectRef BCRetain(BCObjectRef obj);
 void BCRelease(BCObjectRef obj);
@@ -50,7 +40,6 @@ bool BCEqual(BCObjectRef a, BCObjectRef b);
 BCStringRef BCToString(BCObjectRef obj);
 
 BCClassRef BCObjectClass(BCObjectRef obj);
-BCStringRef BCClassName(BCClassRef cls);
 bool BCObjectIsClass(BCObjectRef obj, BCClassRef cls);
 
 // =========================================================

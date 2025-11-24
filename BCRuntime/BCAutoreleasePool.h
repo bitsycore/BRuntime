@@ -4,10 +4,6 @@
 #include "BCObject.h"
 #include "Utilities/BCMacro.h"
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdbool.h>
-
 void BCAutoreleasePoolPush(void);
 void BCAutoreleasePoolPop(void);
 BCObjectRef BCAutorelease(BCObjectRef obj);

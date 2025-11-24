@@ -1,7 +1,8 @@
 #include "BCObject.h"
 
-#include "BCString.h"
 #include "BCAllocator.h"
+#include "BCClass.h"
+#include "BCString.h"
 #include "Utilities/BCMemory.h"
 #include "Utilities/BCThreads.h"
 
@@ -20,11 +21,12 @@ static void ObjectDebugMarkFreed(BCObjectRef obj);
 #define ObjectDebugTrack(obj)
 #define ObjectDebugMarkFreed(obj)
 #endif
+
 // =========================================================
 // MARK: Public
 // =========================================================
 
-BCObjectRef BCAllocObjectWithExtra(const BCClassRef cls, BCAllocatorRef alloc, const size_t extraBytes, const uint16_t flags) {
+BCObjectRef BCObjectAllocWithConfig(const BCClassRef cls, BCAllocatorRef alloc, const size_t extraBytes, const uint16_t flags) {
 	bool useDefaultAllocator = 0;
 	if (alloc == NULL || alloc == kBCAllocatorDefault) {
 		alloc = kBCAllocatorDefault;
@@ -54,8 +56,8 @@ BCObjectRef BCAllocObjectWithExtra(const BCClassRef cls, BCAllocatorRef alloc, c
 	return objRef;
 }
 
-BCObjectRef BCAllocObject(const BCClassRef cls, const BCAllocatorRef alloc) {
-	return BCAllocObjectWithExtra(cls, alloc, 0, BC_OBJECT_FLAG_REFCOUNT);
+BCObjectRef BCObjectAlloc(const BCClassRef cls, const BCAllocatorRef alloc) {
+	return BCObjectAllocWithConfig(cls, alloc, 0, BC_OBJECT_FLAG_REFCOUNT);
 }
 
 BCObjectRef BCRetain(const BCObjectRef obj) {
@@ -120,10 +122,6 @@ BCStringRef BCToString(const BCObjectRef obj) {
 bool BCObjectIsClass(const BCObjectRef obj, const BCClassRef cls) {
 	if (!obj || !cls) return false;
 	return obj->cls == cls;
-}
-
-BCStringRef BCClassName(const BCClassRef cls) {
-	return BCStringPooled(cls->name);
 }
 
 // =========================================================
@@ -209,8 +207,6 @@ static void ObjectDebugMarkFreed(const BCObjectRef obj) {
 
 	BCMutexUnlock(&ObjectDebugTracker.lock);
 }
-
-extern const BCClassRef kBCStringClassRef;
 
 static const char* FlagsToString(const BCClassRef cls, const uint16_t flags) {
 	static char buffer[30];

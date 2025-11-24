@@ -2,6 +2,7 @@
 #include "BCRuntime/BCRuntime.h"
 
 #include "BCRuntime/BCAutoreleasePool.h"
+#include "BCRuntime/BCClass.h"
 #include "BCRuntime/BCNumber.h"
 #include "BCRuntime/BCObject.h"
 #include "BCRuntime/BCString.h"
@@ -9,7 +10,7 @@
 #include "BCRuntime/Map/BCMap.h"
 #include "BCRuntime/Utilities/BCAnsiEscape.h"
 
-#include <time.h>
+#include <stdio.h>
 
 void BIG_TITLE(const char* _x_) {
 	printf("\n"
@@ -226,7 +227,7 @@ void testMap() {
 	printf("%s\n", TO_STR(dic));
 }
 
-int RETRY = 1;
+int RETRY = 1000;
 
 int BCMain() {
 

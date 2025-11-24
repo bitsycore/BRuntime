@@ -6,6 +6,7 @@
 #include <string.h>
 #include <time.h>
 
+#include "BCClass.h"
 #include "BCObject.h"
 #include "Utilities/BCMemory.h"
 #include "Utilities/BCThreads.h"
@@ -137,7 +138,7 @@ static BCStringRef StringPoolGetOrInsert(const char* text, const size_t len, con
 	// ============================================
 	// Insert
 	const size_t extraAlloc = static_string ? sizeof(StringPoolNode) : sizeof(StringPoolNode) + (len + 1);
-	const BCStringRef newStr = (BCStringRef)BCAllocObjectWithExtra(
+	const BCStringRef newStr = (BCStringRef)BCObjectAllocWithConfig(
 		(BCClassRef)&kBCStringClass,
 		NULL,
 		extraAlloc,
@@ -177,7 +178,7 @@ BCStringRef BCStringCreate(const char* fmt, ...) {
 	va_copy(copy, args);
 	const int len = vsnprintf(NULL, 0, fmt, copy);
 	va_end(copy);
-	const BCStringRef str = (BCStringRef) BCAllocObjectWithExtra((BCClassRef) &kBCStringClass, NULL, len + 1, BC_OBJECT_FLAG_REFCOUNT);
+	const BCStringRef str = (BCStringRef) BCObjectAllocWithConfig((BCClassRef) &kBCStringClass, NULL, len + 1, BC_OBJECT_FLAG_REFCOUNT);
 	str->buffer = (char*) ( &str->buffer + 1 );
 	vsnprintf(str->buffer, len + 1, fmt, args);
 	va_end(args);

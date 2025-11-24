@@ -27,4 +27,6 @@ add_library(BCRuntime
 		Utilities/BCAtomics.h
 		BCAllocator.c
         BCAllocator.h
+		BCClass.c
+		BCClass.h
 )

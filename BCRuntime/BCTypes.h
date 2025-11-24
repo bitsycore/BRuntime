@@ -1,11 +1,10 @@
 #ifndef BCRUNTIME_BCTYPES_H
 #define BCRUNTIME_BCTYPES_H
 
-#include <stdbool.h>
 #include <stdint.h>
 
 // =========================================================
-// MARK: Basic
+// MARK: Primitive Types
 // =========================================================
 
 typedef _Bool BC_bool;
@@ -13,7 +12,7 @@ typedef _Bool BC_bool;
 #define BC_false ((BC_bool)(0))
 
 // =========================================================
-// MARK: Core
+// MARK: Core Types
 // =========================================================
 
 typedef struct BCClass* BCClassRef;
@@ -23,10 +22,11 @@ typedef struct BCAllocator* BCAllocatorRef;
 #define $OBJ (BCObjectRef)
 
 // =========================================================
-// MARK: Basic Types
+// MARK: Strings
 // =========================================================
 
 typedef struct BCString* BCStringRef;
+typedef struct BCString* BCStringPooledRef;
 
 // =========================================================
 // MARK: Numbers

@@ -49,4 +49,16 @@
 #define BC_MB(_x_) (1024*1024*(_x_))
 #define BC_KB(_x_) (1024*(_x_))
 
+#ifdef __RESHARPER__
+#define ___BCINTERNAL___REQUIRE_LITERAL_ASSERT(x)
+#else
+#define ___BCINTERNAL___REQUIRE_LITERAL_ASSERT(x) _Static_assert(__builtin_constant_p(x), "Must be a literal")
+#endif
+
+#define BC_REQUIRE_LITERAL(x) ({ \
+	___BCINTERNAL___REQUIRE_LITERAL_ASSERT(x); \
+	("" x ""); \
+	(x); \
+})
+
 #endif //BC_BCMACROTOOLS_H

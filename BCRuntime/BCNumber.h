@@ -53,7 +53,8 @@ static inline BCBoolRef ___BCINTERNAL___BoolSelect(const bool val) { return val 
     uint32_t: BCNumberCreateUInt32, \
     uint64_t: BCNumberCreateUInt64, \
     float: BCNumberCreateFloat, \
-    double: BCNumberCreateDouble \
+    double: BCNumberCreateDouble, \
+    BC_bool: ___BCINTERNAL___BoolSelect \
 )(val)
 
 BCNumberType BCNumberGetType(BCNumberRef num);
