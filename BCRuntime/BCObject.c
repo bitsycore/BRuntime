@@ -139,13 +139,13 @@ BCObjectRef BCAllocObject(const BCClassRef cls, const BCAllocatorRef alloc) {
 
 BCObjectRef BCRetain(const BCObjectRef obj) {
 	if (!obj || !BC_FLAG_HAS(obj->flags, BC_OBJECT_FLAG_REFCOUNT)) return obj;
-	atomic_fetch_add_explicit(&obj->ref_count, 1, memory_order_relaxed);
+	BC_atomic_fetch_add(&obj->ref_count, 1);
 	return obj;
 }
 
 void BCRelease(const BCObjectRef obj) {
 	if (!obj || !BC_FLAG_HAS(obj->flags, BC_OBJECT_FLAG_REFCOUNT)) return;
-	const atomic_int old_count = atomic_fetch_sub(&obj->ref_count, 1);
+	const BC_atomic_int old_count = BC_atomic_fetch_sub(&obj->ref_count, 1);
 	if (old_count == 1) {
 		ObjectDebugMarkFreed(obj);
 		if (obj->cls->dealloc) obj->cls->dealloc(obj);
@@ -270,7 +270,7 @@ void BCObjectDebugDump(void) {
 		if (node->obj == NULL) freedCount++;
 		const char* className = obj->cls->name;
 		const char* flags = FlagsToString(obj->cls, obj->flags);
-		const int refCount = atomic_load(&obj->ref_count);
+		const int refCount = BC_atomic_load(&obj->ref_count);
 
 		// Truncate class name if too long
 		char classDisplay[23];

@@ -3,8 +3,8 @@
 
 #include "BCSettings.h"
 #include "BCTypes.h"
+#include "Utilities/BCAtomics.h"
 
-#include <stdatomic.h>
 #include <stddef.h>
 
 typedef struct BCClass {
@@ -20,7 +20,7 @@ typedef struct BCClass {
 typedef struct BCObject {
 	BCClassRef cls;
 	uint32_t flags;
-	atomic_int ref_count;
+	BC_atomic_int ref_count;
 	BCAllocatorRef allocator;
 } BCObject;
 

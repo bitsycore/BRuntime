@@ -1,7 +1,6 @@
 #include "BCString.h"
 
 #include <stdarg.h>
-#include <stdatomic.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -17,8 +16,8 @@
 
 typedef struct BCString {
 	BCObject base;
-	atomic_size_t length;
-	atomic_uint_fast32_t hash;
+	BC_atomic_size length;
+	BC_atomic_uint_fast32 hash;
 	char* buffer;
 } BCString;
 
@@ -38,8 +37,8 @@ bool StringEqualImpl(const BCObjectRef a, const BCObjectRef b) {
 	if ( BC_FLAG_HAS(s1->base.flags, BC_STRING_FLAG_POOLED) && BC_FLAG_HAS( s2->base.flags, BC_STRING_FLAG_POOLED )) return false;
 
 	// Check Hash Cache
-	const uint32_t h1 = atomic_load(&s1->hash);
-	const uint32_t h2 = atomic_load(&s2->hash);
+	const uint32_t h1 = BC_atomic_load(&s1->hash);
+	const uint32_t h2 = BC_atomic_load(&s2->hash);
 	if (h1 != BC_HASH_UNSET && h2 != BC_HASH_UNSET && h1 != h2) return false;
 
 	if (BCStringLength(s1) != BCStringLength(s2)) return false;
@@ -119,7 +118,7 @@ static BCStringRef StringPoolGetOrInsert(const char* text, const size_t len, con
 			return ret;
 		}
 
-		if (atomic_load(&node->str->hash) == hash) {
+		if (BC_atomic_load(&node->str->hash) == hash) {
 			// CHECK IF LEN SET
 			if (len != BCStringLength(node->str)) {
 				node = node->next;
@@ -201,20 +200,20 @@ BCStringRef BCStringPooledWithInfo(const char* text, const size_t len, const uin
 
 size_t BCStringLength(const BCStringRef str) {
 	if (!str) return 0;
-	size_t len = atomic_load_explicit(&str->length, memory_order_relaxed);
+	size_t len = BC_atomic_load(&str->length);
 	if (len == BC_LEN_UNSET) {
 		len = strlen(str->buffer);
-		atomic_store_explicit(&str->length, len, memory_order_relaxed);
+		BC_atomic_store(&str->length, len);
 	}
 	return len;
 }
 
 uint32_t BCStringHash(const BCStringRef str) {
 	if (!str) return 0;
-	uint32_t hash = atomic_load_explicit(&str->hash, memory_order_relaxed);
+	uint32_t hash = BC_atomic_load(&str->hash);
 	if (hash == BC_HASH_UNSET) {
 		hash = ___BCINTERNAL___StringHasher(str->buffer);
-		atomic_store_explicit(&str->hash, hash, memory_order_relaxed);
+		BC_atomic_store(&str->hash, hash);
 	}
 	return hash;
 }
@@ -251,7 +250,7 @@ void BCStringPoolDebugDump(void) {
 		while (node) {
 			const BCStringRef str = node->str;
 			const char* value = str->buffer;
-			const uint32_t hash = atomic_load(&str->hash);
+			const uint32_t hash = BC_atomic_load(&str->hash);
 			const size_t length = BCStringLength(str);
 
 			// Truncate long strings for display
