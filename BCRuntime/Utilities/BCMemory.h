@@ -3,10 +3,13 @@
 
 #include <stddef.h>
 
-void* BCMalloc(size_t size);
-void* BCCalloc(size_t count, size_t size);
-void* BCRealloc(void* ptr, size_t newSize);
 void BCFree(void* ptr);
+__attribute__((malloc, alloc_size(1)))
+void* BCMalloc(size_t size);
+__attribute__((malloc, alloc_size(1,2)))
+void* BCCalloc(size_t count, size_t size);
+__attribute__((alloc_size(2)))
+void* BCRealloc(void* ptr, size_t newSize);
 
 typedef struct {
 	size_t system_current_rss;
