@@ -33,20 +33,30 @@ static void PlatformSpecificInitialize() {
 bool ___BCINTERNAL___Initialized = false;
 bool ___BCINTERNAL___Deinitialized = false;
 
-void ___BCINTERNAL___InitializeImpl(void) {
+int gArgc;
+char** gArgv;
+
+void BCInitialize(const int argc, char** argv) {
 	if (___BCINTERNAL___Initialized) return;
+
+	gArgc = argc;
+	gArgv = argv;
+
 	PlatformSpecificInitialize();
 	___BCINTERNAL___MemoryInitialize();
 	___BCINTERNAL___NumberInitialize();
 	___BCINTERNAL___ObjectDebugInitialize();
 	___BCINTERNAL___StringPoolInitialize();
+
 	___BCINTERNAL___Initialized = true;
 }
 
-void ___BCINTERNAL___DeinitializeImpl(void) {
+void BCDeinitialize(void) {
 	if (___BCINTERNAL___Deinitialized) return;
+
 	___BCINTERNAL___StringPoolDeinitialize();
 	___BCINTERNAL___ObjectDebugDeinitialize();
 	BCMemoryInfoPrint();
+
 	___BCINTERNAL___Deinitialized = true;
 }

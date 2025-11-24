@@ -7,6 +7,25 @@
 #include "Utilities/BCMacro.h"
 
 // ================================================
+// MARK: RUNTIME INITIALIZATION
+// ================================================
+
+void BCInitialize(int argc, char** argv);
+void BCDeinitialize(void);
+
+#ifdef BC_RUNTIME_MAIN
+
+int BCMain(void);
+
+int main(int argc, char** argv) {
+	BCInitialize(argc, argv);
+	BCMain();
+	BCDeinitialize();
+}
+
+#endif
+
+// ================================================
 // MARK: BOXING $
 // ================================================
 
@@ -80,21 +99,5 @@ static inline BCObjectRef ___BCINTERNAL___Retain(void* obj) { return BCRetain(ob
 
 #define $MAP(...) ___BCINTERNAL___MAP_IMPL(BC_M_CAT(___temp_dic_impl___,__COUNTER__), __VA_ARGS__)
 #define $$MAP(...) ( (BCMapRef) BCAutorelease( $OBJ $MAP(__VA_ARGS__) ) )
-
-// ================================================
-// MARK: RUNTIME INITIALIZATION
-// ================================================
-void ___BCINTERNAL___InitializeImpl(void);
-void ___BCINTERNAL___DeinitializeImpl(void);
-
-BC_AUTOSTART
-static void ___BCINTERNAL___Initialize(void) {
-	___BCINTERNAL___InitializeImpl();
-}
-
-BC_AUTOSTOP
-static void ___BCINTERNAL___Deinitialize(void) {
-	___BCINTERNAL___DeinitializeImpl();
-}
 
 #endif //BC_BCRUNTIME_H

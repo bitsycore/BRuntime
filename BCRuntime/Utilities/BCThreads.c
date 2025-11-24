@@ -41,7 +41,7 @@ void BCMutexDestroy(BCMutex* mutex) {
 // =========================================================
 
 #if defined(_WIN32)
-static BOOL CALLBACK WinInitOnceCallback(PINIT_ONCE InitOnce, PVOID Parameter, PVOID *Context) {
+static BOOL CALLBACK WinInitOnceCallback(PINIT_ONCE InitOnce, const PVOID Parameter, PVOID *Context) {
     void (*func)(void) = (void (*)(void))Parameter;
     if (func) {
         func();
@@ -52,7 +52,7 @@ static BOOL CALLBACK WinInitOnceCallback(PINIT_ONCE InitOnce, PVOID Parameter, P
 
 void BCRunOnce(BCOnceToken* token, void (*func)(void)) {
 #if defined(_WIN32)
-    InitOnceExecuteOnce(token, WinInitOnceCallback, (PVOID)func, nullptr);
+    InitOnceExecuteOnce(token, WinInitOnceCallback, (PVOID)func, NULL);
 #else
     pthread_once(token, func);
 #endif

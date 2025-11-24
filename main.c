@@ -1,18 +1,20 @@
-#include <time.h>
+#define BC_RUNTIME_MAIN
+#include "BCRuntime/BCRuntime.h"
 
 #include "BCRuntime/BCAutoreleasePool.h"
 #include "BCRuntime/BCNumber.h"
 #include "BCRuntime/BCObject.h"
-#include "BCRuntime/BCRuntime.h"
 #include "BCRuntime/BCString.h"
 #include "BCRuntime/Array/BCArray.h"
 #include "BCRuntime/Map/BCMap.h"
 #include "BCRuntime/Utilities/BCAnsiEscape.h"
 
+#include <time.h>
+
 void BIG_TITLE(const char* _x_) {
 	printf("\n"
 		BC_AE_BGREEN "╭───────────────────────────────────────────────────────────────╮" BC_AE_RESET "\n"
-		BC_AE_BGREEN "│"BC_AE_BOLD"                 %-45s "BC_AE_RESET BC_AE_BGREEN"│"BC_AE_RESET"\n"
+		BC_AE_BGREEN "│"BC_AE_BOLD"                 %-45s " BC_AE_RESET BC_AE_BGREEN "│" BC_AE_RESET"\n"
 		BC_AE_BGREEN "╰───────────────────────────────────────────────────────────────╯" BC_AE_RESET "\n",
 		_x_
 	);
@@ -21,7 +23,7 @@ void BIG_TITLE(const char* _x_) {
 void SUB_TITLE(const char* _x_) {
 	printf("\n"
 		BC_AE_BYELLOW "╭┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄╮" BC_AE_RESET "\n"
-		BC_AE_BYELLOW "┊"BC_AE_ITALIC"   %-47s "BC_AE_RESET BC_AE_BYELLOW"┊"BC_AE_RESET"\n"
+		BC_AE_BYELLOW "┊"BC_AE_ITALIC"   %-47s " BC_AE_RESET BC_AE_BYELLOW"┊" BC_AE_RESET"\n"
 		BC_AE_BYELLOW "╰┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄╯" BC_AE_RESET "\n\n",
 		_x_
 	);
@@ -225,13 +227,12 @@ void testMap() {
 
 int RETRY = 1;
 
-int main() {
+int BCMain() {
 
 	BCObjectDebugSetEnabled(true);
 	BCObjectDebugSetKeepFreed(false);
 
 	for (int i = 0; i < RETRY; i++) {
-
 		BIG_TITLE("BC Startup");
 
 		BCAutoreleaseScope() {
@@ -242,7 +243,6 @@ int main() {
 		}
 
 		BIG_TITLE("BC End");
-
 	}
 
 	BCStringPoolDebugDump();

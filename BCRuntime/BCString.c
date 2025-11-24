@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "BCObject.h"
 #include "Utilities/BCMemory.h"
@@ -119,6 +120,7 @@ static BCStringRef StringPoolGetOrInsert(const char* text, const size_t len, con
 		}
 
 		if (atomic_load(&node->str->hash) == hash) {
+			// CHECK IF LEN SET
 			if (len != BCStringLength(node->str)) {
 				node = node->next;
 				continue;
