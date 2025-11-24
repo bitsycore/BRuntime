@@ -60,7 +60,7 @@ typedef struct BCMap* BCMutableMapRef;
 
 typedef void (* BCDeallocFunc)(BCObjectRef obj);
 typedef uint32_t (* BCHashFunc)(BCObjectRef obj);
-typedef bool (* BCEqualFunc)(BCObjectRef a, BCObjectRef b);
+typedef BC_bool (* BCEqualFunc)(BCObjectRef a, BCObjectRef b);
 typedef BCStringRef (* BCToStringFunc)(BCObjectRef obj);
 typedef BCObjectRef (* BCCopyFunc)(BCObjectRef);
 

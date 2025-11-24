@@ -27,10 +27,10 @@ static void ObjectDebugMarkFreed(BCObjectRef obj);
 // =========================================================
 
 BCObjectRef BCObjectAllocWithConfig(const BCClassRef cls, BCAllocatorRef alloc, const size_t extraBytes, const uint16_t flags) {
-	bool useDefaultAllocator = 0;
+	BC_bool useDefaultAllocator = 0;
 	if (alloc == NULL || alloc == kBCAllocatorDefault) {
 		alloc = kBCAllocatorDefault;
-		useDefaultAllocator = true;
+		useDefaultAllocator = BC_true;
 	}
 
 	void* obj = alloc->alloc(
@@ -106,11 +106,11 @@ uint32_t BCHash(const BCObjectRef obj) {
 }
 
 BC_bool BCEqual(const BCObjectRef a, const BCObjectRef b) {
-	if (a == b) return true;
-	if (!a || !b) return false;
-	if (a->cls != b->cls) return false;
+	if (a == b) return BC_true;
+	if (!a || !b) return BC_false;
+	if (a->cls != b->cls) return BC_false;
 	if (a->cls->equal) return a->cls->equal(a, b);
-	return false;
+	return BC_false;
 }
 
 BCStringRef BCToString(const BCObjectRef obj) {
@@ -120,7 +120,7 @@ BCStringRef BCToString(const BCObjectRef obj) {
 }
 
 BC_bool BCObjectIsClass(const BCObjectRef obj, const BCClassRef cls) {
-	if (!obj || !cls) return false;
+	if (!obj || !cls) return BC_false;
 	return obj->cls == cls;
 }
 
@@ -146,8 +146,8 @@ static struct {
 void ___BCINTERNAL___ObjectDebugInitialize(void) {
 	BCMutexInit(&ObjectDebugTracker.lock);
 	ObjectDebugTracker.head = NULL;
-	ObjectDebugTracker.enabled = false;
-	ObjectDebugTracker.keepFreedObjects = false;
+	ObjectDebugTracker.enabled = BC_false;
+	ObjectDebugTracker.keepFreedObjects = BC_false;
 }
 
 void ___BCINTERNAL___ObjectDebugDeinitialize(void) {
@@ -314,7 +314,7 @@ void BCObjectDebugDump(void) {
 			);
 		} else {
 			const BC_bool enabledOld = BC_atomic_load(&ObjectDebugTracker.enabled);
-			BCObjectDebugSetEnabled(false);
+			BCObjectDebugSetEnabled(BC_false);
 			const BCStringRef description = BCToString(node->obj);
 			printf("│%s %-16p │ %-16s │ %-20s │ %-8d │ %-9s │ %-28s "RESET"│\n",
 				color,

@@ -44,9 +44,9 @@ __attribute__((format(printf, 1, 2)))
 BCStringRef BCStringCreate(const char* fmt, ...);
 
 BCStringPooledRef BCStringPooled(const char* text);
-BCStringPooledRef BCStringPooledWithInfo(const char* text, size_t len, uint32_t hash, bool static_string);
+BCStringPooledRef BCStringPooledWithInfo(const char* text, size_t len, uint32_t hash, BC_bool static_string);
 #define		BCStringPooledLiteral(__text__) \
-	BCStringPooledWithInfo( BC_REQUIRE_LITERAL(__text__), sizeof(__text__) / sizeof((__text__)[0]) - 1, ___BCINTERNAL___StringHasher((__text__)), true )
+	BCStringPooledWithInfo( BC_REQUIRE_LITERAL(__text__), sizeof(__text__) / sizeof((__text__)[0]) - 1, ___BCINTERNAL___StringHasher((__text__)), BC_true )
 
 size_t BCStringLength(BCStringRef str);
 uint32_t BCStringHash(BCStringRef str);

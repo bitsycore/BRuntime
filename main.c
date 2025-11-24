@@ -48,7 +48,7 @@ void testString() {
 	const BCStringRef str3 = BCStringCreate("username"); // New Instance
 	BCAutorelease($OBJ str3);
 
-	$LET name = BCClassName(($OBJ(str1))->cls);
+	$LET name = BCClassName(($OBJ str1)->cls);
 	printf("Class Name: %s\n", TO_STR(name));
 
 	printf("StringPool Test: s1=%p, s2=%p (SamePtr? %s)\n", str1, str2, str1 == str2 ? "YES" : "NO");
@@ -66,7 +66,7 @@ void testArray() {
 	$VAR a = $("Hello");
 	BCAutorelease($OBJ a);
 
-	const $VAR arrayAuto = $VEC(a, 5, 6, 7, 8);
+	const $VAR arrayAuto = $LIST(a, 5, 6, 7, 8);
 	BCAutorelease($OBJ arrayAuto);
 
 	const BCListRef array = BCListCreate();
@@ -112,7 +112,7 @@ void testNumber() {
 
 	$LET numInt =  BCNumberCreate(42);
 	FAIL_IF_NOT(BCNumberGetType(numInt) == BCNumberTypeInt32);
-	$LET numBool = BCBool(true);
+	$LET numBool = BCBool(BC_true);
 	FAIL_IF_NOT(BCNumberGetType(numBool) == BCNumberTypeBool);
 
 	BCAutoreleaseAll(
@@ -176,7 +176,7 @@ void testMap() {
 	SUB_TITLE("Test Map");
 	// ================================
 
-	$VAR array = $VEC("username", "password");
+	$VAR array = $LIST("username", "password");
 	BCAutorelease($OBJ array);
 
 	const BCStringRef str1 = BCStringPooledLiteral("username");
@@ -213,7 +213,7 @@ void testMap() {
 		"three", three,
 		"array", array,
 		"innerDic", $$MAP("abc", nine),
-		"innerArr", $$ARR(nine, three)
+		"innerArr", $$LIST(nine, three)
 	);
 	printf("%s\n", TO_STR(autoDic));
 
@@ -230,8 +230,8 @@ int RETRY = 1;
 
 int BCMain() {
 
-	BCObjectDebugSetEnabled(true);
-	BCObjectDebugSetKeepFreed(false);
+	BCObjectDebugSetEnabled(BC_true);
+	BCObjectDebugSetKeepFreed(BC_false);
 
 	for (int i = 0; i < RETRY; i++) {
 

@@ -32,9 +32,9 @@ BCNumberDoubleRef BCNumberCreateDouble(double value);
 extern BCBoolRef kBCTrue;
 extern BCBoolRef kBCFalse;
 
-static inline BCBoolRef ___BCINTERNAL___BoolSelect(const bool val) { return val ? kBCTrue : kBCFalse; }
+static inline BCBoolRef ___BCINTERNAL___BoolSelect(const BC_bool val) { return val ? kBCTrue : kBCFalse; }
 
-#define BCBool(_val_) ___BCINTERNAL___BoolSelect(_val_)
+#define BCBool(_val_) ((_val_) ? kBCTrue : kBCFalse)
 
 #if defined(WIN32) || defined(__APPLE__)
 #define ___BCINTERNAL___NUMBER_CREATE_EXTRA
@@ -72,7 +72,7 @@ ___BCINTERNAL___DECLARE_NUMBER_GET(uint32_t, UInt32)
 ___BCINTERNAL___DECLARE_NUMBER_GET(uint64_t, UInt64)
 ___BCINTERNAL___DECLARE_NUMBER_GET(float, Float)
 ___BCINTERNAL___DECLARE_NUMBER_GET(double, Double)
-___BCINTERNAL___DECLARE_NUMBER_GET(bool, Bool)
+___BCINTERNAL___DECLARE_NUMBER_GET(BC_bool, Bool)
 
 static void BCNumberGetExplicit(const BCNumberRef num, void* value, const BCNumberType dstType) {
 	if (!num || !value) return;
@@ -87,7 +87,7 @@ static void BCNumberGetExplicit(const BCNumberRef num, void* value, const BCNumb
 		case BCNumberTypeUInt64: *(uint64_t*)value = BCNumberGetUInt64(num); break;
 		case BCNumberTypeFloat: *(float*)value = BCNumberGetFloat(num); break;
 		case BCNumberTypeDouble: *(double*)value = BCNumberGetDouble(num); break;
-		case BCNumberTypeBool: *(bool*)value = BCNumberGetBool(num); break;
+		case BCNumberTypeBool: *(BC_bool*)value = BCNumberGetBool(num); break;
 		default:break;
 	}
 }
@@ -103,7 +103,7 @@ static void BCNumberGetExplicit(const BCNumberRef num, void* value, const BCNumb
     uint64_t* : BCNumberGetExplicit(num, outPtr, BCNumberTypeUInt64), \
     float*    : BCNumberGetExplicit(num, outPtr, BCNumberTypeFloat), \
     double*   : BCNumberGetExplicit(num, outPtr, BCNumberTypeDouble), \
-    bool*     : BCNumberGetExplicit(num, outPtr, BCNumberTypeBool) \
+    BC_bool*  : BCNumberGetExplicit(num, outPtr, BCNumberTypeBool) \
 )
 
 #endif //BCRUNTIME_BCNUMBER_H

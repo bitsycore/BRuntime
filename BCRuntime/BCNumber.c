@@ -32,7 +32,7 @@ DEFINE_NUMBER_STRUCT(uint32_t, UInt32)
 DEFINE_NUMBER_STRUCT(uint64_t, UInt64)
 DEFINE_NUMBER_STRUCT(float, Float)
 DEFINE_NUMBER_STRUCT(double, Double)
-DEFINE_NUMBER_STRUCT(bool, Bool)
+DEFINE_NUMBER_STRUCT(BC_bool, Bool)
 
 // =============================================================================
 // MARK: Forward
@@ -40,7 +40,7 @@ DEFINE_NUMBER_STRUCT(bool, Bool)
 
 extern BCClass kClassList[];
 
-static bool isNumber(BCClassRef cls);
+static BC_bool isNumber(BCClassRef cls);
 static BCClassRef typeToClass(BCNumberType type);
 static BCNumberType classToType(BCClassRef cls);
 
@@ -84,16 +84,16 @@ static uint32_t NumberHashImpl(const BCObjectRef obj) {
     return (uint32_t)v;
 }
 
-static bool NumberEqualImpl(const BCObjectRef a, const BCObjectRef b) {
-    if (a == b) return true;
-	if (!a || !b) return false;
+static BC_bool NumberEqualImpl(const BCObjectRef a, const BCObjectRef b) {
+    if (a == b) return BC_true;
+	if (!a || !b) return BC_false;
     const BCNumberType typeA = classToType(a->cls);
     const BCNumberType typeB = classToType(b->cls);
-    if (typeB == BCNumberTypeError) return false;
+    if (typeB == BCNumberTypeError) return BC_false;
 
     // Compare as double if either is float/double
-    const bool isFloatA = (typeA == BCNumberTypeFloat || typeA == BCNumberTypeDouble);
-    const bool isFloatB = (typeB == BCNumberTypeFloat || typeB == BCNumberTypeDouble);
+    const BC_bool isFloatA = (typeA == BCNumberTypeFloat || typeA == BCNumberTypeDouble);
+    const BC_bool isFloatB = (typeB == BCNumberTypeFloat || typeB == BCNumberTypeDouble);
 
     if (isFloatA || isFloatB) {
         double valA, valB;
@@ -191,7 +191,7 @@ DEFINE_NUMBER_GET(uint32_t, UInt32)
 DEFINE_NUMBER_GET(uint64_t, UInt64)
 DEFINE_NUMBER_GET(float, Float)
 DEFINE_NUMBER_GET(double, Double)
-DEFINE_NUMBER_GET(bool, Bool)
+DEFINE_NUMBER_GET(BC_bool, Bool)
 
 BCNumberType BCNumberGetType(const BCNumberRef num) {
 	if (!num) return BCNumberTypeError;
@@ -204,7 +204,7 @@ BCNumberType BCNumberGetType(const BCNumberRef num) {
 
 #define CLASS_COUNT (sizeof(kClassList) / sizeof(kClassList[0]))
 
-static inline bool isNumber(const BCClassRef cls) { return cls >= kClassList && cls < kClassList + CLASS_COUNT; }
+static inline BC_bool isNumber(const BCClassRef cls) { return cls >= kClassList && cls < kClassList + CLASS_COUNT; }
 
 static inline BCClassRef typeToClass(const BCNumberType type) {
 	if (type > BCNumberTypeBool || type <= BCNumberTypeError) return NULL;
@@ -229,13 +229,13 @@ void ___BCINTERNAL___NumberInitialize(void) {
 			.cls = &kClassList[BCNumberTypeBool],
 			.flags = flags
 		},
-		.value = true
+		.value = BC_true
 	};
 	kBCNumberBoolFalse = (BCNumberBool) {
 		.super = {
 			.cls = &kClassList[BCNumberTypeBool],
 			.flags = flags,
 		},
-		.value = false,
+		.value = BC_false,
 	};
 }

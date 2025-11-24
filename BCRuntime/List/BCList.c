@@ -22,7 +22,7 @@ typedef struct BCList {
 // MARK: Private
 // =========================================================
 
-static void ListAdd(const BCListRef arr, const BCObjectRef item, const bool retain) {
+static void ListAdd(const BCListRef arr, const BCObjectRef item, const BC_bool retain) {
 	if (arr->count == arr->capacity) {
 		arr->capacity *= 2;
 		void* newBuff = BCRealloc(arr->items, arr->capacity * sizeof(BCObjectRef));
@@ -80,7 +80,7 @@ BCListRef BCListCreate(void) {
 }
 
 void BCListAdd(const BCListRef list, const BCObjectRef obj) {
-	ListAdd(list, obj, true);
+	ListAdd(list, obj, BC_true);
 }
 
 BCObjectRef BCListGet(const BCListRef list, const size_t index) {
@@ -88,7 +88,7 @@ BCObjectRef BCListGet(const BCListRef list, const size_t index) {
 	return list->items[index];
 }
 
-BCListRef BCListCreateWithObjects(const bool retain, const size_t count, ...) {
+BCListRef BCListCreateWithObjects(const BC_bool retain, const size_t count, ...) {
 	const BCListRef arr = BCListCreate();
 	va_list args;
 	va_start(args, count);

@@ -20,7 +20,7 @@ typedef struct {
 
 typedef struct BCMap {
 	BCObject base;
-	bool isMutable;
+	BC_bool isMutable;
 	size_t capacity;
 	size_t count;
 	BCMapEntry* buckets;
@@ -80,13 +80,13 @@ const BCClassRef kBCDictClassRef = (BCClassRef) &kBCDictClass;
 
 BCMapRef BCMapCreate() {
 	const BCMutableMapRef dic = BCMutableMapCreate();
-	dic->isMutable = false;
+	dic->isMutable = BC_false;
 	return  dic;
 }
 
 BCMutableMapRef BCMutableMapCreate() {
 	const BCMapRef d = (BCMapRef) BCObjectAlloc((BCClassRef)&kBCDictClass, NULL);
-	d->isMutable = true;
+	d->isMutable = BC_true;
 	d->capacity = 8;
 	d->count = 0;
 	d->buckets = BCCalloc(d->capacity, sizeof(BCMapEntry));
@@ -164,7 +164,7 @@ BCListRef BCMapValues(const BCMapRef d) {
 	return arr;
 }
 
-BCMapRef BCMapCreateWithObjects(const bool retain, const size_t count, ...) {
+BCMapRef BCMapCreateWithObjects(const BC_bool retain, const size_t count, ...) {
 	const BCMutableMapRef d = BCMutableMapCreate();
 	va_list args;
 	va_start(args, count);
@@ -178,7 +178,7 @@ BCMapRef BCMapCreateWithObjects(const bool retain, const size_t count, ...) {
 		}
 	}
 	va_end(args);
-	d->isMutable = false;
+	d->isMutable = BC_false;
 	return d;
 }
 

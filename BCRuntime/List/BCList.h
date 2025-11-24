@@ -6,7 +6,7 @@
 extern const BCClassRef kBCListClassRef;
 
 BCListRef BCListCreate(void);
-BCListRef BCListCreateWithObjects(bool retain, size_t count, ...);
+BCListRef BCListCreateWithObjects(BC_bool retain, size_t count, ...);
 
 void BCListAdd(BCListRef list, BCObjectRef obj);
 BCObjectRef BCListGet(BCListRef list, size_t index);

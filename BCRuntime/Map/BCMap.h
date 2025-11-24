@@ -11,7 +11,7 @@ extern const BCClassRef kBCDictClassRef;
 
 BCMapRef BCMapCreate();
 BCMutableMapRef BCMutableMapCreate();
-BCMapRef BCMapCreateWithObjects(bool retain, size_t count, ...);
+BCMapRef BCMapCreateWithObjects(BC_bool retain, size_t count, ...);
 void BCMapSet(BCMutableMapRef d, BCObjectRef key, BCObjectRef val);
 BCObjectRef BCMapGet(BCMapRef d, BCObjectRef key);
 BCListRef BCMapKeys(BCMapRef d);

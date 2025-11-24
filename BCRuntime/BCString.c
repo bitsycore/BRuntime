@@ -30,19 +30,19 @@ uint32_t StringHashImpl(const BCObjectRef obj) {
 	return BCStringHash((BCStringRef) obj);
 }
 
-bool StringEqualImpl(const BCObjectRef a, const BCObjectRef b) {
+BC_bool StringEqualImpl(const BCObjectRef a, const BCObjectRef b) {
 	const BCStringRef s1 = (BCStringRef) a;
 	const BCStringRef s2 = (BCStringRef) b;
 
-	if (s1 == s2) return true;
-	if ( BC_FLAG_HAS(s1->base.flags, BC_STRING_FLAG_POOLED) && BC_FLAG_HAS( s2->base.flags, BC_STRING_FLAG_POOLED )) return false;
+	if (s1 == s2) return BC_true;
+	if ( BC_FLAG_HAS(s1->base.flags, BC_STRING_FLAG_POOLED) && BC_FLAG_HAS( s2->base.flags, BC_STRING_FLAG_POOLED )) return BC_false;
 
 	// Check Hash Cache
 	const uint32_t h1 = BC_atomic_load(&s1->hash);
 	const uint32_t h2 = BC_atomic_load(&s2->hash);
-	if (h1 != BC_HASH_UNSET && h2 != BC_HASH_UNSET && h1 != h2) return false;
+	if (h1 != BC_HASH_UNSET && h2 != BC_HASH_UNSET && h1 != h2) return BC_false;
 
-	if (BCStringLength(s1) != BCStringLength(s2)) return false;
+	if (BCStringLength(s1) != BCStringLength(s2)) return BC_false;
 
 	return memcmp(s1->buffer, s2->buffer, BCStringLength(s1)) == 0;
 }
@@ -103,7 +103,7 @@ void ___BCINTERNAL___StringPoolDeinitialize(void) {
 	}
 }
 
-static BCStringRef StringPoolGetOrInsert(const char* text, const size_t len, const uint32_t hash, const bool static_string) {
+static BCStringRef StringPoolGetOrInsert(const char* text, const size_t len, const uint32_t hash, const BC_bool static_string) {
 	const uint32_t idx = hash % BC_STRING_POOL_SIZE;
 
 	BCMutexLock(&StringPool.lock);
@@ -191,10 +191,10 @@ BCStringRef BCStringCreate(const char* fmt, ...) {
 
 BCStringRef BCStringPooled(const char* text) {
 	if (!text) return NULL;
-	return StringPoolGetOrInsert(text, strlen(text), ___BCINTERNAL___StringHasher(text), false);
+	return StringPoolGetOrInsert(text, strlen(text), ___BCINTERNAL___StringHasher(text), BC_false);
 }
 
-BCStringRef BCStringPooledWithInfo(const char* text, const size_t len, const uint32_t hash, const bool static_string) {
+BCStringRef BCStringPooledWithInfo(const char* text, const size_t len, const uint32_t hash, const BC_bool static_string) {
 	if (!text) return NULL;
 	return StringPoolGetOrInsert(text, len, hash, static_string);
 }

@@ -12,9 +12,9 @@ BCObjectRef BCAutorelease(BCObjectRef obj);
 #define BCAutoreleaseAll(first, ...) ___BCINTERNAL___AutoreleaseImpl(first, __VA_ARGS__)
 
 #define ___BCINTERNAL___AutoreleaseScopeImpl(__name__) for ( \
-    bool __name__ = (BCAutoreleasePoolPush(), true); \
+    BC_bool __name__ = (BCAutoreleasePoolPush(), BC_true); \
     __name__; \
-    __name__ = false, BCAutoreleasePoolPop() \
+    __name__ = BC_false, BCAutoreleasePoolPop() \
 )
 #define BCAutoreleaseScope() ___BCINTERNAL___AutoreleaseScopeImpl(BC_M_CAT(___temp_once_, __COUNTER__))
 
