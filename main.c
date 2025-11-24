@@ -6,7 +6,7 @@
 #include "BCRuntime/BCNumber.h"
 #include "BCRuntime/BCObject.h"
 #include "BCRuntime/BCString.h"
-#include "BCRuntime/Array/BCVector.h"
+#include "BCRuntime/List/BCList.h"
 #include "BCRuntime/Map/BCMap.h"
 #include "BCRuntime/Utilities/BCAnsiEscape.h"
 
@@ -63,23 +63,23 @@ void testArray() {
 
 	const $VAR numIntAuto = $(5);
 	BCAutorelease($OBJ numIntAuto);
-
+	$("Hello world %d", 1);
 	$VAR a = $("Hello");
 	BCAutorelease($OBJ a);
 
 	const $VAR arrayAuto = $VEC(a, 5, 6, 7, 8);
 	BCAutorelease($OBJ arrayAuto);
 
-	const BCVectorRef array = BCVectorCreate();
+	const BCListRef array = BCListCreate();
 	BCAutorelease($OBJ array);
 
-	BCVectorAdd(array, $OBJ BCStringPooledLiteral("Admin") );
-	BCVectorAdd(array, $OBJ BCStringPooledLiteral("Editor") );
-	BCVectorAdd(array, $OBJ $(BC_true));
+	BCListAdd(array, $OBJ BCStringPooledLiteral("Admin") );
+	BCListAdd(array, $OBJ BCStringPooledLiteral("Editor") );
+	BCListAdd(array, $OBJ $(BC_true));
 
 	printf("Array Dump: %s\n", TO_STR(array));
-	printf("Get Element 0: %s\n", TO_STR(BCVectorGet(array, 0)));
-	printf("Get Element 1: %s\n", TO_STR(BCVectorGet(array, 1)));
+	printf("Get Element 0: %s\n", TO_STR(BCListGet(array, 0)));
+	printf("Get Element 1: %s\n", TO_STR(BCListGet(array, 1)));
 }
 
 void testNumber() {
@@ -227,7 +227,7 @@ void testMap() {
 	printf("%s\n", TO_STR(dic));
 }
 
-int RETRY = 1000;
+int RETRY = 1;
 
 int BCMain() {
 

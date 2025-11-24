@@ -6,6 +6,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+extern const BCClassRef kBCBytesArrayClassRef;
+
 BCBytesArrayRef BCBytesArrayCreate(size_t count);
 BCBytesArrayRef BCBytesArrayCreateWithBytes(size_t count, const uint8_t* bytes);
 

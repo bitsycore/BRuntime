@@ -7,12 +7,14 @@
 typedef struct BCMap* BCMapRef;
 typedef struct BCMap* BCMutableMapRef;
 
+extern const BCClassRef kBCDictClassRef;
+
 BCMapRef BCMapCreate();
 BCMutableMapRef BCMutableMapCreate();
 BCMapRef BCMapCreateWithObjects(bool retain, size_t count, ...);
 void BCMapSet(BCMutableMapRef d, BCObjectRef key, BCObjectRef val);
 BCObjectRef BCMapGet(BCMapRef d, BCObjectRef key);
-BCVectorRef BCMapKeys(BCMapRef d);
-BCVectorRef BCMapValues(BCMapRef d);
+BCListRef BCMapKeys(BCMapRef d);
+BCListRef BCMapValues(BCMapRef d);
 
 #endif //BCRUNTIME_BCDICTIONARY_H

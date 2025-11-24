@@ -49,12 +49,12 @@ static inline BCObjectRef ___BCINTERNAL___Retain(void* obj) { return BCRetain(ob
     ___BCINTERNAL___$_EXTRA                 \
     float: BCNumberCreateFloat,             \
     double: BCNumberCreateDouble,           \
-    bool: ___BCINTERNAL___BoolSelect,       \
     char*: BCStringCreate,                  \
     const char*: BCStringCreate,            \
+    BC_bool: ___BCINTERNAL___BoolSelect,    \
     BCStringRef: ___BCINTERNAL___Retain,    \
     BCNumberRef: ___BCINTERNAL___Retain,    \
-    BCVectorRef: ___BCINTERNAL___Retain,     \
+    BCListRef: ___BCINTERNAL___Retain,      \
     BCAllocatorRef: ___BCINTERNAL___Retain, \
     BCMapRef: ___BCINTERNAL___Retain,       \
     BCObjectRef: ___BCINTERNAL___Retain     \
@@ -69,7 +69,7 @@ static inline BCObjectRef ___BCINTERNAL___Retain(void* obj) { return BCRetain(ob
 
 #define ___BCINTERNAL___ARR_IMPL(_counter_, ...) ({ \
     BCAutoreleasePoolPush(); \
-    BCVectorRef BC_M_CAT(___temp_arr_impl___,_counter_) = BCVectorCreateWithObjects( \
+    BCListRef BC_M_CAT(___temp_arr_impl___,_counter_) = BCListCreateWithObjects( \
 		false, /*NO RETAIN*/ \
         BC_ARG_COUNT(__VA_ARGS__), \
         BC_ARG_MAP($, __VA_ARGS__) \
@@ -79,7 +79,7 @@ static inline BCObjectRef ___BCINTERNAL___Retain(void* obj) { return BCRetain(ob
 })
 
 #define $VEC(...) ___BCINTERNAL___ARR_IMPL(BC_M_CAT(___temp_arr_impl___,__COUNTER__), __VA_ARGS__)
-#define $$ARR(...) ( (BCVectorRef) BCAutorelease( $OBJ $VEC(__VA_ARGS__) ) )
+#define $$ARR(...) ( (BCListRef) BCAutorelease( $OBJ $VEC(__VA_ARGS__) ) )
 
 // ================================================
 // MARK: MAP

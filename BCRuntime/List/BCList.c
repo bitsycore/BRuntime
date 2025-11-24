@@ -1,4 +1,4 @@
-#include "BCVector.h"
+#include "BCList.h"
 
 #include "../BCClass.h"
 #include "../BCString.h"
@@ -11,18 +11,18 @@
 // MARK: Struct
 // =========================================================
 
-typedef struct BCVector {
+typedef struct BCList {
 	BCObject base;
 	size_t count;
 	size_t capacity;
 	BCObjectRef* items;
-} BCVector;
+} BCList;
 
 // =========================================================
 // MARK: Private
 // =========================================================
 
-static void ListAdd(const BCVectorRef arr, const BCObjectRef item, const bool retain) {
+static void ListAdd(const BCListRef arr, const BCObjectRef item, const bool retain) {
 	if (arr->count == arr->capacity) {
 		arr->capacity *= 2;
 		void* newBuff = BCRealloc(arr->items, arr->capacity * sizeof(BCObjectRef));
@@ -37,14 +37,14 @@ static void ListAdd(const BCVectorRef arr, const BCObjectRef item, const bool re
 // =========================================================
 
 static void ArrayDeallocImpl(const BCObjectRef obj) {
-	const BCVectorRef arr = (BCVectorRef) obj;
+	const BCListRef arr = (BCListRef) obj;
 	for (size_t i = 0; i < arr->count; i++) BCRelease(arr->items[i]);
 	BCFree(arr->items);
 }
 
 static BCStringRef ArrayToStringImpl(const BCObjectRef obj) {
-	const BCVectorRef arr = (BCVectorRef) obj;
-	return BCStringCreate("BCVector(count: %zu)", arr->count);
+	const BCListRef arr = (BCListRef) obj;
+	return BCStringCreate("BCList(count: %zu)", arr->count);
 	printf("[ ");
 
 	for (size_t i = 0; i < arr->count; i++) {
@@ -55,39 +55,41 @@ static BCStringRef ArrayToStringImpl(const BCObjectRef obj) {
 	printf("]");
 }
 
-static const BCClass kBCVectorClass = {
-	"BCVector",
+static const BCClass kBCListClass = {
+	"BCList",
 	ArrayDeallocImpl,
 	NULL,
 	NULL,
 	ArrayToStringImpl,
 	NULL,
-	sizeof(BCVector)
+	sizeof(BCList)
 };
+
+const BCClassRef kBCListClassRef = (BCClassRef) &kBCListClass;
 
 // =========================================================
 // MARK: Public
 // =========================================================
 
-BCVectorRef BCVectorCreate(void) {
-	const BCVectorRef arr = (BCVectorRef) BCObjectAlloc((BCClassRef) &kBCVectorClass, NULL);
+BCListRef BCListCreate(void) {
+	const BCListRef arr = (BCListRef) BCObjectAlloc((BCClassRef) &kBCListClass, NULL);
 	arr->capacity = 8;
 	arr->count = 0;
 	arr->items = BCCalloc(arr->capacity, sizeof(BCObjectRef));
 	return arr;
 }
 
-void BCVectorAdd(const BCVectorRef arr, const BCObjectRef item) {
-	ListAdd(arr, item, true);
+void BCListAdd(const BCListRef list, const BCObjectRef obj) {
+	ListAdd(list, obj, true);
 }
 
-BCObjectRef BCVectorGet(const BCVectorRef arr, const size_t idx) {
-	if (idx >= arr->count) return NULL;
-	return arr->items[idx];
+BCObjectRef BCListGet(const BCListRef list, const size_t index) {
+	if (index >= list->count) return NULL;
+	return list->items[index];
 }
 
-BCVectorRef BCVectorCreateWithObjects(const bool retain, const size_t count, ...) {
-	const BCVectorRef arr = BCVectorCreate();
+BCListRef BCListCreateWithObjects(const bool retain, const size_t count, ...) {
+	const BCListRef arr = BCListCreate();
 	va_list args;
 	va_start(args, count);
 	for (size_t i = 0; i < count; i++) {

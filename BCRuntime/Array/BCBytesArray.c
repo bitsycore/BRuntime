@@ -29,6 +29,8 @@ static const BCClass kBCBytesArrayClass = {
 	.allocSize = sizeof(BCBytesArray)
 };
 
+const BCClassRef kBCBytesArrayClassRef = (BCClassRef) &kBCBytesArrayClass;
+
 // =========================================================
 // MARK: Public
 // =========================================================

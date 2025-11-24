@@ -2,7 +2,7 @@
 
 #include "../BCClass.h"
 #include "../BCString.h"
-#include "../Array/BCVector.h"
+#include "../List/BCList.h"
 #include "../Utilities/BCMemory.h"
 
 #include <stdarg.h>
@@ -30,7 +30,7 @@ typedef struct BCMap {
 // MARK: Forward
 // =========================================================
 
-static void _DicPutInternal(BCMapEntry* buckets, size_t cap, BCObjectRef key, BCObjectRef val);
+static void MapPut(BCMapEntry* buckets, size_t cap, BCObjectRef key, BCObjectRef val);
 
 // =========================================================
 // MARK: Class
@@ -72,6 +72,8 @@ static const BCClass kBCDictClass = {
 	sizeof(BCMap)
 };
 
+const BCClassRef kBCDictClassRef = (BCClassRef) &kBCDictClass;
+
 // =========================================================
 // MARK: Public
 // =========================================================
@@ -102,7 +104,7 @@ void BCMapSet(const BCMutableMapRef d, const BCObjectRef key, const BCObjectRef 
 		if (!newBuckets) return;
 		for (size_t i = 0; i < dict->capacity; i++) {
 			if (dict->buckets[i].key) {
-				_DicPutInternal(newBuckets, newCap, dict->buckets[i].key, dict->buckets[i].value);
+				MapPut(newBuckets, newCap, dict->buckets[i].key, dict->buckets[i].value);
 			}
 		}
 		BCFree(dict->buckets);
@@ -142,21 +144,21 @@ BCObjectRef BCMapGet(const BCMapRef d, const BCObjectRef key) {
 	return NULL;
 }
 
-BCVectorRef BCMapKeys(const BCMapRef d) {
-	const BCVectorRef arr = BCVectorCreate();
+BCListRef BCMapKeys(const BCMapRef d) {
+	const BCListRef arr = BCListCreate();
 	for (size_t i = 0; i < d->capacity; i++) {
 		if (d->buckets[i].key) {
-			BCVectorAdd(arr, d->buckets[i].key);
+			BCListAdd(arr, d->buckets[i].key);
 		}
 	}
 	return arr;
 }
 
-BCVectorRef BCMapValues(const BCMapRef d) {
-	const BCVectorRef arr = BCVectorCreate();
+BCListRef BCMapValues(const BCMapRef d) {
+	const BCListRef arr = BCListCreate();
 	for (size_t i = 0; i < d->capacity; i++) {
 		if (d->buckets[i].key) {
-			BCVectorAdd(arr, d->buckets[i].value);
+			BCListAdd(arr, d->buckets[i].value);
 		}
 	}
 	return arr;
@@ -184,7 +186,7 @@ BCMapRef BCMapCreateWithObjects(const bool retain, const size_t count, ...) {
 // MARK: Internal
 // =========================================================
 
-static void _DicPutInternal(BCMapEntry* buckets, const size_t cap, const BCObjectRef key, const BCObjectRef val) {
+static void MapPut(BCMapEntry* buckets, const size_t cap, const BCObjectRef key, const BCObjectRef val) {
 	const uint32_t hash = BCHash(key);
 	size_t idx = hash % cap;
 	while (buckets[idx].key) {
