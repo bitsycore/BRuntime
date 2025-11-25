@@ -7,10 +7,4 @@ if (CMAKE_CXX_COMPILER)
 endif()
 
 add_subdirectory(BCRuntime)
-
-add_executable(
-		TestBCRuntime
-		main.c
-)
-
-target_link_libraries(TestBCRuntime BCRuntime)
+add_subdirectory(Test)
