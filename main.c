@@ -266,7 +266,7 @@ void testStringBuilder()
 	BCAutorelease($OBJ finalStr);
 	printf("Finalized BCString: \"%s\"\n", BCStringCPtr(finalStr));
 	printf("Finalized toString: %s\n", TO_STR(finalStr));
-	FAIL_IF_NOT(BCEqual($OBJ finalStr, $OBJ builder1) == BC_true);
+	FAIL_IF_NOT(strcmp(BCStringCPtr(finalStr), BCStringBuilderCPtr(builder1)) == 0);
 
 	// Test 5: Clear and reuse
 	BCStringBuilderClear(builder1);
@@ -310,7 +310,7 @@ void testStringBuilder()
 	printf("\n" BC_AE_BGREEN "✓ All BCStringBuilder tests passed!"BC_AE_RESET"\n");
 }
 
-int RETRY = 1;
+int RETRY = 100;
 
 int BCMain() {
 

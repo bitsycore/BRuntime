@@ -1,7 +1,7 @@
 #include "BCMap.h"
 
 #include "../BCClass.h"
-#include "../BCString.h"
+#include "../BCStringBuilder.h"
 #include "../List/BCList.h"
 #include "../Utilities/BCMemory.h"
 
@@ -49,18 +49,33 @@ static void MapDeallocImpl(const BCObjectRef obj) {
 
 BCStringRef MapToStringImpl(const BCObjectRef obj) {
 	const BCMapRef d = (BCMapRef) obj;
-	return BCStringCreate("BCMap(count: %zu)", d->count);
-	printf("{\n");
+	const BCStringBuilderRef sb = BCStringBuilderCreate();
+	BCStringBuilderAppend(sb, "{ ");
+
+	size_t n = 0;
 	for (size_t i = 0; i < d->capacity; i++) {
 		if (d->buckets[i].key) {
-			BCToString(d->buckets[i].key);
-			printf(":");
-			d->buckets[i].value->cls->toString(d->buckets[i].value);
-			printf(",\n");
+			if (n > 0) {
+				BCStringBuilderAppend(sb, ", ");
+			}
+			const BCStringRef keyStr = BCToString(d->buckets[i].key);
+			const BCStringRef valStr = d->buckets[i].value->cls->toString(d->buckets[i].value);
+			BCStringBuilderAppendString(sb, keyStr);
+			BCStringBuilderAppendChar(sb, ':');
+			BCStringBuilderAppendChar(sb, ' ');
+			BCStringBuilderAppendString(sb, valStr);
+			BCRelease($OBJ keyStr);
+			BCRelease($OBJ valStr);
+			n++;
 		}
 	}
-	printf("}");
+
+	BCStringBuilderAppend(sb, " }");
+	const BCStringRef result = BCStringBuilderFinalize(sb);
+	BCRelease($OBJ sb);
+	return result;
 }
+
 
 static const BCClass kBCDictClass = {
 	"BCMap",

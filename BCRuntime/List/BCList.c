@@ -7,6 +7,8 @@
 #include <stdarg.h>
 #include <stdio.h>
 
+#include "../BCStringBuilder.h"
+
 // =========================================================
 // MARK: Struct
 // =========================================================
@@ -44,15 +46,22 @@ static void ArrayDeallocImpl(const BCObjectRef obj) {
 
 static BCStringRef ArrayToStringImpl(const BCObjectRef obj) {
 	const BCListRef arr = (BCListRef) obj;
-	return BCStringCreate("BCList(count: %zu)", arr->count);
-	printf("[ ");
+	const BCStringBuilderRef sb = BCStringBuilderCreate();
+	BCStringBuilderAppendChar(sb, '[');
 
 	for (size_t i = 0; i < arr->count; i++) {
-		arr->items[i]->cls->toString(arr->items[i]);
-		printf(", ");
+		if (i > 0) {
+			BCStringBuilderAppend(sb, ", ");
+		}
+		const BCStringRef itemStr = BCToString(arr->items[i]);
+		BCStringBuilderAppendString(sb, itemStr);
+		BCRelease($OBJ itemStr);
 	}
 
-	printf("]");
+	BCStringBuilderAppendChar(sb, ']');
+	const BCStringRef result = BCStringBuilderFinalize(sb);
+	BCRelease($OBJ sb);
+	return result;
 }
 
 static const BCClass kBCListClass = {
