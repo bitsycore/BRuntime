@@ -15,14 +15,14 @@
 // MARK: Class
 // =========================================================
 
-extern const BCClassRef kBCStringBuilderClassRef;
+BCClassRef BCStringBuilderClass();
 
 // =========================================================
 // MARK: Creation
 // =========================================================
 
-BCStringBuilderRef BCStringBuilderCreate(void);
-BCStringBuilderRef BCStringBuilderCreateWithCapacity(size_t initialCapacity);
+BCStringBuilderRef BCStringBuilderCreate(BCAllocatorRef allocator);
+BCStringBuilderRef BCStringBuilderCreateWithCapacity(BCAllocatorRef allocator, size_t initialCapacity);
 
 // =========================================================
 // MARK: Append Operations
@@ -47,7 +47,8 @@ const char* BCStringBuilderCPtr(BCStringBuilderRef builder);
 // MARK: Operations
 // =========================================================
 
+void BCStringBuilderEnsureCapacity(BCStringBuilderRef builder, size_t requiredCapacity);
 void BCStringBuilderClear(BCStringBuilderRef builder);
-BCStringRef BCStringBuilderFinalize(BCStringBuilderRef builder);
+BCStringRef BCStringBuilderFinish(BCStringBuilderRef builder);
 
 #endif //BCRUNTIME_BCSTRINGBUILDER_H

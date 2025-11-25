@@ -11,8 +11,11 @@ typedef struct BCAllocator {
 	void* context;
 } BCAllocator;
 
-extern BCAllocatorRef const kBCAllocatorDefault;
+void* BCAllocatorAlloc(BCAllocatorRef allocator, size_t size);
+void* BCAllocatorRealloc(BCAllocatorRef allocator, void* ptr, size_t oldSize, size_t newSize);
+void BCAllocatorFree(BCAllocatorRef allocator, void* ptr);
 
-#define BC_OBJECT_GET_ALLOCATOR(obj) ( BC_FLAG_HAS((obj)->flags, BC_OBJECT_FLAG_NON_DEFAULT_ALLOCATOR) ? (BCAllocatorRef)( (char*)(obj) - sizeof(BCAllocatorRef) ) : kBCAllocatorDefault )
+BCAllocatorRef BCAllocatorGetDefault();
+#define BCObjectGetAllocator(obj) ( BC_FLAG_HAS((obj)->flags, BC_OBJECT_FLAG_NON_DEFAULT_ALLOCATOR) ? (BCAllocatorRef)( (char*)(obj) - sizeof(BCAllocatorRef) ) : BCAllocatorGetDefault() )
 
 #endif //BCRUNTIME_BCALLOCATOR_H

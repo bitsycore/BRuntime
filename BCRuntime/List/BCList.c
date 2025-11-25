@@ -46,7 +46,7 @@ static void ArrayDeallocImpl(const BCObjectRef obj) {
 
 static BCStringRef ArrayToStringImpl(const BCObjectRef obj) {
 	const BCListRef arr = (BCListRef) obj;
-	const BCStringBuilderRef sb = BCStringBuilderCreate();
+	const BCStringBuilderRef sb = BCStringBuilderCreate(NULL);
 	BCStringBuilderAppendChar(sb, '[');
 
 	for (size_t i = 0; i < arr->count; i++) {
@@ -59,7 +59,7 @@ static BCStringRef ArrayToStringImpl(const BCObjectRef obj) {
 	}
 
 	BCStringBuilderAppendChar(sb, ']');
-	const BCStringRef result = BCStringBuilderFinalize(sb);
+	const BCStringRef result = BCStringBuilderFinish(sb);
 	BCRelease($OBJ sb);
 	return result;
 }

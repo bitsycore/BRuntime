@@ -28,16 +28,15 @@ static void ObjectDebugMarkFreed(BCObjectRef obj);
 
 BCObjectRef BCObjectAllocWithConfig(const BCClassRef cls, BCAllocatorRef alloc, const size_t extraBytes, const uint16_t flags) {
 	BC_bool useDefaultAllocator = 0;
-	if (alloc == NULL || alloc == kBCAllocatorDefault) {
-		alloc = kBCAllocatorDefault;
+	if (alloc == NULL || alloc == BCAllocatorGetDefault()) {
 		useDefaultAllocator = BC_true;
 	}
 
-	void* obj = alloc->alloc(
+	void* obj = BCAllocatorAlloc(
+		alloc,
 		(useDefaultAllocator ? 0 : sizeof(BCAllocatorRef))
 			+ cls->allocSize
-			+ extraBytes,
-		alloc->context
+			+ extraBytes
 	);
 
 	if (!useDefaultAllocator) {
@@ -80,10 +79,10 @@ void BCRelease(const BCObjectRef obj) {
 	if (old_count == 1) {
 		if (obj->cls->dealloc) obj->cls->dealloc(obj);
 		if (BC_FLAG_HAS(obj->flags, BC_OBJECT_FLAG_NON_DEFAULT_ALLOCATOR)) {
-			const BCAllocatorRef allocator = (BCAllocatorRef)(char*)obj - sizeof(BCAllocatorRef);
-			allocator->free(obj, allocator->context);
+			const BCAllocatorRef allocator = BCObjectGetAllocator(obj);
+			BCAllocatorFree(allocator, obj);
 		} else {
-			kBCAllocatorDefault->free(obj, kBCAllocatorDefault->context);
+			BCAllocatorFree(NULL, obj);
 		}
 		ObjectDebugMarkFreed(obj);
 	}
@@ -298,7 +297,7 @@ void BCObjectDebugDump(void) {
 		if (!BC_FLAG_HAS(obj->flags, BC_OBJECT_FLAG_NON_DEFAULT_ALLOCATOR)) {
 			snprintf(allocatorPtr, sizeof(allocatorPtr), "DEFAULT");
 		} else {
-			const BCAllocatorRef allocator = BC_OBJECT_GET_ALLOCATOR(obj);
+			const BCAllocatorRef allocator = BCObjectGetAllocator(obj);
 			snprintf(allocatorPtr, sizeof(allocatorPtr), "%p", (void*)allocator);
 		}
 		const char* color = count % 2 == 0 ? DGRAY : BLACK;

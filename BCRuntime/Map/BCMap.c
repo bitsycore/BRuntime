@@ -49,7 +49,7 @@ static void MapDeallocImpl(const BCObjectRef obj) {
 
 BCStringRef MapToStringImpl(const BCObjectRef obj) {
 	const BCMapRef d = (BCMapRef) obj;
-	const BCStringBuilderRef sb = BCStringBuilderCreate();
+	const BCStringBuilderRef sb = BCStringBuilderCreate(NULL);
 	BCStringBuilderAppend(sb, "{ ");
 
 	size_t n = 0;
@@ -71,7 +71,7 @@ BCStringRef MapToStringImpl(const BCObjectRef obj) {
 	}
 
 	BCStringBuilderAppend(sb, " }");
-	const BCStringRef result = BCStringBuilderFinalize(sb);
+	const BCStringRef result = BCStringBuilderFinish(sb);
 	BCRelease($OBJ sb);
 	return result;
 }

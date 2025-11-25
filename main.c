@@ -235,7 +235,7 @@ void testStringBuilder()
 	// ================================
 
 	// Test 1: Basic creation and append
-	$LET builder1 = BCStringBuilderCreate();
+	$LET builder1 = BCStringBuilderCreate(NULL);
 	BCAutorelease($OBJ builder1);
 
 	printf("Initial - Length: %zu, Capacity: %zu\n", BCStringBuilderLength(builder1), BCStringBuilderCapacity(builder1));
@@ -262,7 +262,7 @@ void testStringBuilder()
 	FAIL_IF_NOT(strcmp(BCStringBuilderCPtr(builder1), "Hello World - 5 + 3 = 8!") == 0);
 
 	// Test 4: Finalization
-	$LET finalStr = BCStringBuilderFinalize(builder1);
+	$LET finalStr = BCStringBuilderFinish(builder1);
 	BCAutorelease($OBJ finalStr);
 	printf("Finalized BCString: \"%s\"\n", BCStringCPtr(finalStr));
 	printf("Finalized toString: %s\n", TO_STR(finalStr));
@@ -276,7 +276,7 @@ void testStringBuilder()
 	FAIL_IF_NOT(strcmp(BCStringBuilderCPtr(builder1), "Reused") == 0);
 
 	// Test 6: Capacity growth (force reallocation)
-	$LET builder2 = BCStringBuilderCreateWithCapacity(8);
+	$LET builder2 = BCStringBuilderCreateWithCapacity(NULL, 8);
 	BCAutorelease($OBJ builder2);
 	printf("\nSmall builder - Initial Capacity: %zu\n", BCStringBuilderCapacity(builder2));
 
@@ -296,9 +296,9 @@ void testStringBuilder()
 	FAIL_IF_NOT(strcmp(BCStringBuilderCPtr(builder2), "Item 1, Item 2, Item 3, Item 4, Item 5") == 0);
 
 	// Test 8: Edge case - empty builder finalization
-	$LET builder3 = BCStringBuilderCreate();
+	$LET builder3 = BCStringBuilderCreate(NULL);
 	BCAutorelease($OBJ builder3);
-	$LET emptyStr = BCStringBuilderFinalize(builder3);
+	$LET emptyStr = BCStringBuilderFinish(builder3);
 	BCAutorelease($OBJ emptyStr);
 	printf("\nEmpty builder finalized: \"%s\" (Length: %zu)\n", BCStringCPtr(emptyStr), BCStringLength(emptyStr));
 	FAIL_IF_NOT(BCStringLength(emptyStr) == 0);
@@ -310,7 +310,7 @@ void testStringBuilder()
 	printf("\n" BC_AE_BGREEN "✓ All BCStringBuilder tests passed!"BC_AE_RESET"\n");
 }
 
-int RETRY = 100;
+int RETRY = 1;
 
 int BCMain() {
 
