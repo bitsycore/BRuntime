@@ -3,8 +3,8 @@ add_library(BCRuntime
 		List/BCList.h
 		Array/BCBytesArray.c
 		Array/BCBytesArray.h
-		BCAutoreleasePool.c
-		BCAutoreleasePool.h
+		Pool/BCAutoreleasePool.c
+		Pool/BCAutoreleasePool.h
 		BCNumber.c
 		BCNumber.h
 		BCObject.c
@@ -12,10 +12,10 @@ add_library(BCRuntime
 		BCRuntime.c
 		BCRuntime.h
 		BCSettings.h
-		BCString.c
-		BCString.h
-		BCStringBuilder.c
-		BCStringBuilder.h
+		String/BCString.c
+		String/BCString.h
+		String/BCStringBuilder.c
+		String/BCStringBuilder.h
 		BCTypes.h
 		Map/BCMap.c
 		Map/BCMap.h
@@ -31,6 +31,6 @@ add_library(BCRuntime
         BCAllocator.h
 		BCClass.c
 		BCClass.h
-		BCReleasePool.c
-		BCReleasePool.h
+		Pool/BCReleasePool.c
+		Pool/BCReleasePool.h
 )

@@ -2,7 +2,7 @@
 
 #include "BCAllocator.h"
 #include "BCClass.h"
-#include "BCString.h"
+#include "String/BCString.h"
 #include "Utilities/BCMemory.h"
 #include "Utilities/BCThreads.h"
 

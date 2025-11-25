@@ -1,13 +1,11 @@
 #include "BCList.h"
 
 #include "../BCClass.h"
-#include "../BCString.h"
+#include "../String/BCStringBuilder.h"
 #include "../Utilities/BCMemory.h"
 
 #include <stdarg.h>
 #include <stdio.h>
-
-#include "../BCStringBuilder.h"
 
 // =========================================================
 // MARK: Struct

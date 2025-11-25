@@ -1,7 +1,7 @@
 #ifndef BCRUNTIME_BCSTRINGBUILDER_H
 #define BCRUNTIME_BCSTRINGBUILDER_H
 
-#include "BCTypes.h"
+#include "../BCTypes.h"
 
 #include <stddef.h>
 

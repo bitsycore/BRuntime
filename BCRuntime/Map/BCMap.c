@@ -1,7 +1,7 @@
 #include "BCMap.h"
 
 #include "../BCClass.h"
-#include "../BCStringBuilder.h"
+#include "../String/BCStringBuilder.h"
 #include "../List/BCList.h"
 #include "../Utilities/BCMemory.h"
 

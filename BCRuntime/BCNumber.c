@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 #include "BCClass.h"
-#include "BCString.h"
+#include "String/BCString.h"
 
 // =============================================================================
 // MARK: Struct

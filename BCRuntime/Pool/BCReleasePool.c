@@ -1,9 +1,9 @@
 #include "BCReleasePool.h"
 
-#include "BCAllocator.h"
-#include "BCClass.h"
-#include "BCObject.h"
-#include "Utilities/BCMacro.h"
+#include "../BCAllocator.h"
+#include "../BCClass.h"
+#include "../BCObject.h"
+#include "../Utilities/BCMacro.h"
 
 #include <stdio.h>
 

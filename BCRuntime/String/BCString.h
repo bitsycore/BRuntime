@@ -1,8 +1,8 @@
 #ifndef BCRUNTIME_BCSTRING_H
 #define BCRUNTIME_BCSTRING_H
 
-#include "BCTypes.h"
-#include "Utilities/BCMacro.h"
+#include "../BCTypes.h"
+#include "../Utilities/BCMacro.h"
 
 #include <stddef.h>
 

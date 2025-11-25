@@ -1,17 +1,10 @@
 #include "BCAutoreleasePool.h"
 
+#include "../BCAllocator.h"
+#include "../Utilities/BCKeywords.h"
+#include "../Utilities/BCMemory.h"
+
 #include <string.h>
-
-#include "BCAllocator.h"
-#include "BCClass.h"
-#include "Utilities/BCKeywords.h"
-#include "Utilities/BCMemory.h"
-
-// =========================================================================
-//
-// 		MARK: Stackable Autorelease Pool
-//
-// =========================================================================
 
 #define CAPACITY 255
 

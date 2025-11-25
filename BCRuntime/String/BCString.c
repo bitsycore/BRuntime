@@ -6,10 +6,10 @@
 #include <string.h>
 #include <time.h>
 
-#include "BCClass.h"
-#include "BCObject.h"
-#include "Utilities/BCMemory.h"
-#include "Utilities/BCThreads.h"
+#include "../BCClass.h"
+#include "../BCObject.h"
+#include "../Utilities/BCMemory.h"
+#include "../Utilities/BCThreads.h"
 
 // =========================================================
 // MARK: Struct

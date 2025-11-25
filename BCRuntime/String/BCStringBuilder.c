@@ -5,11 +5,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "BCAllocator.h"
-#include "BCClass.h"
-#include "BCObject.h"
 #include "BCString.h"
-#include "Utilities/BCMemory.h"
+#include "../BCAllocator.h"
+#include "../BCClass.h"
+#include "../BCObject.h"
 
 // =========================================================
 // MARK: Struct
