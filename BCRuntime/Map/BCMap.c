@@ -100,7 +100,7 @@ BCMapRef BCMapCreate() {
 }
 
 BCMutableMapRef BCMutableMapCreate() {
-	const BCMapRef d = (BCMapRef) BCObjectAlloc((BCClassRef)&kBCDictClass, NULL);
+	const BCMapRef d = (BCMapRef) BCObjectAlloc(NULL, (BCClassRef)&kBCDictClass);
 	d->isMutable = BC_true;
 	d->capacity = 8;
 	d->count = 0;

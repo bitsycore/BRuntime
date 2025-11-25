@@ -14,6 +14,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "BCRuntime/BCReleasePool.h"
+
 void BIG_TITLE(const char* _x_) {
 	printf("\n"
 		BC_AE_BGREEN "╭───────────────────────────────────────────────────────────────╮" BC_AE_RESET "\n"
@@ -310,6 +312,21 @@ void testStringBuilder()
 	printf("\n" BC_AE_BGREEN "✓ All BCStringBuilder tests passed!"BC_AE_RESET"\n");
 }
 
+void testReleasePool(void) {
+	$LET pool = BCReleasePoolCreate(NULL, 16);
+	BCAutorelease($OBJ pool);
+
+	$LET a = $("Hello in Release Pool");
+	$LET b = $(53);
+	$LET c = $(BC_true);
+
+	BCReleasePoolAdd(pool, $OBJ a);
+	BCReleasePoolAdd(pool, $OBJ b);
+	BCReleasePoolAdd(pool, $OBJ c);
+
+	printf("Release Pool Finished\n");
+}
+
 int RETRY = 1;
 
 int BCMain() {
@@ -327,6 +344,7 @@ int BCMain() {
 			testArray();
 			testMap();
 			testStringBuilder();
+			testReleasePool();
 
 			BCStringPoolDebugDump();
 			BCObjectDebugDump();

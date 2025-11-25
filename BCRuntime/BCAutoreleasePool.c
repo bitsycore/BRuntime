@@ -1,8 +1,17 @@
 #include "BCAutoreleasePool.h"
 
+#include <string.h>
+
+#include "BCAllocator.h"
 #include "BCClass.h"
 #include "Utilities/BCKeywords.h"
 #include "Utilities/BCMemory.h"
+
+// =========================================================================
+//
+// 		MARK: Stackable Autorelease Pool
+//
+// =========================================================================
 
 #define CAPACITY 255
 
@@ -11,7 +20,6 @@
 // =========================================================
 
 typedef struct BCAutoreleasePool {
-	BCObject base;
 	struct BCAutoreleasePool* next;
 	struct BCAutoreleasePool* parent;
 	struct BCAutoreleasePool* hot;
@@ -33,7 +41,7 @@ $TLS BCAutoreleasePool* CurrentAutoReleasePool = NULL;
 // MARK: Private
 // =========================================================
 
-static BCAutoreleasePool* AllocNewPool() {
+static BCAutoreleasePool* AllocNewAutoreleasePool() {
 	BCAutoreleasePool* pool = BCMalloc(sizeof(BCAutoreleasePool));
 	pool->count = 0;
 	pool->parent = NULL;
@@ -54,7 +62,7 @@ void BCAutoreleasePoolPush(void) {
 		gRootPool.hot = &gRootPool;
 	}
 	else {
-		BCAutoreleasePool* pool = AllocNewPool();
+		BCAutoreleasePool* pool = AllocNewAutoreleasePool();
 		pool->parent = CurrentAutoReleasePool;
 		CurrentAutoReleasePool = pool;
 	}
@@ -77,8 +85,7 @@ void BCAutoreleasePoolPop(void) {
 }
 
 BCObjectRef BCAutorelease(const BCObjectRef obj) {
-	if (!obj)
-		return NULL;
+	if (!obj) return NULL;
 	if (!CurrentAutoReleasePool) {
 		fprintf(stderr, "Warning: Autorelease with no pool. Leaking.\n");
 		return obj;
@@ -86,7 +93,7 @@ BCObjectRef BCAutorelease(const BCObjectRef obj) {
 
 	BCAutoreleasePool* pool = CurrentAutoReleasePool->hot;
 	if (pool->count == CAPACITY) {
-		BCAutoreleasePool* newPool = AllocNewPool();
+		BCAutoreleasePool* newPool = AllocNewAutoreleasePool();
 		pool->next = newPool;
 		CurrentAutoReleasePool->hot = newPool;
 		pool = newPool;
@@ -94,32 +101,4 @@ BCObjectRef BCAutorelease(const BCObjectRef obj) {
 
 	pool->stack[pool->count++] = obj;
 	return obj;
-}
-
-// =========================================================
-// MARK: Class
-// =========================================================
-
-static const BCClass kBCAutoreleasePoolClass = {
-	.name = "BCAutoreleasePool",
-	.dealloc = NULL,
-	.hash =	NULL,
-	.equal = NULL,
-	.toString = NULL,
-	.copy = NULL,
-	.allocSize = sizeof(BCAutoreleasePool)
-};
-
-const BCClassRef kBCAutoreleasePoolClassRef = NULL;
-
-// =========================================================
-// MARK: Methods
-// =========================================================
-
-BCAutoreleasePoolRef BCAutoreleasePoolCreate(void) {
-
-}
-
-BCObjectRef BCAutoreleasePoolAdd(BCAutoreleasePoolRef pool, BCObjectRef obj) {
-
 }

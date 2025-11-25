@@ -4,13 +4,9 @@
 #include "BCObject.h"
 #include "Utilities/BCMacro.h"
 
-typedef struct BCAutoreleasePool* BCAutoreleasePoolRef;
-
 void BCAutoreleasePoolPush(void);
 void BCAutoreleasePoolPop(void);
 BCObjectRef BCAutorelease(BCObjectRef obj);
-BCAutoreleasePoolRef BCAutoreleasePoolCreate(void);
-BCObjectRef BCAutoreleasePoolAdd(BCAutoreleasePoolRef pool, BCObjectRef obj);
 
 #define ___BCINTERNAL___AutoreleaseImpl(...) BC_ARG_MAP(BCAutorelease, __VA_ARGS__)
 #define BCAutoreleaseAll(first, ...) ___BCINTERNAL___AutoreleaseImpl(first, __VA_ARGS__)
@@ -21,7 +17,5 @@ BCObjectRef BCAutoreleasePoolAdd(BCAutoreleasePoolRef pool, BCObjectRef obj);
     __name__ = BC_false, BCAutoreleasePoolPop() \
 )
 #define BCAutoreleaseScope() ___BCINTERNAL___AutoreleaseScopeImpl(BC_M_CAT(___temp_once_, __COUNTER__))
-
-#define $$AR(...) BCAutoreleaseAll( __VA_ARGS__ )
 
 #endif //BCRUNTIME_BCAUTORELEASEPOOL_H

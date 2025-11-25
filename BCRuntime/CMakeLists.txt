@@ -31,4 +31,6 @@ add_library(BCRuntime
         BCAllocator.h
 		BCClass.c
 		BCClass.h
+		BCReleasePool.c
+		BCReleasePool.h
 )

@@ -55,7 +55,7 @@ BCObjectRef BCObjectAllocWithConfig(const BCClassRef cls, BCAllocatorRef alloc, 
 	return objRef;
 }
 
-BCObjectRef BCObjectAlloc(const BCClassRef cls, const BCAllocatorRef alloc) {
+BCObjectRef BCObjectAlloc(const BCAllocatorRef alloc, const BCClassRef cls) {
 	return BCObjectAllocWithConfig(cls, alloc, 0, BC_OBJECT_FLAG_REFCOUNT);
 }
 

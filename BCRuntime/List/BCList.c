@@ -81,7 +81,7 @@ const BCClassRef kBCListClassRef = (BCClassRef) &kBCListClass;
 // =========================================================
 
 BCListRef BCListCreate(void) {
-	const BCListRef arr = (BCListRef) BCObjectAlloc((BCClassRef) &kBCListClass, NULL);
+	const BCListRef arr = (BCListRef) BCObjectAlloc(NULL, (BCClassRef) &kBCListClass);
 	arr->capacity = 8;
 	arr->count = 0;
 	arr->items = BCCalloc(arr->capacity, sizeof(BCObjectRef));

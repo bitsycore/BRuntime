@@ -132,7 +132,7 @@ BCStringBuilderRef BCStringBuilderCreate(const BCAllocatorRef allocator) {
 BCStringBuilderRef BCStringBuilderCreateWithCapacity(const BCAllocatorRef allocator, const size_t initialCapacity) {
 	const size_t capacity = initialCapacity > 0 ? initialCapacity : BC_STRING_BUILDER_DEFAULT_CAPACITY;
 
-	const BCStringBuilderRef builder = (BCStringBuilderRef)BCObjectAlloc((BCClassRef)&kBCStringBuilderClass, allocator);
+	const BCStringBuilderRef builder = (BCStringBuilderRef)BCObjectAlloc(allocator, (BCClassRef)&kBCStringBuilderClass);
 
 	builder->buffer = BCAllocatorAlloc(allocator, capacity);
 	builder->capacity = capacity;

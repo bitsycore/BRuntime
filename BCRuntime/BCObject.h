@@ -23,7 +23,7 @@ typedef struct BCObject {
 // Flags 8 -> 15 Free usage for class
 #define BC_OBJECT_FLAG_CLASS_MASK 0xFF00
 
-BCObjectRef BCObjectAlloc(BCClassRef cls, BCAllocatorRef alloc);
+BCObjectRef BCObjectAlloc(BCAllocatorRef alloc, BCClassRef cls);
 BCObjectRef BCObjectAllocWithConfig(BCClassRef cls, BCAllocatorRef alloc, size_t extraBytes, uint16_t flags);
 
 BCObjectRef BCRetain(BCObjectRef obj);
