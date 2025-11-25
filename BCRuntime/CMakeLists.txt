@@ -14,6 +14,8 @@ add_library(BCRuntime
 		BCSettings.h
 		BCString.c
 		BCString.h
+		BCStringBuilder.c
+		BCStringBuilder.h
 		BCTypes.h
 		Map/BCMap.c
 		Map/BCMap.h

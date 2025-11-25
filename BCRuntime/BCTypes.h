@@ -27,6 +27,7 @@ typedef struct BCAllocator* BCAllocatorRef;
 
 typedef struct BCString* BCStringRef;
 typedef struct BCString* BCStringPooledRef;
+typedef struct BCStringBuilder* BCStringBuilderRef;
 
 // =========================================================
 // MARK: Numbers

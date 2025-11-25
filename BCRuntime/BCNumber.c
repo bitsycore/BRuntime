@@ -116,11 +116,11 @@ static BCStringRef NumberToStringImpl(const BCObjectRef obj) {
 		case BCNumberTypeInt8: return BCStringCreate("%d", ((BCNumberInt8*)obj)->value);
 		case BCNumberTypeInt16: return BCStringCreate("%d", ((BCNumberInt16*)obj)->value);
 		case BCNumberTypeInt32: return BCStringCreate("%d", ((BCNumberInt32*)obj)->value);
-		case BCNumberTypeInt64: return BCStringCreate("%zd", ((BCNumberInt64*)obj)->value);
+		case BCNumberTypeInt64: return BCStringCreate("%lld", ((BCNumberInt64*)obj)->value);
 		case BCNumberTypeUInt8: return BCStringCreate("%u", ((BCNumberUInt8*)obj)->value);
 		case BCNumberTypeUInt16: return BCStringCreate("%u", ((BCNumberUInt16*)obj)->value);
 		case BCNumberTypeUInt32: return BCStringCreate("%u", ((BCNumberUInt32*)obj)->value);
-		case BCNumberTypeUInt64: return BCStringCreate("%zu", ((BCNumberUInt64*)obj)->value);
+		case BCNumberTypeUInt64: return BCStringCreate("%llu", ((BCNumberUInt64*)obj)->value);
 		case BCNumberTypeFloat: return BCStringCreate("%f", ((BCNumberFloat*)obj)->value);
 		case BCNumberTypeDouble: return BCStringCreate("%lf", ((BCNumberDouble*)obj)->value);
 		case BCNumberTypeBool: return BCStringCreate(((BCNumberBool*)obj)->value ? "true" : "false");
