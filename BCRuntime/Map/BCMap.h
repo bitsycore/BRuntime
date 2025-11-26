@@ -32,4 +32,17 @@ BCObjectRef BCMapGet(BCMapRef d, BCObjectRef key);
 BCListRef BCMapKeys(BCMapRef d);
 BCListRef BCMapValues(BCMapRef d);
 
-#endif //BCRUNTIME_BCDICTIONARY_H
+size_t BCMapCount(BCMapRef d);
+BC_bool BCMapIsEmpty(BCMapRef d);
+void BCMapClear(BCMutableMapRef d);
+
+void BCMapRemove(BCMutableMapRef d, BCObjectRef key);
+
+BC_bool BCMapContainsKey(BCMapRef d, BCObjectRef key);
+BC_bool BCMapContainsValue(BCMapRef d, BCObjectRef val);
+
+BCObjectRef BCMapGetOrDefault(BCMapRef d, BCObjectRef key, BCObjectRef defaultValue);
+
+void BCMapForEach(BCMapRef d, void (*block)(BCObjectRef key, BCObjectRef value));
+
+#endif // BCRUNTIME_BCDICTIONARY_H

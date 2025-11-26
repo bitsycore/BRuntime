@@ -10,7 +10,7 @@ void BCMutexInit(BCMutex* mutex) {
 #if defined(_WIN32)
     InitializeCriticalSection(mutex);
 #else
-    pthread_mutex_init(mutex, nullptr);
+    pthread_mutex_init(mutex, NULL);
 #endif
 }
 

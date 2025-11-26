@@ -15,6 +15,7 @@ extern void ___BCINTERNAL___ReleasePoolInitialize();
 
 extern void ___BCINTERNAL___NumberInitialize();
 extern void ___BCINTERNAL___MapInitialize();
+extern void ___BCINTERNAL___SetInitialize();
 extern void ___BCINTERNAL___ListInitialize();
 extern void ___BCINTERNAL___BytesArrayClassInit();
 
@@ -64,6 +65,7 @@ void BCInitialize(const int argc, char** argv) {
 
 	___BCINTERNAL___NumberInitialize();
 	___BCINTERNAL___MapInitialize();
+	___BCINTERNAL___SetInitialize();
 	___BCINTERNAL___ListInitialize();
 	___BCINTERNAL___BytesArrayClassInit();
 

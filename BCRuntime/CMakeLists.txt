@@ -19,6 +19,8 @@ add_library(BCRuntime
 		BCTypes.h
 		Map/BCMap.c
 		Map/BCMap.h
+		Set/BCSet.c
+		Set/BCSet.h
 		Utilities/BCAnsiEscape.h
 		Utilities/BCKeywords.h
 		Utilities/BCMacro.h

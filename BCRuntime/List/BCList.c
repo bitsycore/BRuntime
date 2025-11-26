@@ -110,8 +110,93 @@ BCListRef BCListCreateWithObjects(const BC_bool retain, const size_t count, ...)
 // MARK: Methods
 // =========================================================
 
-void BCListAdd(const BCListRef list, const BCObjectRef obj) {
-	ListAdd(list, obj, BC_true);
+void BCListAdd(const BCListRef list, const BCObjectRef obj) { ListAdd(list, obj, BC_true); }
+
+size_t BCListCount(const BCListRef list) { return list->count; }
+
+BC_bool BCListIsEmpty(const BCListRef list) { return list->count == 0; }
+
+void BCListClear(const BCListRef list) {
+	for (size_t i = 0; i < list->count; i++) {
+		BCRelease(list->items[i]);
+	}
+	list->count = 0;
+}
+
+void BCListRemove(const BCListRef list, const BCObjectRef obj) {
+	const ssize_t index = BCListIndexOf(list, obj);
+	if (index != -1) {
+		BCListRemoveAt(list, (size_t)index);
+	}
+}
+
+void BCListRemoveAt(const BCListRef list, const size_t index) {
+	if (index >= list->count)
+		return;
+
+	BCRelease(list->items[index]);
+
+	// Shift
+	for (size_t i = index; i < list->count - 1; i++) {
+		list->items[i] = list->items[i + 1];
+	}
+
+	list->count--;
+	list->items[list->count] = NULL;
+}
+
+BC_bool BCListContains(const BCListRef list, const BCObjectRef obj) { return BCListIndexOf(list, obj) != -1; }
+
+ssize_t BCListIndexOf(const BCListRef list, const BCObjectRef obj) {
+	for (size_t i = 0; i < list->count; i++) {
+		if (BCEqual(list->items[i], obj)) {
+			return (ssize_t)i;
+		}
+	}
+	return -1;
+}
+
+BCObjectRef BCListFirst(const BCListRef list) {
+	if (list->count == 0)
+		return NULL;
+	return list->items[0];
+}
+
+BCObjectRef BCListLast(const BCListRef list) {
+	if (list->count == 0)
+		return NULL;
+	return list->items[list->count - 1];
+}
+
+void BCListForEach(const BCListRef list, void (*block)(BCObjectRef item, size_t index)) {
+	if (!block)
+		return;
+	for (size_t i = 0; i < list->count; i++) {
+		block(list->items[i], i);
+	}
+}
+
+BCListRef BCListMap(const BCListRef list, BCObjectRef (*transform)(BCObjectRef item, size_t index, void* ctx), void* ctx) {
+	if (!transform)
+		return NULL;
+	const BCListRef newList = BCListCreate();
+	for (size_t i = 0; i < list->count; i++) {
+		const BCObjectRef transformed = transform(list->items[i], i, ctx);
+		BCListAdd(newList, transformed);
+	}
+	return newList;
+}
+
+BCListRef BCListFilter(const BCListRef list, BC_bool (*predicate)(BCObjectRef item, size_t index)) {
+	if (!predicate)
+		return NULL;
+	const BCListRef newList = BCListCreate();
+	for (size_t i = 0; i < list->count; i++) {
+		if (predicate(list->items[i], i)) {
+			BCListAdd(newList, list->items[i]);
+		}
+	}
+	return newList;
 }
 
 // =========================================================
@@ -122,7 +207,8 @@ static void ListAdd(const BCListRef arr, const BCObjectRef item, const BC_bool r
 	if (arr->count == arr->capacity) {
 		arr->capacity *= 2;
 		void* newBuff = BCRealloc(arr->items, arr->capacity * sizeof(BCObjectRef));
-		if (!newBuff) return;
+		if (!newBuff)
+			return;
 		arr->items = newBuff;
 	}
 	arr->items[arr->count++] = retain ? BCRetain(item) : item;

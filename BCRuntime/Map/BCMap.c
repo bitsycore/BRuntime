@@ -1,8 +1,8 @@
 #include "BCMap.h"
 
 #include "../BCClass.h"
-#include "../String/BCStringBuilder.h"
 #include "../List/BCList.h"
+#include "../String/BCStringBuilder.h"
 #include "../Utilities/BCMemory.h"
 
 #include <stdarg.h>
@@ -207,6 +207,95 @@ BCListRef BCMapValues(const BCMapRef d) {
 		}
 	}
 	return arr;
+}
+
+size_t BCMapCount(const BCMapRef d) { return d->count; }
+
+BC_bool BCMapIsEmpty(const BCMapRef d) { return d->count == 0; }
+
+void BCMapClear(const BCMutableMapRef d) {
+	BCMap* dict = d;
+	if (!BC_FLAG_HAS(dict->base.flags, BC_MAP_FLAG_MUTABLE))
+		return;
+
+	for (size_t i = 0; i < dict->capacity; i++) {
+		if (dict->buckets[i].key) {
+			BCRelease(dict->buckets[i].key);
+			BCRelease(dict->buckets[i].value);
+			dict->buckets[i].key = NULL;
+			dict->buckets[i].value = NULL;
+		}
+	}
+	dict->count = 0;
+}
+
+void BCMapRemove(const BCMutableMapRef d, const BCObjectRef key) {
+	BCMap* dict = d;
+	if (!BC_FLAG_HAS(dict->base.flags, BC_MAP_FLAG_MUTABLE))
+		return;
+	if (key == NULL)
+		return;
+
+	const uint32_t hash = BCHash(key);
+	size_t idx = hash % dict->capacity;
+	const size_t start = idx;
+
+	while (dict->buckets[idx].key) {
+		if (BCEqual(dict->buckets[idx].key, key)) {
+			BCRelease(dict->buckets[idx].key);
+			BCRelease(dict->buckets[idx].value);
+			dict->buckets[idx].key = NULL;
+			dict->buckets[idx].value = NULL;
+			dict->count--;
+
+			// Rehash chain
+			size_t nextIdx = (idx + 1) % dict->capacity;
+			while (dict->buckets[nextIdx].key) {
+				BCObjectRef rehashKey = dict->buckets[nextIdx].key;
+				BCObjectRef rehashVal = dict->buckets[nextIdx].value;
+				dict->buckets[nextIdx].key = NULL;
+				dict->buckets[nextIdx].value = NULL;
+				MapPut(dict->buckets, dict->capacity, rehashKey, rehashVal);
+				nextIdx = (nextIdx + 1) % dict->capacity;
+			}
+			return;
+		}
+		idx = (idx + 1) % dict->capacity;
+		if (idx == start)
+			break;
+	}
+}
+
+BC_bool BCMapContainsKey(const BCMapRef d, const BCObjectRef key) {
+    return BCMapGet(d, key) != NULL;
+}
+
+BC_bool BCMapContainsValue(const BCMapRef d, const BCObjectRef val) {
+	for (size_t i = 0; i < d->capacity; i++) {
+		if (d->buckets[i].key) {
+			if (BCEqual(d->buckets[i].value, val)) {
+				return BC_true;
+			}
+		}
+	}
+	return BC_false;
+}
+
+BCObjectRef BCMapGetOrDefault(const BCMapRef d, const BCObjectRef key, const BCObjectRef defaultValue) {
+	const BCObjectRef val = BCMapGet(d, key);
+	if (val)
+		return val;
+	return defaultValue ? BCRetain(defaultValue) : NULL;
+}
+
+void BCMapForEach(const BCMapRef d, void (*block)(BCObjectRef key, BCObjectRef value)) {
+	if (!block)
+		return;
+	for (size_t i = 0; i < d->capacity; i++) {
+		if (d->buckets[i].key) {
+			block(d->buckets[i].key, d->buckets[i].value);
+		}
+	}
 }
 
 // =========================================================
