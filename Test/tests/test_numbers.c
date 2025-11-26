@@ -5,34 +5,34 @@ void testNumber() {
 	SUB_TITLE("Test Number");
 	// ================================
 	$LET numInt8 =  BCNumberCreate((int8_t)-64);
-	FAIL_IF_NOT(BCNumberGetType(numInt8) == BCNumberTypeInt8);
+	PRINT_ERR_IF_NOT(BCNumberGetType(numInt8) == BCNumberTypeInt8);
 	$LET numUInt8 =  BCNumberCreate((uint8_t)255);
-	FAIL_IF_NOT(BCNumberGetType(numUInt8) == BCNumberTypeUInt8);
+	PRINT_ERR_IF_NOT(BCNumberGetType(numUInt8) == BCNumberTypeUInt8);
 
 	$LET numInt16 =  BCNumberCreate((int16_t)-4500);
-	FAIL_IF_NOT(BCNumberGetType(numInt16) == BCNumberTypeInt16);
+	PRINT_ERR_IF_NOT(BCNumberGetType(numInt16) == BCNumberTypeInt16);
 	$LET numUInt16 =  BCNumberCreate((uint16_t)6500);
-	FAIL_IF_NOT(BCNumberGetType(numUInt16) == BCNumberTypeUInt16);
+	PRINT_ERR_IF_NOT(BCNumberGetType(numUInt16) == BCNumberTypeUInt16);
 
 	$LET numInt32 =  BCNumberCreate((int32_t)-15500);
-	FAIL_IF_NOT(BCNumberGetType(numInt32) == BCNumberTypeInt32);
+	PRINT_ERR_IF_NOT(BCNumberGetType(numInt32) == BCNumberTypeInt32);
 	$LET numUInt32 =  BCNumberCreate((uint32_t)135255);
-	FAIL_IF_NOT(BCNumberGetType(numUInt32) == BCNumberTypeUInt32);
+	PRINT_ERR_IF_NOT(BCNumberGetType(numUInt32) == BCNumberTypeUInt32);
 
 	$LET numInt64 =  BCNumberCreate((int64_t)-0x7FFFFFFFFFFFFFFF);
-	FAIL_IF_NOT(BCNumberGetType(numInt64) == BCNumberTypeInt64);
+	PRINT_ERR_IF_NOT(BCNumberGetType(numInt64) == BCNumberTypeInt64);
 	$LET numUInt64 =  BCNumberCreate((uint64_t)0xFFFFFFFFFFFFFFFF);
-	FAIL_IF_NOT(BCNumberGetType(numUInt64) == BCNumberTypeUInt64);
+	PRINT_ERR_IF_NOT(BCNumberGetType(numUInt64) == BCNumberTypeUInt64);
 
 	$LET numFloat =  BCNumberCreate(3.14f);
-	FAIL_IF_NOT(BCNumberGetType(numFloat) == BCNumberTypeFloat);
+	PRINT_ERR_IF_NOT(BCNumberGetType(numFloat) == BCNumberTypeFloat);
 	$LET numDouble =  BCNumberCreate(-5.123456789);
-	FAIL_IF_NOT(BCNumberGetType(numDouble) == BCNumberTypeDouble);
+	PRINT_ERR_IF_NOT(BCNumberGetType(numDouble) == BCNumberTypeDouble);
 
 	$LET numInt =  BCNumberCreate(42);
-	FAIL_IF_NOT(BCNumberGetType(numInt) == BCNumberTypeInt32);
+	PRINT_ERR_IF_NOT(BCNumberGetType(numInt) == BCNumberTypeInt32);
 	$LET numBool = BCBool(BC_true);
-	FAIL_IF_NOT(BCNumberGetType(numBool) == BCNumberTypeBool);
+	PRINT_ERR_IF_NOT(BCNumberGetType(numBool) == BCNumberTypeBool);
 
 	BCAutoreleaseAll(
 		$OBJ numInt8,

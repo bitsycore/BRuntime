@@ -20,7 +20,7 @@ int BCMain() {
 			testMap();
 			testStringBuilder();
 			testReleasePool();
-			//testClassRegistry();
+			testClassRegistry();
 
 			BCObjectDebugDump();
 			BCStringPoolDebugDump();

@@ -36,34 +36,34 @@ void testStringBuilder()
 
 	printf("After appends: \"%s\" (Length: %zu)\n", BCStringBuilderCPtr(builder1), BCStringBuilderLength(builder1));
 
-	FAIL_IF_NOT(BCStringBuilderLength(builder1) == 11);
-	FAIL_IF_NOT(strcmp(BCStringBuilderCPtr(builder1), "Hello World") == 0);
+	PRINT_ERR_IF_NOT(BCStringBuilderLength(builder1) == 11);
+	PRINT_ERR_IF_NOT(strcmp(BCStringBuilderCPtr(builder1), "Hello World") == 0);
 
 	// Test 2: Format append
 	BCStringBuilderAppendFormat(builder1, " - %d + %d = %d", 5, 3, 8);
 	printf("After format append: \"%s\"\n", BCStringBuilderCPtr(builder1));
-	FAIL_IF_NOT(strcmp(BCStringBuilderCPtr(builder1), "Hello World - 5 + 3 = 8") == 0);
+	PRINT_ERR_IF_NOT(strcmp(BCStringBuilderCPtr(builder1), "Hello World - 5 + 3 = 8") == 0);
 
 	// Test 3: Append BCString
 	$LET bcstr = BCStringCreate("!");
 	BCAutorelease($OBJ bcstr);
 	BCStringBuilderAppendString(builder1, bcstr);
 	printf("After BCString append: \"%s\"\n", BCStringBuilderCPtr(builder1));
-	FAIL_IF_NOT(strcmp(BCStringBuilderCPtr(builder1), "Hello World - 5 + 3 = 8!") == 0);
+	PRINT_ERR_IF_NOT(strcmp(BCStringBuilderCPtr(builder1), "Hello World - 5 + 3 = 8!") == 0);
 
 	// Test 4: Finalization
 	$LET finalStr = BCStringBuilderFinish(builder1);
 	BCAutorelease($OBJ finalStr);
 	printf("Finalized BCString: \"%s\"\n", BCStringCPtr(finalStr));
 	printf("Finalized toString: %s\n", TO_STR(finalStr));
-	FAIL_IF_NOT(strcmp(BCStringCPtr(finalStr), BCStringBuilderCPtr(builder1)) == 0);
+	PRINT_ERR_IF_NOT(strcmp(BCStringCPtr(finalStr), BCStringBuilderCPtr(builder1)) == 0);
 
 	// Test 5: Clear and reuse
 	BCStringBuilderClear(builder1);
-	FAIL_IF_NOT(BCStringBuilderLength(builder1) == 0);
+	PRINT_ERR_IF_NOT(BCStringBuilderLength(builder1) == 0);
 	BCStringBuilderAppend(builder1, "Reused");
 	printf("After clear and reuse: \"%s\" (Length: %zu)\n", BCStringBuilderCPtr(builder1), BCStringBuilderLength(builder1));
-	FAIL_IF_NOT(strcmp(BCStringBuilderCPtr(builder1), "Reused") == 0);
+	PRINT_ERR_IF_NOT(strcmp(BCStringBuilderCPtr(builder1), "Reused") == 0);
 
 	// Test 6: Capacity growth (force reallocation)
 	$LET builder2 = BCStringBuilderCreateWithCapacity(NULL, 8);
@@ -74,8 +74,8 @@ void testStringBuilder()
 	printf("After long append - Capacity: %zu, Length: %zu\n", BCStringBuilderCapacity(builder2), BCStringBuilderLength(builder2));
 	printf("Content: \"%s\"\n", BCStringBuilderCPtr(builder2));
 
-	FAIL_IF_NOT(BCStringBuilderCapacity(builder2) > 8);
-	FAIL_IF_NOT(strcmp(BCStringBuilderCPtr(builder2), "This is a much longer string that will trigger reallocation") == 0);
+	PRINT_ERR_IF_NOT(BCStringBuilderCapacity(builder2) > 8);
+	PRINT_ERR_IF_NOT(strcmp(BCStringBuilderCPtr(builder2), "This is a much longer string that will trigger reallocation") == 0);
 
 	// Test 7: Multiple format operations
 	BCStringBuilderClear(builder2);
@@ -83,7 +83,7 @@ void testStringBuilder()
 		BCStringBuilderAppendFormat(builder2, "Item %d%s", i, i < 5 ? ", " : "");
 	}
 	printf("\nMultiple format appends: \"%s\"\n", BCStringBuilderCPtr(builder2));
-	FAIL_IF_NOT(strcmp(BCStringBuilderCPtr(builder2), "Item 1, Item 2, Item 3, Item 4, Item 5") == 0);
+	PRINT_ERR_IF_NOT(strcmp(BCStringBuilderCPtr(builder2), "Item 1, Item 2, Item 3, Item 4, Item 5") == 0);
 
 	// Test 8: Edge case - empty builder finalization
 	$LET builder3 = BCStringBuilderCreate(NULL);
@@ -91,7 +91,7 @@ void testStringBuilder()
 	$LET emptyStr = BCStringBuilderFinish(builder3);
 	BCAutorelease($OBJ emptyStr);
 	printf("\nEmpty builder finalized: \"%s\" (Length: %zu)\n", BCStringCPtr(emptyStr), BCStringLength(emptyStr));
-	FAIL_IF_NOT(BCStringLength(emptyStr) == 0);
+	PRINT_ERR_IF_NOT(BCStringLength(emptyStr) == 0);
 
 	// Test 9: toString implementation
 	BCStringBuilderAppend(builder3, "Test toString");

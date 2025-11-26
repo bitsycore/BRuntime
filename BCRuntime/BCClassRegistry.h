@@ -3,6 +3,6 @@
 
 #include "BCTypes.h"
 
-BCClassId BCClassRegistryGetCount(void);
+BCClassIdSize BCClassRegistryGetCount(void);
 
 #endif // BCRUNTIME_BCCLASSREGISTRY_H
