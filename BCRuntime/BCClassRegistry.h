@@ -27,7 +27,7 @@ uint32_t BCClassRegister(BCClass *cls);
  * @param classId Compressed class index (returned from BCClassRegister)
  * @return Pointer to the BCClass, or NULL if index is invalid
  */
-BCClassRef BCClassDecompress(uint32_t classId);
+BCClassRef BCClassIdToRef(uint32_t classId);
 
 /**
  * Compress a class pointer to get its 32-bit index.
@@ -36,7 +36,7 @@ BCClassRef BCClassDecompress(uint32_t classId);
  * @param cls Pointer to a registered BCClass
  * @return Compressed index, or UINT32_MAX if not found
  */
-uint32_t BCClassCompress(BCClassRef cls);
+uint32_t BCClassRefToId(BCClassRef cls);
 
 /**
  * Get the total number of registered classes.

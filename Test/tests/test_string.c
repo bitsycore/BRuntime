@@ -10,7 +10,7 @@ void testString() {
 	const BCStringRef str3 = BCStringCreate("username"); // New Instance
 	BCAutorelease($OBJ str3);
 
-	$LET name = BCClassName(BCClassDecompress(($OBJ str1)->cls));
+	$LET name = BCClassName(BCClassIdToRef(($OBJ str1)->cls));
 	printf("Class Name: %s\n", TO_STR(name));
 
 	printf("StringPool Test: s1=%p, s2=%p (SamePtr? %s)\n", str1, str2, str1 == str2 ? "YES" : "NO");

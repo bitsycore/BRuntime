@@ -60,11 +60,11 @@ void testClassRegistry()
     {
         TEST("Class decompression");
 
-        const uint32_t idx1 = BCClassCompress(&TestClass1);
-        const uint32_t idx2 = BCClassCompress(&TestClass2);
+        const uint32_t idx1 = BCClassRefToId(&TestClass1);
+        const uint32_t idx2 = BCClassRefToId(&TestClass2);
 
-        const BCClassRef cls1 = BCClassDecompress(idx1);
-        const BCClassRef cls2 = BCClassDecompress(idx2);
+        const BCClassRef cls1 = BCClassIdToRef(idx1);
+        const BCClassRef cls2 = BCClassIdToRef(idx2);
 
         ASSERT(cls1 == &TestClass1, "Decompression returns correct class 1");
         ASSERT(cls2 == &TestClass2, "Decompression returns correct class 2");
@@ -76,9 +76,9 @@ void testClassRegistry()
     {
         TEST("Compression/decompression round-trip");
 
-        const uint32_t idx = BCClassCompress(&TestClass1);
-        const BCClassRef cls = BCClassDecompress(idx);
-        const uint32_t idx2 = BCClassCompress(cls);
+        const uint32_t idx = BCClassRefToId(&TestClass1);
+        const BCClassRef cls = BCClassIdToRef(idx);
+        const uint32_t idx2 = BCClassRefToId(cls);
 
         ASSERT(idx == idx2, "Round-trip preserves index");
         ASSERT(cls == &TestClass1, "Round-trip preserves class pointer");
@@ -109,8 +109,8 @@ void testClassRegistry()
         // Verify all can be decompressed correctly
         for (int i = 0; i < NUM_TEST_CLASSES; i++)
         {
-            const uint32_t idx = BCClassCompress(&manyClasses[i]);
-            const BCClassRef cls = BCClassDecompress(idx);
+            const uint32_t idx = BCClassRefToId(&manyClasses[i]);
+            const BCClassRef cls = BCClassIdToRef(idx);
             ASSERT(cls == &manyClasses[i], "Decompression after growth is correct");
         }
 
@@ -123,7 +123,7 @@ void testClassRegistry()
         TEST("BCObject integration");
 
         // Register a class if not already registered
-        uint32_t idx = BCClassCompress(&TestClass1);
+        uint32_t idx = BCClassRefToId(&TestClass1);
         if (idx == UINT32_MAX)
         {
             idx = BCClassRegister(&TestClass1);

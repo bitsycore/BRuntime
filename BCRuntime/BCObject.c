@@ -46,7 +46,7 @@ BCObjectRef BCObjectAllocWithConfig(const BCClassRef cls,
   }
 
   const BCObjectRef objRef = obj;
-  objRef->cls = BCClassCompress(cls); // Compress class pointer to 32-bit index
+  objRef->cls = BCClassRefToId(cls); // Compress class pointer to 32-bit index
   objRef->flags = flags;
   objRef->ref_count = 1;
   if (!useDefaultAllocator)
@@ -79,7 +79,7 @@ void BCRelease(const BCObjectRef obj) {
   const BC_atomic_uint16 old_count = BC_atomic_fetch_sub(&obj->ref_count, 1);
 
   if (old_count == 1) {
-    const BCClassRef cls = BCClassDecompress(obj->cls);
+    const BCClassRef cls = BCClassIdToRef(obj->cls);
     if (cls && cls->dealloc)
       cls->dealloc(obj);
     if (BC_FLAG_HAS(obj->flags, BC_OBJECT_FLAG_NON_DEFAULT_ALLOCATOR)) {
@@ -95,7 +95,7 @@ void BCRelease(const BCObjectRef obj) {
 BCObjectRef BCObjectCopy(const BCObjectRef obj) {
   if (!obj)
     return NULL;
-  BCClassRef cls = BCClassDecompress(obj->cls);
+  BCClassRef cls = BCClassIdToRef(obj->cls);
   if (cls && cls->copy) {
     return cls->copy(obj);
   }
@@ -107,7 +107,7 @@ BCObjectRef BCObjectCopy(const BCObjectRef obj) {
 uint32_t BCHash(const BCObjectRef obj) {
   if (!obj)
     return 0;
-  BCClassRef cls = BCClassDecompress(obj->cls);
+  BCClassRef cls = BCClassIdToRef(obj->cls);
   if (cls && cls->hash)
     return cls->hash(obj);
   return (uint32_t)(uintptr_t)obj;
@@ -120,21 +120,19 @@ BC_bool BCEqual(const BCObjectRef a, const BCObjectRef b) {
     return BC_false;
   if (a->cls != b->cls)
     return BC_false; // Compare compressed indices
-  BCClassRef cls = BCClassDecompress(a->cls);
+  BCClassRef cls = BCClassIdToRef(a->cls);
   if (cls && cls->equal)
     return cls->equal(a, b);
   return BC_false;
 }
 
 BCStringRef BCToString(const BCObjectRef obj) {
-  if (obj == NULL)
-    return BCStringPooledLiteral("<null>");
-  BCClassRef cls = BCClassDecompress(obj->cls);
+  if (obj == NULL) return BCStringPooledLiteral("<null>");
+  const BCClassRef cls = BCClassIdToRef(obj->cls);
   if (cls && cls->toString)
     return cls->toString(obj);
   if (cls) {
-    return BCStringCreate("<%s@%d>", BCStringCPtr(BCClassName(cls)),
-                          BCHash(obj));
+    return BCStringCreate("<%s@%d>", BCStringCPtr(BCClassName(cls)), BCHash(obj));
   }
   return BCStringPooledLiteral("<invalid>");
 }
@@ -142,13 +140,18 @@ BCStringRef BCToString(const BCObjectRef obj) {
 BC_bool BCObjectIsClass(const BCObjectRef obj, const BCClassRef cls) {
   if (!obj || !cls)
     return BC_false;
-  return BCClassDecompress(obj->cls) == cls;
+  return BCClassIdToRef(obj->cls) == cls;
 }
 
 BCClassRef BCObjectClass(const BCObjectRef obj) {
   if (!obj)
     return NULL;
-  return BCClassDecompress(obj->cls);
+  return BCClassIdToRef(obj->cls);
+}
+
+BCClassId BCObjectClassId(const BCObjectRef obj) {
+  if (!obj) return UINT32_MAX;
+  return obj->cls;
 }
 
 // =========================================================
@@ -246,7 +249,7 @@ static const char *FlagsToString(const BCClassRef cls, const uint16_t flags) {
   if (BC_FLAG_HAS(flags, BC_OBJECT_FLAG_CONSTANT))
     strcat(buffer, "CST ");
 
-  if (cls == BCStringClassId()) {
+  if (cls == BCClassIdToRef(BCStringClassId())) {
     if (flags & BC_OBJECT_FLAG_CLASS_MASK) {
       strcat(buffer, "STR(");
     }
@@ -333,7 +336,7 @@ void BCObjectDebugDump(void) {
     const BCObjectRef obj = node->obj == NULL ? &node->copy : node->obj;
     if (node->obj == NULL)
       freedCount++;
-    BCClassRef cls = BCClassDecompress(obj->cls);
+    const BCClassRef cls = BCClassIdToRef(obj->cls);
     const char *className = cls ? cls->name : "<unknown>";
     const char *flags = FlagsToString(cls, obj->flags);
     const int refCount = BC_atomic_load(&obj->ref_count);

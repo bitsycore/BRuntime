@@ -164,7 +164,7 @@ BCClassId BCClassRegister(const BCClassRef cls) {
   return current_index;
 }
 
-BCClassRef BCClassDecompress(const BCClassId classId) {
+BCClassRef BCClassIdToRef(const BCClassId classId) {
   if (classId >= Registry.total_classes) {
     return NULL;
   }
@@ -179,7 +179,7 @@ BCClassRef BCClassDecompress(const BCClassId classId) {
   return Registry.segments[segment][offset];
 }
 
-uint32_t BCClassCompress(const BCClassRef cls) {
+uint32_t BCClassRefToId(const BCClassRef cls) {
   if (cls == NULL) {
     return UINT32_MAX;
   }
@@ -189,7 +189,7 @@ uint32_t BCClassCompress(const BCClassRef cls) {
   // Linear search through all registered classes
   // This is slow but only needed for initialization/debugging
   for (uint32_t i = 0; i < Registry.total_classes; i++) {
-    if (BCClassDecompress(i) == cls) {
+    if (BCClassIdToRef(i) == cls) {
       BCMutexUnlock(&Registry.lock);
       return i;
     }
