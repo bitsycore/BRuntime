@@ -28,30 +28,19 @@ static void ObjectDebugMarkFreed(BCObjectRef obj);
 // =========================================================
 
 BCObjectRef BCObjectAllocWithConfig(const BCAllocatorRef alloc, const BCClassId cls, const size_t extraBytes, const uint16_t flags) {
-	BC_bool useDefaultAllocator = 0;
-	if (alloc == NULL || alloc == BCAllocatorGetDefault()) {
-		useDefaultAllocator = BC_true;
-	}
-
 	const BCClassRef class = BCClassIdToRef(cls);
 
-	void* obj = BCAllocatorAlloc(alloc, (useDefaultAllocator ? 0 : sizeof(BCAllocatorRef)) + class->allocSize + extraBytes);
+	const BCObjectRef obj = BCAllocatorAlloc(alloc, class->allocSize + extraBytes);
 
-	if (!useDefaultAllocator) {
-		obj = alloc;
-		obj += sizeof(BCAllocatorRef);
-	}
+	obj->cls = cls;
+	obj->flags = flags;
+	obj->ref_count = 1;
 
-	const BCObjectRef objRef = obj;
-	objRef->cls = cls;
-	objRef->flags = flags;
-	objRef->ref_count = 1;
-	if (!useDefaultAllocator)
-		BC_FLAG_SET(objRef->flags, BC_OBJECT_FLAG_NON_DEFAULT_ALLOCATOR);
+	BCObjectSetAllocator(obj, alloc);
 
 	ObjectDebugTrack(obj);
 
-	return objRef;
+	return obj;
 }
 
 BCObjectRef BCObjectAlloc(const BCAllocatorRef alloc, const BCClassId cls) {

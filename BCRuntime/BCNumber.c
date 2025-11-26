@@ -13,12 +13,12 @@
 // Common Type
 // Same layout as BCObject
 typedef struct BCNumber {
-	BCObject super;
+	BCObject base;
 } BCNumber;
 
 #define DEFINE_NUMBER_STRUCT(Type, Name)   \
     typedef struct BCNumber##Name {        \
-        BCObject super;                    \
+        BCObject base;                    \
         Type value;                        \
     } BCNumber##Name;
 
@@ -174,14 +174,14 @@ void ___BCINTERNAL___NumberInitialize(void) {
 	const uint32_t flags = BC_OBJECT_FLAG_CONSTANT;
 	const BCClassId boolClassId = kClassList[BCNumberTypeBool].id;
 	kBCNumberBoolTrue = (BCNumberBool) {
-		.super = {
+		.base = {
 			.cls = boolClassId,
 			.flags = flags
 		},
 		.value = BC_true
 	};
 	kBCNumberBoolFalse = (BCNumberBool) {
-		.super = {
+		.base = {
 			.cls = boolClassId,
 			.flags = flags,
 		},
@@ -196,7 +196,7 @@ void ___BCINTERNAL___NumberInitialize(void) {
 #define DEFINE_NUMBER_GET(Type, Name) \
 	Type BCNumberGet##Name(BCNumberRef num) { \
 		if (!num) return 0; \
-		switch (ClassToType(BCClassIdToRef(num->super.cls))) { \
+		switch (ClassToType(BCClassIdToRef(num->base.cls))) { \
 			case BCNumberTypeInt8:   return (Type)((BCNumberInt8*)num)->value; \
 			case BCNumberTypeInt16:  return (Type)((BCNumberInt16*)num)->value; \
 			case BCNumberTypeInt32:  return (Type)((BCNumberInt32*)num)->value; \
@@ -226,7 +226,7 @@ DEFINE_NUMBER_GET(BC_bool, Bool)
 
 BCNumberType BCNumberGetType(const BCNumberRef num) {
 	if (!num) return BCNumberTypeError;
-	return ClassToType(BCClassIdToRef(num->super.cls));
+	return ClassToType(BCClassIdToRef(num->base.cls));
 }
 
 // =============================================================================

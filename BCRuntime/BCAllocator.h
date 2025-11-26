@@ -3,7 +3,7 @@
 
 #include "BCTypes.h"
 
-#include <stddef.h>
+#include <string.h>
 
 typedef struct BCAllocator {
 	void* (* alloc)(size_t size, const void* ctx);
@@ -16,6 +16,5 @@ void* BCAllocatorRealloc(BCAllocatorRef allocator, void* ptr, size_t oldSize, si
 void BCAllocatorFree(BCAllocatorRef allocator, void* ptr);
 
 BCAllocatorRef BCAllocatorGetDefault();
-#define BCObjectGetAllocator(obj) ( BC_FLAG_HAS((obj)->flags, BC_OBJECT_FLAG_NON_DEFAULT_ALLOCATOR) ? (BCAllocatorRef)( (char*)(obj) - sizeof(BCAllocatorRef) ) : BCAllocatorGetDefault() )
 
 #endif //BCRUNTIME_BCALLOCATOR_H
