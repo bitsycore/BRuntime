@@ -26,7 +26,7 @@ static void ObjectDebugMarkFreed(BCObjectRef obj);
 // MARK: Public
 // =========================================================
 
-BCObjectRef BCObjectAllocWithConfig(const BCClassRef cls, BCAllocatorRef alloc, const size_t extraBytes, const uint16_t flags) {
+BCObjectRef BCObjectAllocWithConfig(const BCClassRef cls, const BCAllocatorRef alloc, const size_t extraBytes, const uint16_t flags) {
 	BC_bool useDefaultAllocator = 0;
 	if (alloc == NULL || alloc == BCAllocatorGetDefault()) {
 		useDefaultAllocator = BC_true;
@@ -65,7 +65,9 @@ BCObjectRef BCRetain(const BCObjectRef obj) {
 		|| !BC_FLAG_HAS(obj->flags, BC_OBJECT_FLAG_REFCOUNT)
 		|| BC_FLAG_HAS(obj->flags, BC_OBJECT_FLAG_CONSTANT)
 	) return obj;
+
 	BC_atomic_fetch_add(&obj->ref_count, 1);
+
 	return obj;
 }
 
@@ -75,7 +77,9 @@ void BCRelease(const BCObjectRef obj) {
 		|| !BC_FLAG_HAS(obj->flags, BC_OBJECT_FLAG_REFCOUNT)
 		|| BC_FLAG_HAS(obj->flags, BC_OBJECT_FLAG_CONSTANT)
 	) return;
+
 	const BC_atomic_uint16 old_count = BC_atomic_fetch_sub(&obj->ref_count, 1);
+
 	if (old_count == 1) {
 		if (obj->cls->dealloc) obj->cls->dealloc(obj);
 		if (BC_FLAG_HAS(obj->flags, BC_OBJECT_FLAG_NON_DEFAULT_ALLOCATOR)) {

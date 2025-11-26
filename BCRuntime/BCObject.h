@@ -20,6 +20,8 @@ typedef struct BCObject {
 #define BC_OBJECT_FLAG_CONSTANT 1 << 1
 // Object uses non-default allocator meaning it use extended layout
 #define BC_OBJECT_FLAG_NON_DEFAULT_ALLOCATOR 1 << 2
+// Object uses non-default allocator meaning it use extended layout
+#define BC_OBJECT_FLAG_INLINED 1 << 3
 // Flags 8 -> 15 Free usage for class
 #define BC_OBJECT_FLAG_CLASS_MASK 0xFF00
 
