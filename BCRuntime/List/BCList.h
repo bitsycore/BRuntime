@@ -3,10 +3,22 @@
 
 #include "../BCObject.h"
 
-extern const BCClassRef kBCListClassRef;
+// =========================================================
+// MARK: Class
+// =========================================================
+
+BCClassId BCListClassId(void);
+
+// =========================================================
+// MARK: Constructors
+// =========================================================
 
 BCListRef BCListCreate(void);
 BCListRef BCListCreateWithObjects(BC_bool retain, size_t count, ...);
+
+// =========================================================
+// MARK: Methods
+// =========================================================
 
 void BCListAdd(BCListRef list, BCObjectRef obj);
 BCObjectRef BCListGet(BCListRef list, size_t index);

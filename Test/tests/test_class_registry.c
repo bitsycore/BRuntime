@@ -130,7 +130,7 @@ void testClassRegistry()
         }
 
         // Create an object with this class
-        const BCObjectRef obj = BCObjectAlloc(NULL, &TestClass1);
+        const BCObjectRef obj = BCObjectAlloc(NULL, TestClass1.id);
         ASSERT(obj != NULL, "Object allocated");
 
         // Verify the class can be retrieved

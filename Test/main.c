@@ -6,7 +6,6 @@
 int RETRY = 1;
 
 int BCMain() {
-
 	BCObjectDebugSetEnabled(BC_true);
 	BCObjectDebugSetKeepFreed(BC_false);
 
@@ -21,9 +20,10 @@ int BCMain() {
 			testMap();
 			testStringBuilder();
 			testReleasePool();
+			//testClassRegistry();
 
-			BCStringPoolDebugDump();
 			BCObjectDebugDump();
+			BCStringPoolDebugDump();
 		}
 
 		BIG_TITLE("BC End");

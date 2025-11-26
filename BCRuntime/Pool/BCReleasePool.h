@@ -11,7 +11,7 @@
 
 typedef struct BCReleasePool* BCReleasePoolRef;
 
-BCClassRef BCReleasePoolClass();
+BCClassId BCReleasePoolClassId();
 
 BCReleasePoolRef BCReleasePoolCreate(BCAllocatorRef allocator, size_t initialCapacity);
 BCObjectRef BCReleasePoolAdd(BCReleasePoolRef pool, BCObjectRef obj);

@@ -19,7 +19,8 @@ typedef struct BCClass *BCClassRef;
 typedef struct BCObject *BCObjectRef;
 typedef struct BCAllocator *BCAllocatorRef;
 
-typedef uint32_t BCClassId;
+#define BC_CLASS_ID_INVALID UINT16_MAX
+typedef uint16_t BCClassId;
 
 #define $OBJ (BCObjectRef)
 

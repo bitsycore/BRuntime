@@ -104,8 +104,9 @@ BCObjectRef StringBuilderCopyImpl(const BCObjectRef obj) {
 // MARK: Class
 // =========================================================
 
-static const BCClass kBCStringBuilderClass = {
+static BCClass kBCStringBuilderClass = {
 	.name = "BCStringBuilder",
+	.id = BC_CLASS_ID_INVALID,
 	.dealloc = StringBuilderDeallocImpl,
 	.hash = StringBuilderHashImpl,
 	.equal = StringBuilderEqualImpl,
@@ -114,10 +115,12 @@ static const BCClass kBCStringBuilderClass = {
 	.allocSize = sizeof(BCStringBuilder)
 };
 
-static BCClassId kBCStringBuilderClassId;
-
 BCClassId BCStringBuilderClassId() {
-	return kBCStringBuilderClassId;
+	return kBCStringBuilderClass.id;
+}
+
+void ___BCINTERNAL___StringBuilderInitialize(void){
+	BCClassRegister(&kBCStringBuilderClass);
 }
 
 // =========================================================
@@ -131,7 +134,7 @@ BCStringBuilderRef BCStringBuilderCreate(const BCAllocatorRef allocator) {
 BCStringBuilderRef BCStringBuilderCreateWithCapacity(const BCAllocatorRef allocator, const size_t initialCapacity) {
 	const size_t capacity = initialCapacity > 0 ? initialCapacity : BC_STRING_BUILDER_DEFAULT_CAPACITY;
 
-	const BCStringBuilderRef builder = (BCStringBuilderRef)BCObjectAlloc(allocator, (BCClassRef)&kBCStringBuilderClass);
+	const BCStringBuilderRef builder = (BCStringBuilderRef)BCObjectAlloc(allocator, kBCStringBuilderClass.id);
 
 	builder->buffer = BCAllocatorAlloc(allocator, capacity);
 	builder->capacity = capacity;
@@ -213,7 +216,7 @@ const char* BCStringBuilderCPtr(const BCStringBuilderRef builder) {
 }
 
 // =========================================================
-// MARK: Operations
+// MARK: Methods
 // =========================================================
 
 void BCStringBuilderEnsureCapacity(const BCStringBuilderRef builder, const size_t requiredCapacity) {
@@ -232,7 +235,7 @@ void BCStringBuilderEnsureCapacity(const BCStringBuilderRef builder, const size_
 		return;
 	}
 	memcpy(newBuffer, builder->buffer, builder->length);
-	alloc->free(builder->buffer, alloc->context);
+	BCAllocatorFree(alloc, builder->buffer);
 	builder->buffer = newBuffer;
 	builder->capacity = newCapacity;
 
@@ -249,8 +252,4 @@ void BCStringBuilderClear(const BCStringBuilderRef builder) {
 BCStringRef BCStringBuilderFinish(const BCStringBuilderRef builder) {
 	if (!builder) return NULL;
 	return BCStringCreate("%.*s", (int)builder->length, builder->buffer);
-}
-
-void ___BCINTERNAL___StringBuilderInitialize(void){
-	kBCStringBuilderClassId = BCClassRegister((BCClassRef) &kBCStringBuilderClass);
 }

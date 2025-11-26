@@ -2,6 +2,6 @@
 
 #include "String/BCString.h"
 
-BCStringPooledRef BCClassName(const BCClassRef cls) {
-	return BCStringPooled(cls->name);
+BCStringPooledRef BCClassName(const BCClassId cid) {
+	return BCStringPooled(BCClassIdToRef(cid)->name);
 }

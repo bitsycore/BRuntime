@@ -3,6 +3,17 @@
 
 #include "BCTypes.h"
 
+// =========================================================
+// MARK: Singletons
+// =========================================================
+
+extern BCBoolRef kBCTrue;
+extern BCBoolRef kBCFalse;
+
+// =========================================================
+// MARK: Class
+// =========================================================
+
 typedef enum {
 	BCNumberTypeError = -1,
 	BCNumberTypeInt8 = 0,
@@ -18,6 +29,13 @@ typedef enum {
 	BCNumberTypeBool = 10
 } BCNumberType;
 
+BCClassId BCNumberClassId(BCNumberType type);
+BCNumberType BCNumberGetType(BCNumberRef num);
+
+// =========================================================
+// MARK: Constructors
+// =========================================================
+
 BCNumberInt8Ref BCNumberCreateInt8(int8_t value);
 BCNumberInt16Ref BCNumberCreateInt16(int16_t value);
 BCNumberInt32Ref BCNumberCreateInt32(int32_t value);
@@ -28,9 +46,6 @@ BCNumberUInt32Ref BCNumberCreateUInt32(uint32_t value);
 BCNumberUInt64Ref BCNumberCreateUInt64(uint64_t value);
 BCNumberFloatRef BCNumberCreateFloat(float value);
 BCNumberDoubleRef BCNumberCreateDouble(double value);
-
-extern BCBoolRef kBCTrue;
-extern BCBoolRef kBCFalse;
 
 static inline BCBoolRef ___BCINTERNAL___BoolSelect(const BC_bool val) { return val ? kBCTrue : kBCFalse; }
 
@@ -57,7 +72,9 @@ static inline BCBoolRef ___BCINTERNAL___BoolSelect(const BC_bool val) { return v
     BC_bool: ___BCINTERNAL___BoolSelect \
 )(val)
 
-BCNumberType BCNumberGetType(BCNumberRef num);
+// =========================================================
+// MARK: Methods
+// =========================================================
 
 #define ___BCINTERNAL___DECLARE_NUMBER_GET(Type, Name) \
 	Type BCNumberGet##Name(BCNumberRef num);

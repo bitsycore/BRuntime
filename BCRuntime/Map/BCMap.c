@@ -33,11 +33,11 @@ typedef struct BCMap {
 static void MapPut(BCMapEntry* buckets, size_t cap, BCObjectRef key, BCObjectRef val);
 
 // =========================================================
-// MARK: Class
+// MARK: Methods
 // =========================================================
 
 static void MapDeallocImpl(const BCObjectRef obj) {
-	const BCMapRef d = (BCMapRef) obj;
+	const BCMapRef d = (BCMapRef)obj;
 	for (size_t i = 0; i < d->capacity; i++) {
 		if (d->buckets[i].key) {
 			BCRelease(d->buckets[i].key);
@@ -48,7 +48,7 @@ static void MapDeallocImpl(const BCObjectRef obj) {
 }
 
 BCStringRef MapToStringImpl(const BCObjectRef obj) {
-	const BCMapRef d = (BCMapRef) obj;
+	const BCMapRef d = (BCMapRef)obj;
 	const BCStringBuilderRef sb = BCStringBuilderCreate(NULL);
 	BCStringBuilderAppend(sb, "{ ");
 
@@ -76,31 +76,41 @@ BCStringRef MapToStringImpl(const BCObjectRef obj) {
 	return result;
 }
 
+// =========================================================
+// MARK: Class
+// =========================================================
 
-static const BCClass kBCDictClass = {
-	"BCMap",
-	MapDeallocImpl,
-	NULL,
-	NULL,
-	MapToStringImpl,
-	NULL,
-	sizeof(BCMap)
+static BCClass kBCMapClass = {
+	.name = "BCMap",
+	.id = BC_CLASS_ID_INVALID,
+	.dealloc = MapDeallocImpl,
+	.hash = NULL,
+	.equal = NULL,
+	.toString = MapToStringImpl,
+	.copy = NULL,
+	.allocSize = sizeof(BCMap)
 };
 
-const BCClassRef kBCDictClassRef = (BCClassRef) &kBCDictClass;
+BCClassId BCMapClassId() {
+	return kBCMapClass.id;
+}
+
+void ___BCINTERNAL___MapInitialize(void) {
+	BCClassRegister(&kBCMapClass);
+}
 
 // =========================================================
-// MARK: Public
+// MARK: Constructors
 // =========================================================
 
 BCMapRef BCMapCreate() {
 	const BCMutableMapRef dic = BCMutableMapCreate();
 	dic->isMutable = BC_false;
-	return  dic;
+	return dic;
 }
 
 BCMutableMapRef BCMutableMapCreate() {
-	const BCMapRef d = (BCMapRef) BCObjectAlloc(NULL, (BCClassRef)&kBCDictClass);
+	const BCMapRef d = (BCMapRef)BCObjectAlloc(NULL, kBCMapClass.id);
 	d->isMutable = BC_true;
 	d->capacity = 8;
 	d->count = 0;
@@ -108,12 +118,16 @@ BCMutableMapRef BCMutableMapCreate() {
 	return d;
 }
 
+// =========================================================
+// MARK: Public
+// =========================================================
+
 void BCMapSet(const BCMutableMapRef d, const BCObjectRef key, const BCObjectRef val) {
-	BCMap *dict = d;
+	BCMap* dict = d;
 	if (!dict->isMutable) return;
 
 	// Resize Check
-	if (dict->count >= (size_t) ((double) dict->capacity * 0.75)) {
+	if (dict->count >= (size_t)((double)dict->capacity * 0.75)) {
 		const size_t newCap = dict->capacity * 2;
 		BCMapEntry* newBuckets = BCCalloc(newCap, sizeof(BCMapEntry));
 		if (!newBuckets) return;
@@ -140,7 +154,7 @@ void BCMapSet(const BCMutableMapRef d, const BCObjectRef key, const BCObjectRef 
 	}
 
 	// New Entry: COPY Key, RETAIN Value
-	dict->buckets[idx].key = BCObjectCopy(key);
+	dict->buckets[idx].key = BCCopy(key);
 	dict->buckets[idx].value = BCRetain(val);
 	dict->count++;
 }
@@ -183,7 +197,7 @@ BCMapRef BCMapCreateWithObjects(const BC_bool retain, const size_t count, ...) {
 	const BCMutableMapRef d = BCMutableMapCreate();
 	va_list args;
 	va_start(args, count);
-	for (size_t i = 0; i < count/2; i++) {
+	for (size_t i = 0; i < count / 2; i++) {
 		const BCObjectRef key = va_arg(args, BCObjectRef);
 		const BCObjectRef val = va_arg(args, BCObjectRef);
 		BCMapSet(d, key, val);

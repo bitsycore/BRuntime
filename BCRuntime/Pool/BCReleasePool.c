@@ -23,11 +23,11 @@ typedef struct BCReleasePool {
 // =========================================================
 
 static void ReleasePoolDealloc(const BCObjectRef obj) {
-    const BCReleasePool* pool = (BCReleasePool*)obj;
+	const BCReleasePool* pool = (BCReleasePool*)obj;
 
-    for (uint16_t i = 0; i < pool->count; i++) {
-        BCRelease(pool->stack[i]);
-    }
+	for (uint16_t i = 0; i < pool->count; i++) {
+		BCRelease(pool->stack[i]);
+	}
 
 	const BCAllocatorRef alloc = BCObjectGetAllocator(obj);
 	BCAllocatorFree(alloc, pool->stack);
@@ -37,18 +37,22 @@ static void ReleasePoolDealloc(const BCObjectRef obj) {
 // MARK: Class
 // =========================================================
 
-static const BCClass kBCReleasePoolClass = {
+static BCClass kBCReleasePoolClass = {
 	.name = "BCReleasePool",
 	.dealloc = ReleasePoolDealloc,
-	.hash =	NULL,
+	.hash = NULL,
 	.equal = NULL,
 	.toString = NULL,
 	.copy = NULL,
 	.allocSize = sizeof(BCReleasePool)
 };
 
-BCClassRef BCReleasePoolClass() {
-	return (BCClassRef)&kBCReleasePoolClass;
+BCClassId BCReleasePoolClassId() {
+	return kBCReleasePoolClass.id;
+}
+
+void ___BCINTERNAL___ReleasePoolInitialize(void) {
+	BCClassRegister((BCClassRef)&kBCReleasePoolClass);
 }
 
 // =========================================================
@@ -56,7 +60,7 @@ BCClassRef BCReleasePoolClass() {
 // =========================================================
 
 BCReleasePoolRef BCReleasePoolCreate(const BCAllocatorRef allocator, const size_t initialCapacity) {
-	const BCReleasePoolRef pool = (BCReleasePoolRef)BCObjectAlloc(allocator, BCReleasePoolClass());
+	const BCReleasePoolRef pool = (BCReleasePoolRef)BCObjectAlloc(allocator, kBCReleasePoolClass.id);
 	pool->count = 0;
 	pool->capacity = initialCapacity;
 	pool->stack = BCAllocatorAlloc(allocator, sizeof(BCObjectRef) * initialCapacity);

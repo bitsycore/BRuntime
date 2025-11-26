@@ -18,14 +18,14 @@
 BCClassId BCStringBuilderClassId();
 
 // =========================================================
-// MARK: Creation
+// MARK: Constructors
 // =========================================================
 
 BCStringBuilderRef BCStringBuilderCreate(BCAllocatorRef allocator);
 BCStringBuilderRef BCStringBuilderCreateWithCapacity(BCAllocatorRef allocator, size_t initialCapacity);
 
 // =========================================================
-// MARK: Append Operations
+// MARK: Appends
 // =========================================================
 
 void BCStringBuilderAppend(BCStringBuilderRef builder, const char* str);
@@ -36,7 +36,7 @@ __attribute__((format(printf, 2, 3)))
 void BCStringBuilderAppendFormat(BCStringBuilderRef builder, const char* fmt, ...);
 
 // =========================================================
-// MARK: Properties
+// MARK: Getters
 // =========================================================
 
 size_t BCStringBuilderLength(BCStringBuilderRef builder);

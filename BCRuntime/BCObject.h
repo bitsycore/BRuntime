@@ -9,7 +9,7 @@
 #include <stddef.h>
 
 typedef struct BCObject {
-  BCClassId cls; // 32-bit compressed class index
+  BCClassId cls;
   uint16_t flags;
   BC_atomic_uint16 ref_count;
 } BCObject;
@@ -26,23 +26,20 @@ typedef struct BCObject {
 // Flags 8 -> 15 Free usage for class
 #define BC_OBJECT_FLAG_CLASS_MASK 0xFF00
 
-BCObjectRef BCObjectAlloc(BCAllocatorRef alloc, BCClassRef cls);
-BCObjectRef BCObjectAllocWithConfig(BCClassRef cls, BCAllocatorRef alloc,
-                                    size_t extraBytes, uint16_t flags);
+BCObjectRef BCObjectAlloc(BCAllocatorRef alloc, BCClassId cls);
+BCObjectRef BCObjectAllocWithConfig(BCAllocatorRef alloc, BCClassId cls, size_t extraBytes, uint16_t flags);
 
 BCObjectRef BCRetain(BCObjectRef obj);
 void BCRelease(BCObjectRef obj);
 
-BCObjectRef BCObjectCopy(BCObjectRef obj);
+BCObjectRef BCCopy(BCObjectRef obj);
 uint32_t BCHash(BCObjectRef obj);
 BC_bool BCEqual(BCObjectRef a, BCObjectRef b);
 BCStringRef BCToString(BCObjectRef obj);
 
+BC_bool BCIsClass(BCObjectRef obj, BCClassId cls);
 BCClassRef BCObjectClass(BCObjectRef obj);
-BC_bool BCObjectIsClass(BCObjectRef obj, BCClassRef cls);
 
-// Helper to get decompressed class pointer from object
-#define BCObjectGetClass(obj) BCClassDecompress((obj)->cls)
 
 // =========================================================
 // MARK: Debug

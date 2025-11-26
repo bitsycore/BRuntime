@@ -23,7 +23,7 @@ typedef struct BCString {
 } BCString;
 
 // =========================================================
-// MARK: Class Methods
+// MARK: Impl
 // =========================================================
 
 uint32_t StringHashImpl(const BCObjectRef obj) {
@@ -59,7 +59,7 @@ BCObjectRef StringCopyImpl(const BCObjectRef obj) {
 // MARK: Class
 // =========================================================
 
-static const BCClass kBCStringClass = {
+static BCClass kBCStringClass = {
 	.name = "BCString",
 	.dealloc = NULL,
 	.hash = StringHashImpl,
@@ -69,10 +69,12 @@ static const BCClass kBCStringClass = {
 	.allocSize = sizeof(BCString)
 };
 
-static BCClassId kBCStringClassId;
-
 BCClassId BCStringClassId() {
-	return kBCStringClassId;
+	return kBCStringClass.id;
+}
+
+void ___BCINTERNAL___StringInitialize(void){
+	BCClassRegister(&kBCStringClass);
 }
 
 // =========================================================
@@ -143,8 +145,8 @@ static BCStringRef StringPoolGetOrInsert(const char* text, const size_t len, con
 	// Insert
 	const size_t extraAlloc = static_string ? sizeof(StringPoolNode) : sizeof(StringPoolNode) + (len + 1);
 	const BCStringRef newStr = (BCStringRef)BCObjectAllocWithConfig(
-		(BCClassRef)&kBCStringClass,
 		NULL,
+		kBCStringClass.id,
 		extraAlloc,
 		static_string ? BC_STRING_FLAG_POOLED | BC_STRING_FLAG_STATIC : BC_STRING_FLAG_POOLED
 	);
@@ -172,7 +174,7 @@ static BCStringRef StringPoolGetOrInsert(const char* text, const size_t len, con
 }
 
 // =========================================================
-// MARK: Public
+// MARK: Constructors
 // =========================================================
 
 BCStringRef BCStringCreate(const char* fmt, ...) {
@@ -182,7 +184,7 @@ BCStringRef BCStringCreate(const char* fmt, ...) {
 	va_copy(copy, args);
 	const int len = vsnprintf(NULL, 0, fmt, copy);
 	va_end(copy);
-	const BCStringRef str = (BCStringRef) BCObjectAllocWithConfig((BCClassRef) &kBCStringClass, NULL, len + 1, BC_OBJECT_FLAG_REFCOUNT);
+	const BCStringRef str = (BCStringRef) BCObjectAllocWithConfig(NULL, kBCStringClass.id, len + 1, BC_OBJECT_FLAG_REFCOUNT);
 	str->buffer = (char*) ( &str->buffer + 1 );
 	vsnprintf(str->buffer, len + 1, fmt, args);
 	va_end(args);
@@ -202,6 +204,10 @@ BCStringRef BCStringPooledWithInfo(const char* text, const size_t len, const uin
 	if (!text) return NULL;
 	return StringPoolGetOrInsert(text, len, hash, static_string);
 }
+
+// =========================================================
+// MARK: Methods
+// =========================================================
 
 size_t BCStringLength(const BCStringRef str) {
 	if (!str) return 0;
@@ -235,6 +241,7 @@ const char* BCStringCPtr(const BCStringRef str) {
 #define BLACK "\033[48;5;235m"
 #define RESET "\033[0m"
 #define BOLD "\033[1m"
+
 void BCStringPoolDebugDump(void) {
 	BCMutexLock(&StringPool.lock);
 	const clock_t start = clock();
@@ -296,8 +303,4 @@ void BCStringPoolDebugDump(void) {
 		"└────────┴────────────────────────────────────────────────┴────────────┴────────┴──────────────────┘\n"
 		"    %zu entr%s (%fms)\n\n", count, count == 1 ? "y" : "ies", elapsed
 	);
-}
-
-void ___BCINTERNAL___StringInitialize(void){
-	kBCStringClassId = BCClassRegister((BCClassRef) &kBCStringClass);
 }

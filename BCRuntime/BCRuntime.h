@@ -73,15 +73,15 @@ static inline BCObjectRef ___BCINTERNAL___Retain(void* obj) { return BCRetain(ob
 // MARK: ARRAY
 // ================================================
 
-#define ___BCINTERNAL___ARR_IMPL(_counter_, ...) ({ \
+#define ___BCINTERNAL___ARR_IMPL(_name_, ...) ({ \
     BCAutoreleasePoolPush(); \
-    BCListRef BC_M_CAT(___temp_arr_impl___,_counter_) = BCListCreateWithObjects( \
+    BCListRef _name_ = BCListCreateWithObjects( \
 		BC_false, /*NO RETAIN*/ \
         BC_ARG_COUNT(__VA_ARGS__), \
         BC_ARG_MAP($, __VA_ARGS__) \
     ); \
     BCAutoreleasePoolPop(); \
-    BC_M_CAT(___temp_arr_impl___,_counter_); \
+    _name_; \
 })
 
 #define $LIST(...) ___BCINTERNAL___ARR_IMPL(BC_M_CAT(___temp_arr_impl___,__COUNTER__), __VA_ARGS__)
@@ -93,7 +93,7 @@ static inline BCObjectRef ___BCINTERNAL___Retain(void* obj) { return BCRetain(ob
 
 #define ___BCINTERNAL___MAP_IMPL(_name_, ...) ({ \
     BCAutoreleasePoolPush();\
-    _Static_assert(((BC_ARG_COUNT(__VA_ARGS__)) % 2) == 0, "DIC requires an even number of arguments"); \
+    _Static_assert(((BC_ARG_COUNT(__VA_ARGS__)) % 2) == 0, "Map requires an even number of arguments"); \
     BCMapRef _name_ = BCMapCreateWithObjects( \
 		BC_false, /*NO RETAIN*/ \
         BC_ARG_COUNT(__VA_ARGS__), \

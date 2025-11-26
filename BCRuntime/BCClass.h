@@ -7,6 +7,7 @@
 
 typedef struct BCClass {
 	const char* name;
+	BCClassId id;
 	BCDeallocFunc dealloc;
 	BCHashFunc hash;
 	BCEqualFunc equal;
@@ -15,6 +16,10 @@ typedef struct BCClass {
 	size_t allocSize;
 } BCClass;
 
-BCStringPooledRef BCClassName(BCClassRef cls);
+BCClassId BCClassRegister(BCClassRef cls);
+BCStringPooledRef BCClassName(BCClassId cid);
+
+BCClassRef BCClassIdToRef(BCClassId cid);
+BCClassId BCClassRefToId(BCClassRef cls);
 
 #endif //BCRUNTIME_BCCLASS_H

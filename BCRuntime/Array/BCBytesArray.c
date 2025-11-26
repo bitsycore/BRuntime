@@ -19,8 +19,9 @@ typedef struct BCBytesArray {
 // MARK: Class
 // =========================================================
 
-static const BCClass kBCBytesArrayClass = {
+static BCClass kBCBytesArrayClass = {
 	.name = "BCBytesArray",
+	.id = BC_CLASS_ID_INVALID,
 	.dealloc = NULL,
 	.hash =	NULL,
 	.equal = NULL,
@@ -29,25 +30,35 @@ static const BCClass kBCBytesArrayClass = {
 	.allocSize = sizeof(BCBytesArray)
 };
 
-const BCClassRef kBCBytesArrayClassRef = (BCClassRef) &kBCBytesArrayClass;
+BCClassId BCBytesArrayClassId(void) {
+	return kBCBytesArrayClass.id;
+}
+
+void ___BCINTERNAL___BytesArrayClassInit(void) {
+	BCClassRegister(&kBCBytesArrayClass);
+}
 
 // =========================================================
-// MARK: Public
+// MARK: Constructors
 // =========================================================
 
 BCBytesArrayRef BCBytesArrayCreate(const size_t count) {
-	const BCBytesArrayRef arr = (BCBytesArrayRef) BCObjectAllocWithConfig((BCClassRef) &kBCBytesArrayClass, NULL, count * sizeof(uint8_t), BC_OBJECT_FLAG_REFCOUNT);
+	const BCBytesArrayRef arr = (BCBytesArrayRef) BCObjectAllocWithConfig(NULL, kBCBytesArrayClass.id, count * sizeof(uint8_t), BC_OBJECT_FLAG_REFCOUNT);
 	arr->count = count;
 	memset(arr->bytes, 0, count);
 	return arr;
 }
 
 BCBytesArrayRef BCBytesArrayCreateWithBytes(const size_t count, const uint8_t* bytes) {
-	const BCBytesArrayRef arr = (BCBytesArrayRef) BCObjectAllocWithConfig((BCClassRef) &kBCBytesArrayClass, NULL, count * sizeof(uint8_t), BC_OBJECT_FLAG_REFCOUNT);
+	const BCBytesArrayRef arr = (BCBytesArrayRef) BCObjectAllocWithConfig(NULL, kBCBytesArrayClass.id, count * sizeof(uint8_t), BC_OBJECT_FLAG_REFCOUNT);
 	arr->count = count;
 	memcpy(arr->bytes, bytes, count);
 	return arr;
 }
+
+// =========================================================
+// MARK: Methods
+// =========================================================
 
 uint8_t BCBytesArrayGet(const BCBytesArrayRef arr, const size_t idx) {
 	return arr->bytes[idx];

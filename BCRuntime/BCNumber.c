@@ -40,17 +40,17 @@ DEFINE_NUMBER_STRUCT(BC_bool, Bool)
 
 extern BCClass kClassList[];
 
-static BC_bool isNumber(BCClassRef cls);
-static BCClassRef typeToClass(BCNumberType type);
-static BCNumberType classToType(BCClassRef cls);
+static BC_bool IsNumber(BCClassRef cls);
+static BCClassRef TypeToClass(BCNumberType type);
+static BCNumberType ClassToType(BCClassRef cls);
 
 // =============================================================================
 // MARK: Create
 // =============================================================================
 
 #define IMPLEMENT_CREATE(Type, _Name_) \
-    BCNumber##_Name_##Ref BCNumberCreate##_Name_(Type value) { \
-        BCNumber##_Name_* obj = (BCNumber##_Name_*)BCObjectAlloc( NULL, (BCClassRef) &kClassList[BCNumberType##_Name_] ); \
+    BCNumber##_Name_##Ref BCNumberCreate##_Name_(const Type value) { \
+        BCNumber##_Name_* obj = (BCNumber##_Name_*)BCObjectAlloc( NULL, kClassList[BCNumberType##_Name_].id ); \
         if (obj) { \
             obj->value = value; \
         } \
@@ -78,7 +78,7 @@ static BCNumberBool kBCNumberBoolFalse;
 
 static uint32_t NumberHashImpl(const BCObjectRef obj) {
 	if (!obj) return 0;
-    const BCNumberType type = classToType(BCClassIdToRef(obj->cls));
+    const BCNumberType type = ClassToType(BCClassIdToRef(obj->cls));
     uint64_t v = 0;
     BCNumberGetExplicit((BCNumberRef)obj, &v, type);
     return (uint32_t)v;
@@ -87,8 +87,8 @@ static uint32_t NumberHashImpl(const BCObjectRef obj) {
 static BC_bool NumberEqualImpl(const BCObjectRef a, const BCObjectRef b) {
     if (a == b) return BC_true;
 	if (!a || !b) return BC_false;
-    const BCNumberType typeA = classToType(BCClassIdToRef(a->cls));
-    const BCNumberType typeB = classToType(BCClassIdToRef(b->cls));
+    const BCNumberType typeA = ClassToType(BCClassIdToRef(a->cls));
+    const BCNumberType typeB = ClassToType(BCClassIdToRef(b->cls));
     if (typeB == BCNumberTypeError) return BC_false;
 
     // Compare as double if either is float/double
@@ -112,7 +112,7 @@ static BC_bool NumberEqualImpl(const BCObjectRef a, const BCObjectRef b) {
 }
 
 static BCStringRef NumberToStringImpl(const BCObjectRef obj) {
-	switch (classToType(BCClassIdToRef(obj->cls))) {
+	switch (ClassToType(BCClassIdToRef(obj->cls))) {
 		case BCNumberTypeInt8: return BCStringCreate("%d", ((BCNumberInt8*)obj)->value);
 		case BCNumberTypeInt16: return BCStringCreate("%d", ((BCNumberInt16*)obj)->value);
 		case BCNumberTypeInt32: return BCStringCreate("%d", ((BCNumberInt32*)obj)->value);
@@ -136,6 +136,7 @@ static BCObjectRef NumberCopyImpl(const BCObjectRef obj) { return BCRetain(obj);
 
 #define INIT_CLASS(StrName) { \
     .name = "BCNumber" #StrName, \
+    .id = BC_CLASS_ID_INVALID, \
     .dealloc = NULL, \
     .hash = NumberHashImpl, \
     .equal = NumberEqualImpl, \
@@ -158,14 +159,44 @@ BCClass kClassList[] = {
 	INIT_CLASS(Bool),
 };
 
+BCBoolRef kBCTrue = (BCBoolRef) &kBCNumberBoolTrue;
+BCBoolRef kBCFalse = (BCBoolRef) &kBCNumberBoolFalse;
+
+#define CLASS_COUNT (sizeof(kClassList) / sizeof(kClassList[0]))
+
+BCClassId BCNumberClassId(const BCNumberType type) {
+	const BCClassRef cls = TypeToClass(type);
+	return cls ? cls->id : BC_CLASS_ID_INVALID;
+}
+
+void ___BCINTERNAL___NumberInitialize(void) {
+	for (size_t i = 0; i < CLASS_COUNT; i++) { BCClassRegister(&kClassList[i]); }
+	const uint32_t flags = BC_OBJECT_FLAG_CONSTANT;
+	const BCClassId boolClassId = kClassList[BCNumberTypeBool].id;
+	kBCNumberBoolTrue = (BCNumberBool) {
+		.super = {
+			.cls = boolClassId,
+			.flags = flags
+		},
+		.value = BC_true
+	};
+	kBCNumberBoolFalse = (BCNumberBool) {
+		.super = {
+			.cls = boolClassId,
+			.flags = flags,
+		},
+		.value = BC_false,
+	};
+}
+
 // =============================================================================
-// MARK: Public
+// MARK: Methods
 // =============================================================================
 
 #define DEFINE_NUMBER_GET(Type, Name) \
 	Type BCNumberGet##Name(BCNumberRef num) { \
 		if (!num) return 0; \
-		switch (classToType(BCClassIdToRef(num->super.cls))) { \
+		switch (ClassToType(BCClassIdToRef(num->super.cls))) { \
 			case BCNumberTypeInt8:   return (Type)((BCNumberInt8*)num)->value; \
 			case BCNumberTypeInt16:  return (Type)((BCNumberInt16*)num)->value; \
 			case BCNumberTypeInt32:  return (Type)((BCNumberInt32*)num)->value; \
@@ -195,51 +226,20 @@ DEFINE_NUMBER_GET(BC_bool, Bool)
 
 BCNumberType BCNumberGetType(const BCNumberRef num) {
 	if (!num) return BCNumberTypeError;
-	return classToType(BCClassIdToRef(num->super.cls));
+	return ClassToType(BCClassIdToRef(num->super.cls));
 }
 
 // =============================================================================
-// MARK: Static Utility
+// MARK: Internal
 // =============================================================================
 
-#define CLASS_COUNT (sizeof(kClassList) / sizeof(kClassList[0]))
+static inline BC_bool IsNumber(const BCClassRef cls) { return cls >= kClassList && cls < kClassList + CLASS_COUNT; }
 
-static inline BC_bool isNumber(const BCClassRef cls) { return cls >= kClassList && cls < kClassList + CLASS_COUNT; }
-
-static inline BCClassRef typeToClass(const BCNumberType type) {
+static inline BCClassRef TypeToClass(const BCNumberType type) {
 	if (type > BCNumberTypeBool || type <= BCNumberTypeError) return NULL;
 	return &kClassList[type];
 }
 
-static inline BCNumberType classToType(const BCClassRef cls) {
-	return !isNumber(cls) ? BCNumberTypeError : (BCNumberType) (cls - kClassList);
-}
-
-// =============================================================================
-// MARK: Init
-// =============================================================================
-
-BCBoolRef kBCTrue = (BCBoolRef) &kBCNumberBoolTrue;
-BCBoolRef kBCFalse = (BCBoolRef) &kBCNumberBoolFalse;
-
-void ___BCINTERNAL___NumberInitialize(void) {
-	BCClassId boolClassId = 0;
-	for (size_t i = 0; i < CLASS_COUNT; i++) {
-		boolClassId = BCClassRegister(&kClassList[i]);
-	}
-	const uint32_t flags = BC_OBJECT_FLAG_CONSTANT;
-	kBCNumberBoolTrue = (BCNumberBool) {
-		.super = {
-			.cls = boolClassId,
-			.flags = flags
-		},
-		.value = BC_true
-	};
-	kBCNumberBoolFalse = (BCNumberBool) {
-		.super = {
-			.cls = boolClassId,
-			.flags = flags,
-		},
-		.value = BC_false,
-	};
+static inline BCNumberType ClassToType(const BCClassRef cls) {
+	return !IsNumber(cls) ? BCNumberTypeError : (BCNumberType) (cls - kClassList);
 }

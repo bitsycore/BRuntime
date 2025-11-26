@@ -19,21 +19,13 @@ typedef struct BCList {
 } BCList;
 
 // =========================================================
-// MARK: Private
+// MARK: Forwards
 // =========================================================
 
-static void ListAdd(const BCListRef arr, const BCObjectRef item, const BC_bool retain) {
-	if (arr->count == arr->capacity) {
-		arr->capacity *= 2;
-		void* newBuff = BCRealloc(arr->items, arr->capacity * sizeof(BCObjectRef));
-		if (!newBuff) return;
-		arr->items = newBuff;
-	}
-	arr->items[arr->count++] = retain ? BCRetain(item) : item;
-}
+static void ListAdd(BCListRef arr, BCObjectRef item, BC_bool retain);
 
 // =========================================================
-// MARK: Class
+// MARK: Impl
 // =========================================================
 
 static void ArrayDeallocImpl(const BCObjectRef obj) {
@@ -62,32 +54,39 @@ static BCStringRef ArrayToStringImpl(const BCObjectRef obj) {
 	return result;
 }
 
-static const BCClass kBCListClass = {
-	"BCList",
-	ArrayDeallocImpl,
-	NULL,
-	NULL,
-	ArrayToStringImpl,
-	NULL,
-	sizeof(BCList)
+// =========================================================
+// MARK: Class
+// =========================================================
+
+static BCClass kBCListClass = {
+	.name= "BCList",
+	.id = BC_CLASS_ID_INVALID,
+	.dealloc = ArrayDeallocImpl,
+	.hash = NULL,
+	.equal = NULL,
+	.toString = ArrayToStringImpl,
+	.copy = NULL,
+	.allocSize = sizeof(BCList)
 };
 
-const BCClassRef kBCListClassRef = (BCClassRef) &kBCListClass;
+BCClassId BCListClassId(void) {
+	return kBCListClass.id;
+}
+
+void ___BCINTERNAL___ListInitialize(void) {
+	BCClassRegister(&kBCListClass);
+}
 
 // =========================================================
-// MARK: Public
+// MARK: Constructors
 // =========================================================
 
 BCListRef BCListCreate(void) {
-	const BCListRef arr = (BCListRef) BCObjectAlloc(NULL, (BCClassRef) &kBCListClass);
+	const BCListRef arr = (BCListRef) BCObjectAlloc(NULL, kBCListClass.id);
 	arr->capacity = 8;
 	arr->count = 0;
 	arr->items = BCCalloc(arr->capacity, sizeof(BCObjectRef));
 	return arr;
-}
-
-void BCListAdd(const BCListRef list, const BCObjectRef obj) {
-	ListAdd(list, obj, BC_true);
 }
 
 BCObjectRef BCListGet(const BCListRef list, const size_t index) {
@@ -105,4 +104,26 @@ BCListRef BCListCreateWithObjects(const BC_bool retain, const size_t count, ...)
 	}
 	va_end(args);
 	return arr;
+}
+
+// =========================================================
+// MARK: Methods
+// =========================================================
+
+void BCListAdd(const BCListRef list, const BCObjectRef obj) {
+	ListAdd(list, obj, BC_true);
+}
+
+// =========================================================
+// MARK: Internal
+// =========================================================
+
+static void ListAdd(const BCListRef arr, const BCObjectRef item, const BC_bool retain) {
+	if (arr->count == arr->capacity) {
+		arr->capacity *= 2;
+		void* newBuff = BCRealloc(arr->items, arr->capacity * sizeof(BCObjectRef));
+		if (!newBuff) return;
+		arr->items = newBuff;
+	}
+	arr->items[arr->count++] = retain ? BCRetain(item) : item;
 }
