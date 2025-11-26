@@ -8,12 +8,24 @@
 
 #include <stddef.h>
 
+#if BC_SETTINGS_UNALIGNED_ALLOCATOR_PTR == 1
+
+#define ALLOCATOR_PTR_SET uint8_t allocator_ptr[sizeof(uintptr_t)];
+
+#else
+
+#define ALLOCATOR_PTR_SET BCAllocatorRef allocator_ptr;
+
+#endif
+
 typedef struct BCObject {
 	BCClassId cls;
 	uint16_t flags;
 	BC_atomic_uint16 ref_count;
-	uint8_t allocator_ptr[sizeof(uintptr_t)];
+	ALLOCATOR_PTR_SET;
 } BCObject;
+
+#define BC_OBJECT_DEFAULT_FLAGS (BC_OBJECT_FLAG_REFCOUNT)
 
 // Flags 0 -> 7 Object
 // Use BC refcounting mechanism
@@ -23,7 +35,7 @@ typedef struct BCObject {
 // Object uses non-default allocator meaning it use extended layout
 #define BC_OBJECT_FLAG_NON_DEFAULT_ALLOCATOR 1 << 2
 // Object uses non-default allocator meaning it use extended layout
-#define BC_OBJECT_FLAG_INLINED 1 << 2
+#define BC_OBJECT_FLAG_INLINED 1 << 3
 // Flags 8 -> 15 Free usage for class
 #define BC_OBJECT_FLAG_CLASS_MASK 0xFF00
 
@@ -44,6 +56,8 @@ BCClassRef BCObjectClass(BCObjectRef obj);
 // =========================================================
 // MARK: Allocator Handling
 // =========================================================
+
+#if BC_SETTINGS_UNALIGNED_ALLOCATOR_PTR == 1
 
 static inline void* ___BCINTERNAL_ObjectAllocatorLoad(const BCObjectRef o) {
 	uintptr_t v;
@@ -67,6 +81,23 @@ static inline void ___BCINTERNAL_ObjectAllocatorSave(const BCObjectRef o, const 
             ___BCINTERNAL_ObjectAllocatorSave((obj), (allocator)); \
         } \
     } while (0)
+
+#else
+
+#define BCObjectGetAllocator(obj) ( BC_FLAG_HAS( (obj)->flags, BC_OBJECT_FLAG_NON_DEFAULT_ALLOCATOR ) ?  ( (obj)->allocator_ptr ) : BCAllocatorGetDefault() )
+
+#define BCObjectSetAllocator(obj, allocator) \
+	do { \
+		if ( allocator == NULL || allocator == BCAllocatorGetDefault() ) { \
+			BC_FLAG_CLEAR( (obj)->flags, BC_OBJECT_FLAG_NON_DEFAULT_ALLOCATOR ); \
+			(obj)->allocator_ptr = NULL; \
+		} else { \
+			BC_FLAG_SET( (obj)->flags, BC_OBJECT_FLAG_NON_DEFAULT_ALLOCATOR ); \
+			(obj)->allocator_ptr = (allocator); \
+		} \
+	} while (0)
+
+#endif
 
 // =========================================================
 // MARK: Debug

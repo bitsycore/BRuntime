@@ -13,6 +13,8 @@ typedef struct BCMap* BCMutableMapRef;
 
 BCClassId BCMapClassId();
 
+#define BC_MAP_FLAG_MUTABLE (1 << 8)
+
 // =========================================================
 // MARK: Constructors
 // =========================================================

@@ -20,7 +20,6 @@ typedef struct {
 
 typedef struct BCMap {
 	BCObject base;
-	BC_bool isMutable;
 	size_t capacity;
 	size_t count;
 	BCMapEntry* buckets;
@@ -105,16 +104,33 @@ void ___BCINTERNAL___MapInitialize(void) {
 
 BCMapRef BCMapCreate() {
 	const BCMutableMapRef dic = BCMutableMapCreate();
-	dic->isMutable = BC_false;
+	BC_FLAG_CLEAR(dic->base.flags, BC_MAP_FLAG_MUTABLE);
 	return dic;
 }
 
 BCMutableMapRef BCMutableMapCreate() {
-	const BCMapRef d = (BCMapRef)BCObjectAlloc(NULL, kBCMapClass.id);
-	d->isMutable = BC_true;
+	const BCMapRef d = (BCMapRef)BCObjectAllocWithConfig(NULL, kBCMapClass.id, 0, BC_OBJECT_DEFAULT_FLAGS | BC_MAP_FLAG_MUTABLE);
 	d->capacity = 8;
 	d->count = 0;
 	d->buckets = BCCalloc(d->capacity, sizeof(BCMapEntry));
+	return d;
+}
+
+BCMapRef BCMapCreateWithObjects(const BC_bool retain, const size_t count, ...) {
+	const BCMutableMapRef d = BCMutableMapCreate();
+	va_list args;
+	va_start(args, count);
+	for (size_t i = 0; i < count / 2; i++) {
+		const BCObjectRef key = va_arg(args, BCObjectRef);
+		const BCObjectRef val = va_arg(args, BCObjectRef);
+		BCMapSet(d, key, val);
+		if (!retain) {
+			BCRelease(key);
+			BCRelease(val);
+		}
+	}
+	va_end(args);
+	BC_FLAG_CLEAR(d->base.flags, BC_MAP_FLAG_MUTABLE);
 	return d;
 }
 
@@ -124,7 +140,7 @@ BCMutableMapRef BCMutableMapCreate() {
 
 void BCMapSet(const BCMutableMapRef d, const BCObjectRef key, const BCObjectRef val) {
 	BCMap* dict = d;
-	if (!dict->isMutable) return;
+	if (!BC_FLAG_HAS(dict->base.flags, BC_MAP_FLAG_MUTABLE)) return;
 
 	// Resize Check
 	if (dict->count >= (size_t)((double)dict->capacity * 0.75)) {
@@ -191,24 +207,6 @@ BCListRef BCMapValues(const BCMapRef d) {
 		}
 	}
 	return arr;
-}
-
-BCMapRef BCMapCreateWithObjects(const BC_bool retain, const size_t count, ...) {
-	const BCMutableMapRef d = BCMutableMapCreate();
-	va_list args;
-	va_start(args, count);
-	for (size_t i = 0; i < count / 2; i++) {
-		const BCObjectRef key = va_arg(args, BCObjectRef);
-		const BCObjectRef val = va_arg(args, BCObjectRef);
-		BCMapSet(d, key, val);
-		if (!retain) {
-			BCRelease(key);
-			BCRelease(val);
-		}
-	}
-	va_end(args);
-	d->isMutable = BC_false;
-	return d;
 }
 
 // =========================================================
