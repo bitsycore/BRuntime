@@ -20,7 +20,7 @@ void testArray() {
 	BCListAdd(array, $OBJ BCStringPooledLiteral("Editor") );
 	BCListAdd(array, $OBJ $(BC_true));
 
-	printf("Array Dump: %s\n", TO_STR(array));
-	printf("Get Element 0: %s\n", TO_STR(BCListGet(array, 0)));
-	printf("Get Element 1: %s\n", TO_STR(BCListGet(array, 1)));
+	log_fmt("Array Dump: %s\n", TO_STR(array));
+	log_fmt("Get Element 0: %s\n", TO_STR(BCListGet(array, 0)));
+	log_fmt("Get Element 1: %s\n", TO_STR(BCListGet(array, 1)));
 }

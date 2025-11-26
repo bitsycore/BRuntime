@@ -12,5 +12,5 @@ void testReleasePool(void) {
 	BCReleasePoolAdd(pool, $OBJ b);
 	BCReleasePoolAdd(pool, $OBJ c);
 
-	printf("Release Pool Finished\n");
+	log_fmt("Release Pool Finished\n");
 }

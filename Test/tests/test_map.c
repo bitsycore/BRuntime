@@ -25,12 +25,12 @@ void testMap() {
 	BCMapSet(dictionary, $OBJ key, $OBJ value);
 
 	// Description of Map
-	printf("%s\n", TO_STR(dictionary));
+	log_fmt("%s\n", TO_STR(dictionary));
 
 	// Get Value by Key
 	const BCObjectRef found = BCMapGet( dictionary, $OBJ str2); // Look up using pooled string
 	if (found) {
-		printf("\"username\": %s\n", TO_STR(found));
+		log_fmt("\"username\": %s\n", TO_STR(found));
 		BCRelease(found);
 	}
 
@@ -44,7 +44,7 @@ void testMap() {
 		"innerDic", $$MAP("abc", nine),
 		"innerArr", $$LIST(nine, three)
 	);
-	printf("%s\n", TO_STR(autoDic));
+	log_fmt("%s\n", TO_STR(autoDic));
 
 	$LET dic = $$MAP(
 		"title", "Test Map",
@@ -52,5 +52,5 @@ void testMap() {
 		"author", "Beej",
 		"isActive", BC_true
 	);
-	printf("%s\n", TO_STR(dic));
+	log_fmt("%s\n", TO_STR(dic));
 }

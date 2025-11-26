@@ -143,5 +143,5 @@ void testClassRegistry() {
 		BCRelease(obj);
 	}
 
-	printf("\n");
+	log_fmt("\n");
 }
