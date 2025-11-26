@@ -9,13 +9,9 @@
 #include <stddef.h>
 
 #if BC_SETTINGS_UNALIGNED_ALLOCATOR_PTR == 1
-
 #define ALLOCATOR_PTR_SET uint8_t allocator_ptr[sizeof(uintptr_t)];
-
 #else
-
 #define ALLOCATOR_PTR_SET BCAllocatorRef allocator_ptr;
-
 #endif
 
 typedef struct BCObject {

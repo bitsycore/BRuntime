@@ -11,6 +11,8 @@
 #include <string.h>
 #include <time.h>
 
+#include "Map/BCMap.h"
+
 // =========================================================
 // MARK: Forward
 // =========================================================
@@ -44,7 +46,7 @@ BCObjectRef BCObjectAllocWithConfig(const BCAllocatorRef alloc, const BCClassId 
 }
 
 BCObjectRef BCObjectAlloc(const BCAllocatorRef alloc, const BCClassId cls) {
-	return BCObjectAllocWithConfig(alloc, cls, 0, BC_OBJECT_FLAG_REFCOUNT);
+	return BCObjectAllocWithConfig(alloc, cls, 0, BC_OBJECT_DEFAULT_FLAGS);
 }
 
 BCObjectRef BCRetain(const BCObjectRef obj) {
@@ -217,7 +219,7 @@ static void ObjectDebugMarkFreed(const BCObjectRef obj) {
 	BCMutexUnlock(&ObjectDebugTracker.lock);
 }
 
-static const char* FlagsToString(const BCClassRef cls, const uint16_t flags) {
+static const char* FlagsToString(const BCClassId cls, const uint16_t flags) {
 	static char buffer[30];
 	buffer[0] = '\0';
 
@@ -225,15 +227,30 @@ static const char* FlagsToString(const BCClassRef cls, const uint16_t flags) {
 		strcat(buffer, "REF ");
 	if (BC_FLAG_HAS(flags, BC_OBJECT_FLAG_CONSTANT))
 		strcat(buffer, "CST ");
+	if (BC_FLAG_HAS(flags, BC_OBJECT_FLAG_NON_DEFAULT_ALLOCATOR))
+		strcat(buffer, "ALL ");
+	if (BC_FLAG_HAS(flags, BC_OBJECT_FLAG_INLINED))
+		strcat(buffer, "INL ");
 
-	if (cls == BCClassIdToRef(BCStringClassId())) {
+	if (cls == BCStringClassId()) {
 		if (flags & BC_OBJECT_FLAG_CLASS_MASK) {
 			strcat(buffer, "STR(");
 		}
 		if (BC_FLAG_HAS(flags, BC_STRING_FLAG_POOLED))
-			strcat(buffer, " POOL");
+			strcat(buffer, " POL");
 		if (BC_FLAG_HAS(flags, BC_STRING_FLAG_STATIC))
 			strcat(buffer, " CST");
+		if (flags & BC_OBJECT_FLAG_CLASS_MASK) {
+			strcat(buffer, " ) ");
+		}
+	}
+
+	if (cls == BCMapClassId()) {
+		if (flags & BC_OBJECT_FLAG_CLASS_MASK) {
+			strcat(buffer, "MAP(");
+		}
+		if (BC_FLAG_HAS(flags, BC_MAP_FLAG_MUTABLE))
+			strcat(buffer, " MUT");
 		if (flags & BC_OBJECT_FLAG_CLASS_MASK) {
 			strcat(buffer, " ) ");
 		}
@@ -296,7 +313,7 @@ void BCObjectDebugDump(void) {
 			freedCount++;
 		const BCClassRef cls = BCClassIdToRef(obj->cls);
 		const char* className = cls ? cls->name : "<unknown>";
-		const char* flags = FlagsToString(cls, obj->flags);
+		const char* flags = FlagsToString(obj->cls, obj->flags);
 		const int refCount = BC_atomic_load(&obj->ref_count);
 
 		// Truncate class name if too long

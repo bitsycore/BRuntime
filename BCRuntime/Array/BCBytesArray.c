@@ -43,14 +43,14 @@ void ___BCINTERNAL___BytesArrayClassInit(void) {
 // =========================================================
 
 BCBytesArrayRef BCBytesArrayCreate(const size_t count) {
-	const BCBytesArrayRef arr = (BCBytesArrayRef) BCObjectAllocWithConfig(NULL, kBCBytesArrayClass.id, count * sizeof(uint8_t), BC_OBJECT_FLAG_REFCOUNT);
+	const BCBytesArrayRef arr = (BCBytesArrayRef) BCObjectAllocWithConfig(NULL, kBCBytesArrayClass.id, count * sizeof(uint8_t), BC_OBJECT_DEFAULT_FLAGS);
 	arr->count = count;
 	memset(arr->bytes, 0, count);
 	return arr;
 }
 
 BCBytesArrayRef BCBytesArrayCreateWithBytes(const size_t count, const uint8_t* bytes) {
-	const BCBytesArrayRef arr = (BCBytesArrayRef) BCObjectAllocWithConfig(NULL, kBCBytesArrayClass.id, count * sizeof(uint8_t), BC_OBJECT_FLAG_REFCOUNT);
+	const BCBytesArrayRef arr = (BCBytesArrayRef) BCObjectAllocWithConfig(NULL, kBCBytesArrayClass.id, count * sizeof(uint8_t), BC_OBJECT_DEFAULT_FLAGS);
 	arr->count = count;
 	memcpy(arr->bytes, bytes, count);
 	return arr;
