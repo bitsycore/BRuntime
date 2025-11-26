@@ -287,35 +287,15 @@ void BCObjectDebugDump(void) {
 	printf("\n"
 		"                                                      " BOLD
 		"Object Dump" RESET "\n"
-		"┌"
-		"──────────────────"
-		"┬"
-		"──────────────────"
-		"┬"
-		"──────────────────────"
-		"┬"
-		"──────────"
-		"┬"
-		"───────────"
-		"┬"
-		"──────────────────────────────"
-		"┐\n"
-		"│" DGRAY BOLD "     Address      " RESET DGRAY "│" BOLD
-		"      Class       " RESET DGRAY "│" BOLD
-		"         Flags        " RESET DGRAY "│" BOLD " RefCount " RESET DGRAY
-		"│" BOLD " Allocator " RESET DGRAY "│" BOLD
-		"          Description         " RESET "│\n"
-		"├" BLACK "──────────────────"
-		"┼"
-		"──────────────────"
-		"┼"
-		"──────────────────────"
-		"┼"
-		"──────────"
-		"┼"
-		"───────────"
-		"┼"
-		"──────────────────────────────" RESET "┤\n");
+		"┌──────────────────┬──────────────────┬──────────────────────┬──────────┬───────────┬──────────────────────────────┐\n"
+		"│" DGRAY BOLD "     Address      " RESET DGRAY
+		"│" BOLD    "      Class       "    RESET DGRAY
+		"│" BOLD  "         Flags        "  RESET DGRAY
+		"│" BOLD        " RefCount "        RESET DGRAY
+		"│" BOLD        " Allocator "       RESET DGRAY
+		"│" BOLD "          Description         " RESET "│\n"
+		"├" BLACK "──────────────────┼──────────────────┼──────────────────────┼──────────┼───────────┼──────────────────────────────" RESET "┤\n"
+	);
 
 	// Print entries
 	size_t count = 0;
