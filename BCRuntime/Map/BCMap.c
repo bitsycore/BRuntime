@@ -59,7 +59,7 @@ BCStringRef MapToStringImpl(const BCObjectRef obj) {
 				BCStringBuilderAppend(sb, ", ");
 			}
 			const BCStringRef keyStr = BCToString(d->buckets[i].key);
-			const BCStringRef valStr = d->buckets[i].value->cls->toString(d->buckets[i].value);
+			const BCStringRef valStr = BCToString(d->buckets[i].value);
 			BCStringBuilderAppendString(sb, keyStr);
 			BCStringBuilderAppendChar(sb, ':');
 			BCStringBuilderAppendChar(sb, ' ');

@@ -1,6 +1,7 @@
 #ifndef BCRUNTIME_BCOBJECT_H
 #define BCRUNTIME_BCOBJECT_H
 
+#include "BCClassRegistry.h"
 #include "BCSettings.h"
 #include "BCTypes.h"
 #include "Utilities/BCAtomics.h"
@@ -8,9 +9,9 @@
 #include <stddef.h>
 
 typedef struct BCObject {
-	BCClassRef cls;
-	uint16_t flags;
-	BC_atomic_uint16 ref_count;
+  BCClassId cls; // 32-bit compressed class index
+  uint16_t flags;
+  BC_atomic_uint16 ref_count;
 } BCObject;
 
 // Flags 0 -> 7 Object
@@ -26,7 +27,8 @@ typedef struct BCObject {
 #define BC_OBJECT_FLAG_CLASS_MASK 0xFF00
 
 BCObjectRef BCObjectAlloc(BCAllocatorRef alloc, BCClassRef cls);
-BCObjectRef BCObjectAllocWithConfig(BCClassRef cls, BCAllocatorRef alloc, size_t extraBytes, uint16_t flags);
+BCObjectRef BCObjectAllocWithConfig(BCClassRef cls, BCAllocatorRef alloc,
+                                    size_t extraBytes, uint16_t flags);
 
 BCObjectRef BCRetain(BCObjectRef obj);
 void BCRelease(BCObjectRef obj);
@@ -38,6 +40,9 @@ BCStringRef BCToString(BCObjectRef obj);
 
 BCClassRef BCObjectClass(BCObjectRef obj);
 BC_bool BCObjectIsClass(BCObjectRef obj, BCClassRef cls);
+
+// Helper to get decompressed class pointer from object
+#define BCObjectGetClass(obj) BCClassDecompress((obj)->cls)
 
 // =========================================================
 // MARK: Debug
@@ -57,4 +62,4 @@ void BCObjectDebugDump(void);
 
 #endif
 
-#endif //BCRUNTIME_BCOBJECT_H
+#endif // BCRUNTIME_BCOBJECT_H

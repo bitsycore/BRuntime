@@ -39,8 +39,10 @@ static inline uint32_t ___BCINTERNAL___StringHasher(const char* s) {
 // MARK: Class
 // =========================================================
 
-extern const BCClassRef kBCStringClassRef;
+BCClassId BCStringClassId();
 
+// =========================================================
+// MARK: Constructor
 // =========================================================
 
 __attribute__((format(printf, 1, 2)))
@@ -51,6 +53,8 @@ BCStringPooledRef BCStringPooledWithInfo(const char* text, size_t len, uint32_t 
 #define           BCStringPooledLiteral(__text__) \
     BCStringPooledWithInfo( BC_REQUIRE_LITERAL(__text__), sizeof(__text__) / sizeof((__text__)[0]) - 1, ___BCINTERNAL___StringHasher((__text__)), BC_true )
 
+// =========================================================
+// MARK: Properties
 // =========================================================
 
 size_t BCStringLength(BCStringRef str);

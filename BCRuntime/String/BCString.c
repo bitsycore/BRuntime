@@ -69,7 +69,11 @@ static const BCClass kBCStringClass = {
 	.allocSize = sizeof(BCString)
 };
 
-const BCClassRef kBCStringClassRef = (BCClassRef) &kBCStringClass;
+static BCClassId kBCStringClassId;
+
+BCClassId BCStringClassId() {
+	return kBCStringClassId;
+}
 
 // =========================================================
 // MARK: Pool
@@ -292,4 +296,8 @@ void BCStringPoolDebugDump(void) {
 		"└────────┴────────────────────────────────────────────────┴────────────┴────────┴──────────────────┘\n"
 		"    %zu entr%s (%fms)\n\n", count, count == 1 ? "y" : "ies", elapsed
 	);
+}
+
+void ___BCINTERNAL___StringInitialize(void){
+	kBCStringClassId = BCClassRegister((BCClassRef) &kBCStringClass);
 }

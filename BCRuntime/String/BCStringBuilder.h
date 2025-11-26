@@ -15,7 +15,7 @@
 // MARK: Class
 // =========================================================
 
-BCClassRef BCStringBuilderClass();
+BCClassId BCStringBuilderClassId();
 
 // =========================================================
 // MARK: Creation

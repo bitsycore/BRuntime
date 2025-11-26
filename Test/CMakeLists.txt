@@ -8,6 +8,7 @@ add_executable(
 		tests/test_map.c
 		tests/tests.h
 		tests/test_pool.c
+		tests/test_class_registry.c
 )
 
 target_include_directories(

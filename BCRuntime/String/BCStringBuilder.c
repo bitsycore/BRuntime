@@ -67,7 +67,7 @@ uint32_t StringBuilderHashImpl(const BCObjectRef obj) {
 BC_bool StringBuilderEqualImpl(const BCObjectRef a, const BCObjectRef b) {
 	if (a == b) return BC_true;
 
-	if (a->cls == BCStringBuilderClass() && b->cls == BCStringBuilderClass()) {
+	if (a->cls == BCStringBuilderClassId() && b->cls == BCStringBuilderClassId()) {
 		const BCStringBuilderRef sb1 = (BCStringBuilderRef)a;
 		const BCStringBuilderRef sb2 = (BCStringBuilderRef)b;
 
@@ -114,10 +114,10 @@ static const BCClass kBCStringBuilderClass = {
 	.allocSize = sizeof(BCStringBuilder)
 };
 
-const BCClassRef kBCStringBuilderClassRef = (BCClassRef)&kBCStringBuilderClass;
+static BCClassId kBCStringBuilderClassId;
 
-BCClassRef BCStringBuilderClass() {
-	return kBCStringBuilderClassRef;
+BCClassId BCStringBuilderClassId() {
+	return kBCStringBuilderClassId;
 }
 
 // =========================================================
@@ -249,4 +249,8 @@ void BCStringBuilderClear(const BCStringBuilderRef builder) {
 BCStringRef BCStringBuilderFinish(const BCStringBuilderRef builder) {
 	if (!builder) return NULL;
 	return BCStringCreate("%.*s", (int)builder->length, builder->buffer);
+}
+
+void ___BCINTERNAL___StringBuilderInitialize(void){
+	kBCStringBuilderClassId = BCClassRegister((BCClassRef) &kBCStringBuilderClass);
 }
