@@ -1,12 +1,9 @@
 #include "BCAutoreleasePool.h"
 
-#include "../BCAllocator.h"
 #include "../Utilities/BC_Keywords.h"
 #include "../Utilities/BC_Memory.h"
 
-#include <string.h>
-
-#define CAPACITY 255
+#define CAPACITY 64
 
 // =========================================================
 // MARK: Struct

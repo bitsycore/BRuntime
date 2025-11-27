@@ -1,8 +1,7 @@
 #include "../tests/tests.h"
 
-#include <BCRuntime/BCObject.h>
-#include <BCRuntime/Class/BCClass.h>
-#include <BCRuntime/Class/BCClassRegistry.h>
+#include <BCRuntime/Core/BCClass.h>
+#include <BCRuntime/Object/BCObject.h>
 
 static BCClass TestClass1 = {
 	.name = "TestClass1",
@@ -41,9 +40,9 @@ void testClassRegistry() {
 	{
 		TEST("Basic class registration");
 
-		const BCClassId idx1 = BCClassRegister(&TestClass1);
-		const BCClassId idx2 = BCClassRegister(&TestClass2);
-		const BCClassId idx3 = BCClassRegister(&TestClass3);
+		const BCClassId idx1 = BCClassRegistryInsert(&TestClass1);
+		const BCClassId idx2 = BCClassRegistryInsert(&TestClass2);
+		const BCClassId idx3 = BCClassRegistryInsert(&TestClass3);
 
 		ASSERT(idx1 != BC_CLASS_ID_INVALID, "Class 1 registered successfully");
 		ASSERT(idx2 != BC_CLASS_ID_INVALID, "Class 2 registered successfully");
@@ -58,11 +57,11 @@ void testClassRegistry() {
 	{
 		TEST("Class decompression");
 
-		const BCClassId idx1 = BCClassRefToId(&TestClass1);
-		const BCClassId idx2 = BCClassRefToId(&TestClass2);
+		const BCClassId idx1 = BCClassGetId(&TestClass1);
+		const BCClassId idx2 = BCClassGetId(&TestClass2);
 
-		const BCClassRef cls1 = BCClassIdToRef(idx1);
-		const BCClassRef cls2 = BCClassIdToRef(idx2);
+		const BCClassRef cls1 = BCClassIdGetRef(idx1);
+		const BCClassRef cls2 = BCClassIdGetRef(idx2);
 
 		ASSERT(cls1 == &TestClass1, "Decompression returns correct class 1");
 		ASSERT(cls2 == &TestClass2, "Decompression returns correct class 2");
@@ -74,9 +73,9 @@ void testClassRegistry() {
 	{
 		TEST("Compression/decompression round-trip");
 
-		const BCClassId idx = BCClassRefToId(&TestClass1);
-		const BCClassRef cls = BCClassIdToRef(idx);
-		const BCClassId idx2 = BCClassRefToId(cls);
+		const BCClassId idx = BCClassGetId(&TestClass1);
+		const BCClassRef cls = BCClassIdGetRef(idx);
+		const BCClassId idx2 = BCClassGetId(cls);
 
 		ASSERT(idx == idx2, "Round-trip preserves index");
 		ASSERT(cls == &TestClass1, "Round-trip preserves class pointer");
@@ -101,14 +100,14 @@ void testClassRegistry() {
 			manyClasses[i].copy = NULL;
 			manyClasses[i].allocSize = sizeof(BCObject);
 
-			const BCClassId idx = BCClassRegister(&manyClasses[i]);
+			const BCClassId idx = BCClassRegistryInsert(&manyClasses[i]);
 			ASSERT_SILENT(idx != BC_CLASS_ID_INVALID, "Class registered in segment growth");
 		}
 
 		// Verify all can be decompressed correctly
 		for (int i = 0; i < NUM_TEST_CLASSES; i++) {
-			const BCClassId idx = BCClassRefToId(&manyClasses[i]);
-			const BCClassRef cls = BCClassIdToRef(idx);
+			const BCClassId idx = BCClassGetId(&manyClasses[i]);
+			const BCClassRef cls = BCClassIdGetRef(idx);
 			ASSERT_SILENT(cls == &manyClasses[i], "Decompression after growth is correct");
 		}
 
@@ -121,9 +120,9 @@ void testClassRegistry() {
 		TEST("BCObject integration");
 
 		// Register a class if not already registered
-		uint32_t idx = BCClassRefToId(&TestClass1);
+		uint32_t idx = BCClassGetId(&TestClass1);
 		if (idx == UINT32_MAX) {
-			idx = BCClassRegister(&TestClass1);
+			idx = BCClassRegistryInsert(&TestClass1);
 		}
 
 		// Create an object with this class

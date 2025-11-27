@@ -1,7 +1,7 @@
 #ifndef BCRUNTIME_BCBYTESARRAY_H
 #define BCRUNTIME_BCBYTESARRAY_H
 
-#include "../BCTypes.h"
+#include "../Core/BCTypes.h"
 
 #include <stddef.h>
 #include <stdint.h>

@@ -1,15 +1,14 @@
 #include "BCStringBuilder.h"
 
+#include "BCObject.h"
+#include "BCString.h"
+#include "../Core/BCAllocator.h"
+#include "../Core/BCClass.h"
+
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include "BCString.h"
-#include "../BCAllocator.h"
-#include "../BCObject.h"
-#include "../Class/BCClass.h"
-#include "../Class/BCClassRegistry.h"
 
 // =========================================================
 // MARK: Struct
@@ -120,8 +119,8 @@ BCClassId BCStringBuilderClassId() {
 	return kBCStringBuilderClass.id;
 }
 
-void ___BCINTERNAL___StringBuilderInitialize(void){
-	BCClassRegister(&kBCStringBuilderClass);
+void ___BCINTERNAL___StringBuilderInitialize(void) {
+	BCClassRegistryInsert(&kBCStringBuilderClass);
 }
 
 // =========================================================

@@ -1,10 +1,10 @@
 #ifndef BCRUNTIME_BCOBJECT_H
 #define BCRUNTIME_BCOBJECT_H
 
-#include "BCAllocator.h"
-#include "BCSettings.h"
-#include "BCTypes.h"
-#include "Utilities/BC_Atomics.h"
+#include "../Core/BCAllocator.h"
+#include "../BCSettings.h"
+#include "../Core/BCTypes.h"
+#include "../Utilities/BC_Atomics.h"
 
 #include <stddef.h>
 

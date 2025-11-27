@@ -1,42 +1,42 @@
 add_library(BCRuntime
-		Array/BCBytesArray.c
-		Array/BCBytesArray.h
-		BCObject.c
-		BCObject.h
 		BCRuntime.c
 		BCRuntime.h
 		BCSettings.h
-		BCTypes.h
-		List/BCList.c
-		List/BCList.h
-		Map/BCMap.c
-		Map/BCMap.h
-		Number/BCNumber.c
-		Number/BCNumber.h
-		Pool/BCAutoreleasePool.c
-		Pool/BCAutoreleasePool.h
-		Set/BCSet.c
-		Set/BCSet.h
-		String/BCString.c
-		String/BCString.h
-		String/BCStringBuilder.c
-		String/BCStringBuilder.h
+		Core/BCTypes.h
+		Core/BCAllocator.c
+		Core/BCAllocator.h
+		Core/BCAutoreleasePool.c
+		Core/BCAutoreleasePool.h
+		Core/BCClass.c
+		Core/BCClass.h
+		Core/BCClassRegistry.c
+		Core/BCBoxMacro.h
+		Object/BCBytesArray.c
+		Object/BCBytesArray.h
+		Object/BCList.c
+		Object/BCList.h
+		Object/BCMap.c
+		Object/BCMap.h
+		Object/BCNumber.c
+		Object/BCNumber.h
+		Object/BCObject.c
+		Object/BCObject.h
+		Object/BCReleasePool.c
+		Object/BCReleasePool.h
+		Object/BCSet.c
+		Object/BCSet.h
+		Object/BCString.c
+		Object/BCString.h
+		Object/BCStringBuilder.c
+		Object/BCStringBuilder.h
 		Utilities/BC_AnsiEscape.h
-		Utilities/BC_Keywords.h
-		Utilities/BC_Macro.h
-        Utilities/BC_Memory.h
-		BCAllocator.c
 		Utilities/BC_Atomics.h
 		Utilities/BC_Compat.c
 		Utilities/BC_Compat.h
+		Utilities/BC_Keywords.h
+		Utilities/BC_Macro.h
 		Utilities/BC_Memory.c
+		Utilities/BC_Memory.h
 		Utilities/BC_Threads.c
 		Utilities/BC_Threads.h
-        BCAllocator.h
-		Class/BCClass.c
-		Class/BCClass.h
-		Class/BCClassRegistry.c
-		Class/BCClassRegistry.h
-		Pool/BCReleasePool.c
-		Pool/BCReleasePool.h
 )

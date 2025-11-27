@@ -2,7 +2,8 @@
 
 #include <string.h>
 
-#include "Utilities/BC_Memory.h"
+#include "../Utilities/BC_Keywords.h"
+#include "../Utilities/BC_Memory.h"
 
 // =========================================================
 // MARK: Default Allocator
@@ -18,14 +19,17 @@ static void AllocatorDefaultFree(void* ptr, const void* ctx) {
 	BCFree(ptr);
 }
 
-static BCAllocator kBCAllocatorDefault = {AllocatorDefaultAlloc, AllocatorDefaultFree, NULL};
+static BCAllocator const kBCAllocatorSystem = {AllocatorDefaultAlloc, AllocatorDefaultFree, NULL};
+const BCAllocatorRef kBCAllocatorRefSystem = (BCAllocatorRef)&kBCAllocatorSystem;
+
+$TLS BCAllocatorRef gBCAllocatorDefault = kBCAllocatorRefSystem;
 
 // =========================================================
 // MARK: Public
 // =========================================================
 
 void* BCAllocatorAlloc(BCAllocatorRef allocator, const size_t size) {
-	if (!allocator) allocator = &kBCAllocatorDefault;
+	if (!allocator) allocator = kBCAllocatorRefSystem;
 	return allocator->alloc(size, allocator->context);
 }
 
@@ -41,10 +45,14 @@ void* BCAllocatorRealloc(const BCAllocatorRef allocator, void* ptr, const size_t
 }
 
 void BCAllocatorFree(BCAllocatorRef allocator, void* ptr) {
-	if (!allocator) allocator = &kBCAllocatorDefault;
+	if (!allocator) allocator = kBCAllocatorRefSystem;
 	allocator->free(ptr, allocator->context);
 }
 
 BCAllocatorRef BCAllocatorGetDefault() {
-	return &kBCAllocatorDefault;
+	return gBCAllocatorDefault;
+}
+
+void BCAllocatorSetDefault(const BCAllocatorRef allocator) {
+	gBCAllocatorDefault = allocator ? allocator : kBCAllocatorRefSystem;
 }

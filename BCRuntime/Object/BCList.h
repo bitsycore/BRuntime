@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 
-#include "../BCObject.h"
+#include "BCObject.h"
 
 // =========================================================
 // MARK: Class

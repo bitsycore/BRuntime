@@ -1,18 +1,16 @@
 #include "BCObject.h"
 
-#include "BCAllocator.h"
-#include "Class/BCClass.h"
-#include "Class/BCClassRegistry.h"
-#include "String/BCString.h"
-#include "Utilities/BC_Memory.h"
-#include "Utilities/BC_Threads.h"
+#include "BCMap.h"
+#include "BCString.h"
+#include "../Core/BCAllocator.h"
+#include "../Core/BCClass.h"
+#include "../Utilities/BC_Compat.h"
+#include "../Utilities/BC_Memory.h"
+#include "../Utilities/BC_Threads.h"
 
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
-
-#include "Map/BCMap.h"
-#include "Utilities/BC_Compat.h"
 
 // =========================================================
 // MARK: Forward
@@ -31,7 +29,7 @@ static void ObjectDebugMarkFreed(BCObjectRef obj);
 // =========================================================
 
 BCObjectRef BCObjectAllocWithConfig(const BCAllocatorRef alloc, const BCClassId cls, const size_t extraBytes, const uint16_t flags) {
-	const BCClassRef class = BCClassIdToRef(cls);
+	const BCClassRef class = BCClassIdGetRef(cls);
 
 	const BCObjectRef obj = BCAllocatorAlloc(alloc, class->allocSize + extraBytes);
 
@@ -68,7 +66,7 @@ void BCRelease(const BCObjectRef obj) {
 	const BC_atomic_uint16 old_count = BC_atomic_fetch_sub(&obj->ref_count, 1);
 
 	if (old_count == 1) {
-		const BCClassRef cls = BCClassIdToRef(obj->cls);
+		const BCClassRef cls = BCClassIdGetRef(obj->cls);
 		if (cls && cls->dealloc)
 			cls->dealloc(obj);
 		if (BC_FLAG_HAS(obj->flags, BC_OBJECT_FLAG_NON_DEFAULT_ALLOCATOR)) {
@@ -84,7 +82,7 @@ void BCRelease(const BCObjectRef obj) {
 
 BCObjectRef BCCopy(const BCObjectRef obj) {
 	if (!obj) return NULL;
-	const BCClassRef cls = BCClassIdToRef(obj->cls);
+	const BCClassRef cls = BCClassIdGetRef(obj->cls);
 	if (cls && cls->copy) return cls->copy(obj);
 	// Retain if no copy method,
 	// assume it is immutable.
@@ -93,7 +91,7 @@ BCObjectRef BCCopy(const BCObjectRef obj) {
 
 uint32_t BCHash(const BCObjectRef obj) {
 	if (!obj) return 0;
-	const BCClassRef cls = BCClassIdToRef(obj->cls);
+	const BCClassRef cls = BCClassIdGetRef(obj->cls);
 	if (cls && cls->hash) return cls->hash(obj);
 	return (uint32_t)(uintptr_t)obj;
 }
@@ -102,7 +100,7 @@ BC_bool BCEqual(const BCObjectRef a, const BCObjectRef b) {
 	if (a == b) return BC_true;
 	if (!a || !b) return BC_false;
 	if (a->cls != b->cls) return BC_false;
-	const BCClassRef cls = BCClassIdToRef(a->cls);
+	const BCClassRef cls = BCClassIdGetRef(a->cls);
 	if (cls && cls->equal) return cls->equal(a, b);
 	return BC_false;
 }
@@ -110,10 +108,10 @@ BC_bool BCEqual(const BCObjectRef a, const BCObjectRef b) {
 BCStringRef BCToString(const BCObjectRef obj) {
 	if (obj == NULL) return BCStringPooledLiteral("<null>");
 
-	const BCClassRef cls = BCClassIdToRef(obj->cls);
+	const BCClassRef cls = BCClassIdGetRef(obj->cls);
 
 	if (cls && cls->toString) return cls->toString(obj);
-	if (cls) return BCStringCreate("<%s@%8x>", BCStringCPtr(BCClassName(obj->cls)), BCHash(obj));
+	if (cls) return BCStringCreate("<%s@%8x>", BCStringCPtr(BCClassIdName(obj->cls)), BCHash(obj));
 
 	return BCStringPooledLiteral("<invalid>");
 }
@@ -125,7 +123,7 @@ BC_bool BCIsClass(const BCObjectRef obj, const BCClassId cls) {
 
 BCClassRef BCObjectClass(const BCObjectRef obj) {
 	if (!obj) return NULL;
-	return BCClassIdToRef(obj->cls);
+	return BCClassIdGetRef(obj->cls);
 }
 
 BCClassId BCObjectClassId(const BCObjectRef obj) {
@@ -258,7 +256,7 @@ static const char* FlagsToString(const BCClassId cls, const uint16_t flags) {
 	}
 
 	if (buffer[0] == '\0') {
-		BC_strcat_s(buffer, sizeof(buffer),  "NONE");
+		BC_strcat_s(buffer, sizeof(buffer), "NONE");
 	}
 	else {
 		// Remove trailing space
@@ -312,7 +310,7 @@ void BCObjectDebugDump(void) {
 		const BCObjectRef obj = node->obj == NULL ? &node->copy : node->obj;
 		if (node->obj == NULL)
 			freedCount++;
-		const BCClassRef cls = BCClassIdToRef(obj->cls);
+		const BCClassRef cls = BCClassIdGetRef(obj->cls);
 		const char* className = cls ? cls->name : "<unknown>";
 		const char* flags = FlagsToString(obj->cls, obj->flags);
 		const int refCount = BC_atomic_load(&obj->ref_count);

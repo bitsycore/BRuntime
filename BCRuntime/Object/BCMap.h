@@ -1,7 +1,7 @@
 #ifndef BCRUNTIME_BCDICTIONARY_H
 #define BCRUNTIME_BCDICTIONARY_H
 
-#include "../BCObject.h"
+#include "BCObject.h"
 #include "../Utilities/BC_Macro.h"
 
 // =========================================================

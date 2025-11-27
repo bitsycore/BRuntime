@@ -1,8 +1,7 @@
 #include "BCList.h"
 
-#include "../Class/BCClass.h"
-#include "../Class/BCClassRegistry.h"
-#include "../String/BCStringBuilder.h"
+#include "BCStringBuilder.h"
+#include "../Core/BCClass.h"
 #include "../Utilities/BC_Memory.h"
 
 #include <stdarg.h>
@@ -30,13 +29,13 @@ static void ListAdd(BCListRef arr, BCObjectRef item, BC_bool retain);
 // =========================================================
 
 static void ArrayDeallocImpl(const BCObjectRef obj) {
-	const BCListRef arr = (BCListRef) obj;
+	const BCListRef arr = (BCListRef)obj;
 	for (size_t i = 0; i < arr->count; i++) BCRelease(arr->items[i]);
 	BCFree(arr->items);
 }
 
 static BCStringRef ArrayToStringImpl(const BCObjectRef obj) {
-	const BCListRef arr = (BCListRef) obj;
+	const BCListRef arr = (BCListRef)obj;
 	const BCStringBuilderRef sb = BCStringBuilderCreate(NULL);
 	BCStringBuilderAppendChar(sb, '[');
 
@@ -60,7 +59,7 @@ static BCStringRef ArrayToStringImpl(const BCObjectRef obj) {
 // =========================================================
 
 static BCClass kBCListClass = {
-	.name= "BCList",
+	.name = "BCList",
 	.id = BC_CLASS_ID_INVALID,
 	.dealloc = ArrayDeallocImpl,
 	.hash = NULL,
@@ -75,7 +74,7 @@ BCClassId BCListClassId(void) {
 }
 
 void ___BCINTERNAL___ListInitialize(void) {
-	BCClassRegister(&kBCListClass);
+	BCClassRegistryInsert(&kBCListClass);
 }
 
 // =========================================================
@@ -83,7 +82,7 @@ void ___BCINTERNAL___ListInitialize(void) {
 // =========================================================
 
 BCListRef BCListCreate(void) {
-	const BCListRef arr = (BCListRef) BCObjectAlloc(NULL, kBCListClass.id);
+	const BCListRef arr = (BCListRef)BCObjectAlloc(NULL, kBCListClass.id);
 	arr->capacity = 8;
 	arr->count = 0;
 	arr->items = BCCalloc(arr->capacity, sizeof(BCObjectRef));

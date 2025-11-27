@@ -1,9 +1,8 @@
 #include "BCMap.h"
 
-#include "../Class/BCClass.h"
-#include "../Class/BCClassRegistry.h"
-#include "../List/BCList.h"
-#include "../String/BCStringBuilder.h"
+#include "BCList.h"
+#include "BCStringBuilder.h"
+#include "../Core/BCClass.h"
 #include "../Utilities/BC_Memory.h"
 
 #include <stdarg.h>
@@ -96,7 +95,7 @@ BCClassId BCMapClassId() {
 }
 
 void ___BCINTERNAL___MapInitialize(void) {
-	BCClassRegister(&kBCMapClass);
+	BCClassRegistryInsert(&kBCMapClass);
 }
 
 // =========================================================
@@ -268,7 +267,7 @@ void BCMapRemove(const BCMutableMapRef d, const BCObjectRef key) {
 }
 
 BC_bool BCMapContainsKey(const BCMapRef d, const BCObjectRef key) {
-    return BCMapGet(d, key) != NULL;
+	return BCMapGet(d, key) != NULL;
 }
 
 BC_bool BCMapContainsValue(const BCMapRef d, const BCObjectRef val) {

@@ -1,9 +1,8 @@
 #include "BCSet.h"
 
-#include "../Class/BCClass.h"
-#include "../Class/BCClassRegistry.h"
-#include "../List/BCList.h"
-#include "../String/BCStringBuilder.h"
+#include "BCList.h"
+#include "BCStringBuilder.h"
+#include "../Core/BCClass.h"
 #include "../Utilities/BC_Memory.h"
 
 #include <stdarg.h>
@@ -70,11 +69,12 @@ static BCStringRef SetToStringImpl(const BCObjectRef obj) {
 // =========================================================
 
 static BCClass kBCSetClass = {
-	.name = "BCSet", .id = BC_CLASS_ID_INVALID, .dealloc = SetDeallocImpl, .hash = NULL, .equal = NULL, .toString = SetToStringImpl, .copy = NULL, .allocSize = sizeof(BCSet)};
+	.name = "BCSet", .id = BC_CLASS_ID_INVALID, .dealloc = SetDeallocImpl, .hash = NULL, .equal = NULL, .toString = SetToStringImpl, .copy = NULL, .allocSize = sizeof(BCSet)
+};
 
 BCClassId BCSetClassId(void) { return kBCSetClass.id; }
 
-void ___BCINTERNAL___SetInitialize(void) { BCClassRegister(&kBCSetClass); }
+void ___BCINTERNAL___SetInitialize(void) { BCClassRegistryInsert(&kBCSetClass); }
 
 // =========================================================
 // MARK: Constructors

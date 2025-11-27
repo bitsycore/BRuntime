@@ -1,7 +1,5 @@
-#include "BCClassRegistry.h"
-
-#include "BCClassRegistry.h"
 #include "BCClass.h"
+
 #include "../Utilities/BC_Memory.h"
 #include "../Utilities/BC_Threads.h"
 
@@ -81,7 +79,7 @@ BCClassId BCClassRegistryGetCount(void) {
 	return gClassRegistryState.total_classes;
 }
 
-BCClassId BCClassRegister(const BCClassRef cls) {
+BCClassId BCClassRegistryInsert(const BCClassRef cls) {
 	BCSpinlockLock(&gClassRegistryState.lock);
 
 	// Check if we need to allocate a new segment
@@ -122,7 +120,7 @@ BCClassId BCClassRegister(const BCClassRef cls) {
 	return current_index;
 }
 
-BCClassRef BCClassIdToRef(const BCClassId cid) {
+BCClassRef BCClassIdGetRef(const BCClassId cid) {
 	if (cid >= gClassRegistryState.total_classes) {
 		return NULL;
 	}
@@ -137,13 +135,13 @@ BCClassRef BCClassIdToRef(const BCClassId cid) {
 	return gClassRegistryState.segments[segment][offset];
 }
 
-BCClassId BCClassRefToId(const BCClassRef cls) {
+BCClassId BCClassGetId(const BCClassRef cls) {
 	if (cls == NULL) { return BC_CLASS_ID_INVALID; }
 	BCSpinlockLock(&gClassRegistryState.lock);
 
 	// Slow Linear Search, only for debugging purposes
 	for (uint32_t i = 0; i < gClassRegistryState.total_classes; i++) {
-		if (BCClassIdToRef(i) == cls) {
+		if (BCClassIdGetRef(i) == cls) {
 			BCSpinlockUnlock(&gClassRegistryState.lock);
 			return i;
 		}

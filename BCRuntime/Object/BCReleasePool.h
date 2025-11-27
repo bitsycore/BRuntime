@@ -1,7 +1,7 @@
 #ifndef BCRUNTIME_BCRELEASEPOOL_H
 #define BCRUNTIME_BCRELEASEPOOL_H
 
-#include "../BCTypes.h"
+#include "../Core/BCTypes.h"
 
 #include <stddef.h>
 

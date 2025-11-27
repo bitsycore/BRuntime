@@ -1,9 +1,8 @@
 #include "BCReleasePool.h"
 
-#include "../BCAllocator.h"
-#include "../BCObject.h"
-#include "../Class/BCClass.h"
-#include "../Class/BCClassRegistry.h"
+#include "BCObject.h"
+#include "../Core/BCAllocator.h"
+#include "../Core/BCClass.h"
 #include "../Utilities/BC_Macro.h"
 
 #include <stdio.h>
@@ -53,7 +52,7 @@ BCClassId BCReleasePoolClassId() {
 }
 
 void ___BCINTERNAL___ReleasePoolInitialize(void) {
-	BCClassRegister((BCClassRef)&kBCReleasePoolClass);
+	BCClassRegistryInsert((BCClassRef)&kBCReleasePoolClass);
 }
 
 // =========================================================

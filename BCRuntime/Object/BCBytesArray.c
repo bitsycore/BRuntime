@@ -2,9 +2,8 @@
 
 #include <string.h>
 
-#include "../BCObject.h"
-#include "../Class/BCClass.h"
-#include "../Class/BCClassRegistry.h"
+#include "BCObject.h"
+#include "../Core/BCClass.h"
 
 // =========================================================
 // MARK: Struct
@@ -24,7 +23,7 @@ static BCClass kBCBytesArrayClass = {
 	.name = "BCBytesArray",
 	.id = BC_CLASS_ID_INVALID,
 	.dealloc = NULL,
-	.hash =	NULL,
+	.hash = NULL,
 	.equal = NULL,
 	.toString = NULL,
 	.copy = NULL,
@@ -36,7 +35,7 @@ BCClassId BCBytesArrayClassId(void) {
 }
 
 void ___BCINTERNAL___BytesArrayClassInit(void) {
-	BCClassRegister(&kBCBytesArrayClass);
+	BCClassRegistryInsert(&kBCBytesArrayClass);
 }
 
 // =========================================================
@@ -44,14 +43,14 @@ void ___BCINTERNAL___BytesArrayClassInit(void) {
 // =========================================================
 
 BCBytesArrayRef BCBytesArrayCreate(const size_t count) {
-	const BCBytesArrayRef arr = (BCBytesArrayRef) BCObjectAllocWithConfig(NULL, kBCBytesArrayClass.id, count * sizeof(uint8_t), BC_OBJECT_DEFAULT_FLAGS);
+	const BCBytesArrayRef arr = (BCBytesArrayRef)BCObjectAllocWithConfig(NULL, kBCBytesArrayClass.id, count * sizeof(uint8_t), BC_OBJECT_DEFAULT_FLAGS);
 	arr->count = count;
 	memset(arr->bytes, 0, count);
 	return arr;
 }
 
 BCBytesArrayRef BCBytesArrayCreateWithBytes(const size_t count, const uint8_t* bytes) {
-	const BCBytesArrayRef arr = (BCBytesArrayRef) BCObjectAllocWithConfig(NULL, kBCBytesArrayClass.id, count * sizeof(uint8_t), BC_OBJECT_DEFAULT_FLAGS);
+	const BCBytesArrayRef arr = (BCBytesArrayRef)BCObjectAllocWithConfig(NULL, kBCBytesArrayClass.id, count * sizeof(uint8_t), BC_OBJECT_DEFAULT_FLAGS);
 	arr->count = count;
 	memcpy(arr->bytes, bytes, count);
 	return arr;

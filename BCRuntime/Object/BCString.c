@@ -1,16 +1,15 @@
 #include "BCString.h"
 
+#include "BCObject.h"
+#include "../Core/BCClass.h"
+#include "../Utilities/BC_Memory.h"
+#include "../Utilities/BC_Threads.h"
+
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-
-#include "../BCObject.h"
-#include "../Class/BCClass.h"
-#include "../Class/BCClassRegistry.h"
-#include "../Utilities/BC_Memory.h"
-#include "../Utilities/BC_Threads.h"
 
 // =========================================================
 // MARK: Struct
@@ -28,15 +27,15 @@ typedef struct BCString {
 // =========================================================
 
 uint32_t StringHashImpl(const BCObjectRef obj) {
-	return BCStringHash((BCStringRef) obj);
+	return BCStringHash((BCStringRef)obj);
 }
 
 BC_bool StringEqualImpl(const BCObjectRef a, const BCObjectRef b) {
-	const BCStringRef s1 = (BCStringRef) a;
-	const BCStringRef s2 = (BCStringRef) b;
+	const BCStringRef s1 = (BCStringRef)a;
+	const BCStringRef s2 = (BCStringRef)b;
 
 	if (s1 == s2) return BC_true;
-	if ( BC_FLAG_HAS(s1->base.flags, BC_STRING_FLAG_POOLED) && BC_FLAG_HAS( s2->base.flags, BC_STRING_FLAG_POOLED )) return BC_false;
+	if (BC_FLAG_HAS(s1->base.flags, BC_STRING_FLAG_POOLED) && BC_FLAG_HAS(s2->base.flags, BC_STRING_FLAG_POOLED)) return BC_false;
 
 	// Check Hash Cache
 	const uint32_t h1 = BC_atomic_load(&s1->hash);
@@ -74,8 +73,8 @@ BCClassId BCStringClassId() {
 	return kBCStringClass.id;
 }
 
-void ___BCINTERNAL___StringInitialize(void){
-	BCClassRegister(&kBCStringClass);
+void ___BCINTERNAL___StringInitialize(void) {
+	BCClassRegistryInsert(&kBCStringClass);
 }
 
 // =========================================================
@@ -103,7 +102,7 @@ void ___BCINTERNAL___StringPoolDeinitialize(void) {
 		const StringPoolNode* node = StringPool.buckets[i];
 		while (node) {
 			const StringPoolNode* next = node->next;
-			BCFree( node->str );
+			BCFree(node->str);
 			node = next;
 			if (next == NULL) StringPool.buckets[i] = NULL;
 		}
@@ -118,10 +117,9 @@ static BCStringRef StringPoolGetOrInsert(const char* text, const size_t len, con
 	// Lookup
 	const StringPoolNode* node = StringPool.buckets[idx];
 	while (node) {
-
 		// Fast path for static literal strings
 		if (static_string && node->str->buffer == text) {
-			const BCStringRef ret = (BCStringRef) BCRetain((BCObjectRef) node->str);
+			const BCStringRef ret = (BCStringRef)BCRetain((BCObjectRef)node->str);
 			BCSpinlockUnlock(&StringPool.lock);
 			return ret;
 		}
@@ -133,7 +131,7 @@ static BCStringRef StringPoolGetOrInsert(const char* text, const size_t len, con
 				continue;
 			}
 			if (strcmp(node->str->buffer, text) == 0) {
-				const BCStringRef ret = (BCStringRef) BCRetain((BCObjectRef) node->str);
+				const BCStringRef ret = (BCStringRef)BCRetain((BCObjectRef)node->str);
 				BCSpinlockUnlock(&StringPool.lock);
 				return ret;
 			}
@@ -153,16 +151,17 @@ static BCStringRef StringPoolGetOrInsert(const char* text, const size_t len, con
 	);
 
 	if (!static_string) {
-		newStr->buffer = (char*) ( &newStr->buffer + 1 );
+		newStr->buffer = (char*)(&newStr->buffer + 1);
 		memcpy(newStr->buffer, text, len + 1);
-	} else {
+	}
+	else {
 		newStr->buffer = (char*)text;
 	}
 
 	newStr->length = len;
 	newStr->hash = hash;
 
-	StringPoolNode* newNode = (StringPoolNode*) ( (char*)newStr + sizeof(BCString) + (static_string ? 0 : len + 1) );
+	StringPoolNode* newNode = (StringPoolNode*)((char*)newStr + sizeof(BCString) + (static_string ? 0 : len + 1));
 	newNode->str = newStr;
 	newNode->next = StringPool.buckets[idx];
 	StringPool.buckets[idx] = newNode;
@@ -179,14 +178,13 @@ static BCStringRef StringPoolGetOrInsert(const char* text, const size_t len, con
 // =========================================================
 
 BCStringRef BCStringCreate(const char* fmt, ...) {
-
 	va_list args, copy;
 	va_start(args, fmt);
 	va_copy(copy, args);
 	const int len = vsnprintf(NULL, 0, fmt, copy);
 	va_end(copy);
-	const BCStringRef str = (BCStringRef) BCObjectAllocWithConfig(NULL, kBCStringClass.id, len + 1, BC_OBJECT_FLAG_REFCOUNT);
-	str->buffer = (char*) ( &str->buffer + 1 );
+	const BCStringRef str = (BCStringRef)BCObjectAllocWithConfig(NULL, kBCStringClass.id, len + 1, BC_OBJECT_FLAG_REFCOUNT);
+	str->buffer = (char*)(&str->buffer + 1);
 	vsnprintf(str->buffer, len + 1, fmt, args);
 	va_end(args);
 
@@ -251,10 +249,10 @@ void BCStringPoolDebugDump(void) {
 	// FOOTER
 	printf("\n"
 		"                                          "BOLD"String Pool Dump"RESET"\n"
-		"┌"          "────────┬────────────────────────────────────────────────┬────────────┬────────┬──────────────────"     "┐\n"
+		"┌" "────────┬────────────────────────────────────────────────┬────────────┬────────┬──────────────────" "┐\n"
 		"│"BLACK BOLD" Bucket "RESET BLACK"│"BOLD"                     Value                      "RESET BLACK"│"
 		BOLD"    Hash    "RESET BLACK"│"BOLD" Length "RESET BLACK"│"BOLD"       Next       "RESET"│\n"
-		"├"DGRAY     "────────┼────────────────────────────────────────────────┼────────────┼────────┼──────────────────"RESET"┤\n"
+		"├"DGRAY "────────┼────────────────────────────────────────────────┼────────────┼────────┼──────────────────"RESET"┤\n"
 	);
 
 	// Print entries
@@ -271,7 +269,8 @@ void BCStringPoolDebugDump(void) {
 			char displayValue[47];
 			if (strlen(value) > 43) {
 				snprintf(displayValue, sizeof(displayValue), "%.43s...", value);
-			} else {
+			}
+			else {
 				snprintf(displayValue, sizeof(displayValue), "%s", value);
 			}
 
@@ -279,14 +278,15 @@ void BCStringPoolDebugDump(void) {
 			char nextPtr[18];
 			if (node->next) {
 				snprintf(nextPtr, sizeof(nextPtr), "%p", (void*)node->next);
-			} else {
+			}
+			else {
 				snprintf(nextPtr, sizeof(nextPtr), "NULL");
 			}
 
 			if (count % 2 == 0)
-				printf( "│"BLACK" %-6zu │ %-46s │ 0x%08X │ %-6zu │ %-16s "RESET"│\n", i, displayValue, hash, length, nextPtr);
+				printf("│"BLACK" %-6zu │ %-46s │ 0x%08X │ %-6zu │ %-16s "RESET"│\n", i, displayValue, hash, length, nextPtr);
 			else
-				printf( "│"DGRAY" %-6zu │ %-46s │ 0x%08X │ %-6zu │ %-16s "RESET"│\n", i, displayValue, hash, length, nextPtr);
+				printf("│"DGRAY" %-6zu │ %-46s │ 0x%08X │ %-6zu │ %-16s "RESET"│\n", i, displayValue, hash, length, nextPtr);
 
 			count++;
 			node = node->next;

@@ -1,7 +1,7 @@
 #ifndef BCRUNTIME_BCAUTORELEASEPOOL_H
 #define BCRUNTIME_BCAUTORELEASEPOOL_H
 
-#include "../BCObject.h"
+#include "../Object/BCObject.h"
 #include "../Utilities/BC_Macro.h"
 
 void BCAutoreleasePoolPush(void);

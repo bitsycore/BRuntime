@@ -6,15 +6,18 @@
 #include <string.h>
 
 typedef struct BCAllocator {
-	void* (* alloc)(size_t size, const void* ctx);
-	void (* free)(void* ptr, const void* ctx);
+	void* (*alloc)(size_t size, const void* ctx);
+	void (*free)(void* ptr, const void* ctx);
 	void* context;
 } BCAllocator;
+
+extern const BCAllocatorRef kBCAllocatorRefSystem;
 
 void* BCAllocatorAlloc(BCAllocatorRef allocator, size_t size);
 void* BCAllocatorRealloc(BCAllocatorRef allocator, void* ptr, size_t oldSize, size_t newSize);
 void BCAllocatorFree(BCAllocatorRef allocator, void* ptr);
 
 BCAllocatorRef BCAllocatorGetDefault();
+void BCAllocatorSetDefault(BCAllocatorRef allocator);
 
 #endif //BCRUNTIME_BCALLOCATOR_H

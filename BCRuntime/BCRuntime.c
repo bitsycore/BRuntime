@@ -2,7 +2,6 @@
 
 #include <stdio.h>
 
-#include "Class/BCClassRegistry.h"
 #include "Utilities/BC_Memory.h"
 
 // =========================================================
@@ -49,6 +48,14 @@ static BC_bool ___BCINTERNAL___Initialized = BC_false;
 
 static int gArgc;
 static char** gArgv;
+
+int BCArgc(void) {
+	return gArgc;
+}
+
+char** BCArgv(void) {
+	return gArgv;
+}
 
 void BCInitialize(const int argc, char** argv) {
 	if (___BCINTERNAL___Initialized)

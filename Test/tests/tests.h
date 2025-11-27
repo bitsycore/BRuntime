@@ -2,14 +2,13 @@
 #define BCRUNTIME_TESTS_H
 
 #include <BCRuntime/BCRuntime.h>
-#include <BCRuntime/Class/BCClass.h>
-#include <BCRuntime/Class/BCClassRegistry.h>
-#include <BCRuntime/List/BCList.h>
-#include <BCRuntime/Map/BCMap.h>
-#include <BCRuntime/Number/BCNumber.h>
-#include <BCRuntime/Pool/BCAutoreleasePool.h>
-#include <BCRuntime/String/BCString.h>
-#include <BCRuntime/String/BCStringBuilder.h>
+#include <BCRuntime/Core/BCAutoreleasePool.h>
+#include <BCRuntime/Core/BCClass.h>
+#include <BCRuntime/Object/BCList.h>
+#include <BCRuntime/Object/BCMap.h>
+#include <BCRuntime/Object/BCNumber.h>
+#include <BCRuntime/Object/BCString.h>
+#include <BCRuntime/Object/BCStringBuilder.h>
 #include <BCRuntime/Utilities/BC_AnsiEscape.h>
 
 #include <stdio.h>
