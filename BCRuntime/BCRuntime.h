@@ -1,7 +1,7 @@
 #ifndef BC_BCRUNTIME_H
 #define BC_BCRUNTIME_H
 
-#include "BCNumber.h"
+#include "Number/BCNumber.h"
 #include "BCObject.h"
 #include "BCTypes.h"
 #include "List/BCList.h"

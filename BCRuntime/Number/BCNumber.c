@@ -1,10 +1,11 @@
 #include "BCNumber.h"
-#include "BCObject.h"
+
+#include "../BCObject.h"
+#include "../Class/BCClass.h"
+#include "../Class/BCClassRegistry.h"
+#include "../String/BCString.h"
 
 #include <stdio.h>
-
-#include "BCClass.h"
-#include "String/BCString.h"
 
 // =============================================================================
 // MARK: Struct

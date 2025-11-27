@@ -1,8 +1,8 @@
 #include "BCObject.h"
 
 #include "BCAllocator.h"
-#include "BCClass.h"
-#include "BCClassRegistry.h"
+#include "Class/BCClass.h"
+#include "Class/BCClassRegistry.h"
 #include "String/BCString.h"
 #include "Utilities/BC_Memory.h"
 #include "Utilities/BC_Threads.h"

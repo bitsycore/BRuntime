@@ -6,8 +6,9 @@
 #include <string.h>
 #include <time.h>
 
-#include "../BCClass.h"
 #include "../BCObject.h"
+#include "../Class/BCClass.h"
+#include "../Class/BCClassRegistry.h"
 #include "../Utilities/BC_Memory.h"
 #include "../Utilities/BC_Threads.h"
 

@@ -1,8 +1,8 @@
 add_library(BCRuntime
 		Array/BCBytesArray.c
 		Array/BCBytesArray.h
-		BCNumber.c
-		BCNumber.h
+		Number/BCNumber.c
+		Number/BCNumber.h
 		BCObject.c
 		BCObject.h
 		BCRuntime.c
@@ -33,10 +33,10 @@ add_library(BCRuntime
 		Utilities/BC_Compat.c
 		Utilities/BC_Compat.h
         BCAllocator.h
-		BCClass.c
-		BCClass.h
-		BCClassRegistry.c
-		BCClassRegistry.h
+		Class/BCClass.c
+		Class/BCClass.h
+		Class/BCClassRegistry.c
+		Class/BCClassRegistry.h
 		Pool/BCReleasePool.c
 		Pool/BCReleasePool.h
 )

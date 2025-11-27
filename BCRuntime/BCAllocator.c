@@ -18,15 +18,14 @@ static void AllocatorDefaultFree(void* ptr, const void* ctx) {
 	BCFree(ptr);
 }
 
-static BCAllocator _kBCAllocatorDefault = {AllocatorDefaultAlloc, AllocatorDefaultFree, NULL};
-BCAllocatorRef const kBCAllocatorDefault = &_kBCAllocatorDefault;
+static BCAllocator kBCAllocatorDefault = {AllocatorDefaultAlloc, AllocatorDefaultFree, NULL};
 
 // =========================================================
 // MARK: Public
 // =========================================================
 
 void* BCAllocatorAlloc(BCAllocatorRef allocator, const size_t size) {
-	if (!allocator) allocator = kBCAllocatorDefault;
+	if (!allocator) allocator = &kBCAllocatorDefault;
 	return allocator->alloc(size, allocator->context);
 }
 
@@ -42,10 +41,10 @@ void* BCAllocatorRealloc(const BCAllocatorRef allocator, void* ptr, const size_t
 }
 
 void BCAllocatorFree(BCAllocatorRef allocator, void* ptr) {
-	if (!allocator) allocator = kBCAllocatorDefault;
+	if (!allocator) allocator = &kBCAllocatorDefault;
 	allocator->free(ptr, allocator->context);
 }
 
 BCAllocatorRef BCAllocatorGetDefault() {
-	return kBCAllocatorDefault;
+	return &kBCAllocatorDefault;
 }

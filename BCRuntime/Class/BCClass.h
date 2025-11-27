@@ -1,7 +1,7 @@
 #ifndef BCRUNTIME_BCCLASS_H
 #define BCRUNTIME_BCCLASS_H
 
-#include "BCTypes.h"
+#include "../BCTypes.h"
 
 #include <stddef.h>
 
@@ -16,10 +16,6 @@ typedef struct BCClass {
 	size_t allocSize;
 } BCClass;
 
-BCClassId BCClassRegister(BCClassRef cls);
 BCStringPooledRef BCClassName(BCClassId cid);
-
-BCClassRef BCClassIdToRef(BCClassId cid);
-BCClassId BCClassRefToId(BCClassRef cls);
 
 #endif //BCRUNTIME_BCCLASS_H

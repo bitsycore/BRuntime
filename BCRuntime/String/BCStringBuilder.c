@@ -7,8 +7,9 @@
 
 #include "BCString.h"
 #include "../BCAllocator.h"
-#include "../BCClass.h"
 #include "../BCObject.h"
+#include "../Class/BCClass.h"
+#include "../Class/BCClassRegistry.h"
 
 // =========================================================
 // MARK: Struct

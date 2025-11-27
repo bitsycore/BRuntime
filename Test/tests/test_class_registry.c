@@ -1,9 +1,8 @@
 #include "../tests/tests.h"
 
-#include <BCRuntime/BCClass.h>
-#include <BCRuntime/BCClassRegistry.h>
 #include <BCRuntime/BCObject.h>
-
+#include <BCRuntime/Class/BCClass.h>
+#include <BCRuntime/Class/BCClassRegistry.h>
 
 static BCClass TestClass1 = {
 	.name = "TestClass1",

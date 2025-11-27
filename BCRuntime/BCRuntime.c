@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 
-#include "BCClassRegistry.h"
+#include "Class/BCClassRegistry.h"
 #include "Utilities/BC_Memory.h"
 
 // =========================================================

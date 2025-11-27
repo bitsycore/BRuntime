@@ -1,7 +1,7 @@
 #ifndef BCRUNTIME_BCNUMBER_H
 #define BCRUNTIME_BCNUMBER_H
 
-#include "BCTypes.h"
+#include "../BCTypes.h"
 
 // =========================================================
 // MARK: Singletons

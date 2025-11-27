@@ -1,8 +1,9 @@
 #include "BCClassRegistry.h"
 
+#include "BCClassRegistry.h"
 #include "BCClass.h"
-#include "Utilities/BC_Memory.h"
-#include "Utilities/BC_Threads.h"
+#include "../Utilities/BC_Memory.h"
+#include "../Utilities/BC_Threads.h"
 
 #include <stddef.h>
 #include <string.h>
@@ -31,17 +32,17 @@
 static struct {
 	BC_SPINLOCK_MAYBE(lock)
 	BCClass** segments[BC_CLASS_REGISTRY_MAX_SEGMENTS];
-	BCClassIdSize segment_count;
-	BCClassIdSize total_classes;
+	BCClassId segment_count;
+	BCClassId total_classes;
 } gClassRegistryState;
 
 // =========================================================
 // MARK: Forwards
 // =========================================================
 
-static inline BCClassIdSize GetSegmentIndex(BCClassIdSize class_index);
-static inline BCClassIdSize GetSegmentOffset(BCClassIdSize class_index);
-static inline BCClassIdSize GetSegmentSize(BCClassIdSize segment_index);
+static inline BCClassId GetSegmentIndex(BCClassId class_index);
+static inline BCClassId GetSegmentOffset(BCClassId class_index);
+static inline BCClassId GetSegmentSize(BCClassId segment_index);
 
 // =========================================================
 // MARK: Initialization
@@ -58,7 +59,7 @@ void ___BCINTERNAL___ClassRegistryDeinitialize(void) {
 	BCSpinlockLock(&gClassRegistryState.lock);
 
 	// Free all allocated segments
-	for (BCClassIdSize i = 0; i < gClassRegistryState.segment_count; i++) {
+	for (BCClassId i = 0; i < gClassRegistryState.segment_count; i++) {
 		if (gClassRegistryState.segments[i]) {
 			BCFree(gClassRegistryState.segments[i]);
 			gClassRegistryState.segments[i] = NULL;
@@ -76,7 +77,7 @@ void ___BCINTERNAL___ClassRegistryDeinitialize(void) {
 // MARK: Class Public
 // =========================================================
 
-BCClassIdSize BCClassRegistryGetCount(void) {
+BCClassId BCClassRegistryGetCount(void) {
 	return gClassRegistryState.total_classes;
 }
 
@@ -156,7 +157,7 @@ BCClassId BCClassRefToId(const BCClassRef cls) {
 // MARK: Internal
 // =========================================================
 
-static inline BCClassIdSize GetSegmentIndex(const BCClassIdSize class_index) {
+static inline BCClassId GetSegmentIndex(const BCClassId class_index) {
 	// Segments grow exponentially:
 	// Segment 0: indices [0, INITIAL_SIZE)
 	// Segment 1: indices [INITIAL_SIZE, INITIAL_SIZE + INITIAL_SIZE*2)
@@ -176,7 +177,7 @@ static inline BCClassIdSize GetSegmentIndex(const BCClassIdSize class_index) {
 	return BC_CLASS_REGISTRY_MAX_SEGMENTS - 1;
 }
 
-static inline BCClassIdSize GetSegmentOffset(const BCClassIdSize class_index) {
+static inline BCClassId GetSegmentOffset(const BCClassId class_index) {
 	// Calculate cumulative capacity up to the segment containing class_index
 	uint32_t cumulative = 0;
 	const uint32_t segment = GetSegmentIndex(class_index);
@@ -189,6 +190,6 @@ static inline BCClassIdSize GetSegmentOffset(const BCClassIdSize class_index) {
 	return class_index - cumulative;
 }
 
-static inline BCClassIdSize GetSegmentSize(const BCClassIdSize segment_index) {
+static inline BCClassId GetSegmentSize(const BCClassId segment_index) {
 	return BC_CLASS_REGISTRY_INITIAL_SEGMENT_SIZE << segment_index;
 }

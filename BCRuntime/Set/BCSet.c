@@ -1,6 +1,7 @@
 #include "BCSet.h"
 
-#include "../BCClass.h"
+#include "../Class/BCClass.h"
+#include "../Class/BCClassRegistry.h"
 #include "../List/BCList.h"
 #include "../String/BCStringBuilder.h"
 #include "../Utilities/BC_Memory.h"
