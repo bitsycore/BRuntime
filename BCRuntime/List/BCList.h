@@ -1,6 +1,8 @@
 #ifndef BCRUNTIME_BCARRAY_H
 #define BCRUNTIME_BCARRAY_H
 
+#include <stdio.h>
+
 #include "../BCObject.h"
 
 // =========================================================
@@ -31,7 +33,7 @@ void BCListRemove(BCListRef list, BCObjectRef obj);
 void BCListRemoveAt(BCListRef list, size_t index);
 
 BC_bool BCListContains(BCListRef list, BCObjectRef obj);
-ssize_t BCListIndexOf(BCListRef list, BCObjectRef obj);
+size_t BCListIndexOf(BCListRef list, BCObjectRef obj);
 
 BCObjectRef BCListFirst(BCListRef list);
 BCObjectRef BCListLast(BCListRef list);

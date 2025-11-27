@@ -124,7 +124,7 @@ void BCListClear(const BCListRef list) {
 }
 
 void BCListRemove(const BCListRef list, const BCObjectRef obj) {
-	const ssize_t index = BCListIndexOf(list, obj);
+	const size_t index = BCListIndexOf(list, obj);
 	if (index != -1) {
 		BCListRemoveAt(list, (size_t)index);
 	}
@@ -147,10 +147,10 @@ void BCListRemoveAt(const BCListRef list, const size_t index) {
 
 BC_bool BCListContains(const BCListRef list, const BCObjectRef obj) { return BCListIndexOf(list, obj) != -1; }
 
-ssize_t BCListIndexOf(const BCListRef list, const BCObjectRef obj) {
+size_t BCListIndexOf(const BCListRef list, const BCObjectRef obj) {
 	for (size_t i = 0; i < list->count; i++) {
 		if (BCEqual(list->items[i], obj)) {
-			return (ssize_t)i;
+			return (size_t)i;
 		}
 	}
 	return -1;
