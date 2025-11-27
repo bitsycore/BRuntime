@@ -4,7 +4,7 @@
 #include "BCAllocator.h"
 #include "BCSettings.h"
 #include "BCTypes.h"
-#include "Utilities/BCAtomics.h"
+#include "Utilities/BC_Atomics.h"
 
 #include <stddef.h>
 

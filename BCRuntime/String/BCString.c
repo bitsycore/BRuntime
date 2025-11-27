@@ -8,8 +8,8 @@
 
 #include "../BCClass.h"
 #include "../BCObject.h"
-#include "../Utilities/BCMemory.h"
-#include "../Utilities/BCThreads.h"
+#include "../Utilities/BC_Memory.h"
+#include "../Utilities/BC_Threads.h"
 
 // =========================================================
 // MARK: Struct
@@ -87,17 +87,17 @@ typedef struct StringPoolNode {
 } StringPoolNode;
 
 static struct {
-	BC_MUTEX_MAYBE(lock);
+	BC_SPINLOCK_MAYBE(lock);
 	StringPoolNode* buckets[BC_STRING_POOL_SIZE];
 } StringPool;
 
 void ___BCINTERNAL___StringPoolInitialize(void) {
-	BCMutexInit(&StringPool.lock);
+	BCSpinlockInit(&StringPool.lock);
 	memset(StringPool.buckets, 0, sizeof(StringPool.buckets));
 }
 
 void ___BCINTERNAL___StringPoolDeinitialize(void) {
-	BCMutexDestroy(&StringPool.lock);
+	BCSpinlockDestroy(&StringPool.lock);
 	for (size_t i = 0; i < BC_STRING_POOL_SIZE; i++) {
 		const StringPoolNode* node = StringPool.buckets[i];
 		while (node) {
@@ -112,7 +112,7 @@ void ___BCINTERNAL___StringPoolDeinitialize(void) {
 static BCStringRef StringPoolGetOrInsert(const char* text, const size_t len, const uint32_t hash, const BC_bool static_string) {
 	const uint32_t idx = hash % BC_STRING_POOL_SIZE;
 
-	BCMutexLock(&StringPool.lock);
+	BCSpinlockLock(&StringPool.lock);
 
 	// Lookup
 	const StringPoolNode* node = StringPool.buckets[idx];
@@ -121,7 +121,7 @@ static BCStringRef StringPoolGetOrInsert(const char* text, const size_t len, con
 		// Fast path for static literal strings
 		if (static_string && node->str->buffer == text) {
 			const BCStringRef ret = (BCStringRef) BCRetain((BCObjectRef) node->str);
-			BCMutexUnlock(&StringPool.lock);
+			BCSpinlockUnlock(&StringPool.lock);
 			return ret;
 		}
 
@@ -133,7 +133,7 @@ static BCStringRef StringPoolGetOrInsert(const char* text, const size_t len, con
 			}
 			if (strcmp(node->str->buffer, text) == 0) {
 				const BCStringRef ret = (BCStringRef) BCRetain((BCObjectRef) node->str);
-				BCMutexUnlock(&StringPool.lock);
+				BCSpinlockUnlock(&StringPool.lock);
 				return ret;
 			}
 		}
@@ -166,7 +166,7 @@ static BCStringRef StringPoolGetOrInsert(const char* text, const size_t len, con
 	newNode->next = StringPool.buckets[idx];
 	StringPool.buckets[idx] = newNode;
 
-	BCMutexUnlock(&StringPool.lock);
+	BCSpinlockUnlock(&StringPool.lock);
 
 	newStr->base.ref_count = 0;
 
@@ -243,7 +243,7 @@ const char* BCStringCPtr(const BCStringRef str) {
 #define BOLD "\033[1m"
 
 void BCStringPoolDebugDump(void) {
-	BCMutexLock(&StringPool.lock);
+	BCSpinlockLock(&StringPool.lock);
 	const clock_t start = clock();
 
 	// --------------------------------------------------------------------------
@@ -292,7 +292,7 @@ void BCStringPoolDebugDump(void) {
 		}
 	}
 
-	BCMutexUnlock(&StringPool.lock);
+	BCSpinlockUnlock(&StringPool.lock);
 
 	const clock_t end = clock();
 	const double elapsed = (double)(end - start) / CLOCKS_PER_SEC * 1000;

@@ -2,7 +2,7 @@
 #define BCRUNTIME_BCDICTIONARY_H
 
 #include "../BCObject.h"
-#include "../Utilities/BCMacro.h"
+#include "../Utilities/BC_Macro.h"
 
 // =========================================================
 // MARK: Class

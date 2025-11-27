@@ -9,7 +9,7 @@
 #include <BCRuntime/Pool/BCAutoreleasePool.h>
 #include <BCRuntime/String/BCString.h>
 #include <BCRuntime/String/BCStringBuilder.h>
-#include <BCRuntime/Utilities/BCAnsiEscape.h>
+#include <BCRuntime/Utilities/BC_AnsiEscape.h>
 
 #include <stdio.h>
 #include <string.h>

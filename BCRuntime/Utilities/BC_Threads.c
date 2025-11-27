@@ -1,4 +1,4 @@
-#include "BCThreads.h"
+#include "BC_Threads.h"
 
 // =========================================================
 // MARK: Mutex Implementation
@@ -38,13 +38,44 @@ void BCMutexDestroy(BCMutex* mutex) {
 #endif
 }
 
+void BCSpinlockInit(BCSpinlock* sl) {
+#if defined(_WIN32)
+	sl->v = 0;
+#else
+	pthread_spin_init(sl, 0);
 #endif
+}
+
+void BCSpinlockLock(BCSpinlock* sl) {
+#if defined(_WIN32)
+	while (InterlockedCompareExchange(&sl->v, 1, 0) != 0) {
+		YieldProcessor();
+	}
+#else
+	pthread_spin_lock(sl);
+#endif
+}
+
+void BCSpinlockUnlock(BCSpinlock* sl) {
+#if defined(_WIN32)
+	InterlockedExchange(&sl->v, 0);
+#else
+	pthread_spin_unlock(sl);
+#endif
+}
+
+void BCSpinlockDestroy(BCSpinlock* sl) {
+#if defined(_WIN32)
+	/* nothing to destroy */
+#else
+	pthread_spin_destroy(sl);
+#endif
+}
 
 // =========================================================
 // MARK: Run Once Implementation
 // =========================================================
 
-#if BC_SETTINGS_ENABLE_THREAD_SAFETY == 1
 
 #if defined(_WIN32)
 static BOOL CALLBACK WinInitOnceCallback(PINIT_ONCE InitOnce, const PVOID Parameter, PVOID *Context) {

@@ -2,7 +2,7 @@
 #define BCRUNTIME_BCSTRING_H
 
 #include "../BCTypes.h"
-#include "../Utilities/BCMacro.h"
+#include "../Utilities/BC_Macro.h"
 
 #include <stddef.h>
 

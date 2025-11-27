@@ -4,14 +4,15 @@
 #include "BCClass.h"
 #include "BCClassRegistry.h"
 #include "String/BCString.h"
-#include "Utilities/BCMemory.h"
-#include "Utilities/BCThreads.h"
+#include "Utilities/BC_Memory.h"
+#include "Utilities/BC_Threads.h"
 
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
 
 #include "Map/BCMap.h"
+#include "Utilities/BC_Compat.h"
 
 // =========================================================
 // MARK: Forward
@@ -145,21 +146,21 @@ typedef struct BCObjectDebugNode {
 } BCObjectDebugNode;
 
 static struct {
-	BC_MUTEX_MAYBE(lock)
+	BC_SPINLOCK_MAYBE(lock)
 	BCObjectDebugNode* head;
 	BC_atomic_bool enabled;
 	BC_atomic_bool keepFreedObjects;
 } ObjectDebugTracker;
 
 void ___BCINTERNAL___ObjectDebugInitialize(void) {
-	BCMutexInit(&ObjectDebugTracker.lock);
+	BCSpinlockInit(&ObjectDebugTracker.lock);
 	ObjectDebugTracker.head = NULL;
 	ObjectDebugTracker.enabled = BC_false;
 	ObjectDebugTracker.keepFreedObjects = BC_false;
 }
 
 void ___BCINTERNAL___ObjectDebugDeinitialize(void) {
-	BCMutexLock(&ObjectDebugTracker.lock);
+	BCSpinlockLock(&ObjectDebugTracker.lock);
 
 	BCObjectDebugNode* node = ObjectDebugTracker.head;
 	while (node) {
@@ -169,15 +170,15 @@ void ___BCINTERNAL___ObjectDebugDeinitialize(void) {
 	}
 
 	ObjectDebugTracker.head = NULL;
-	BCMutexUnlock(&ObjectDebugTracker.lock);
-	BCMutexDestroy(&ObjectDebugTracker.lock);
+	BCSpinlockUnlock(&ObjectDebugTracker.lock);
+	BCSpinlockDestroy(&ObjectDebugTracker.lock);
 }
 
 static void ObjectDebugTrack(const BCObjectRef obj) {
 	if (!ObjectDebugTracker.enabled)
 		return;
 
-	BCMutexLock(&ObjectDebugTracker.lock);
+	BCSpinlockLock(&ObjectDebugTracker.lock);
 
 	BCObjectDebugNode* node = BCMalloc(sizeof(BCObjectDebugNode));
 	node->obj = obj;
@@ -185,14 +186,14 @@ static void ObjectDebugTrack(const BCObjectRef obj) {
 	node->next = ObjectDebugTracker.head;
 	ObjectDebugTracker.head = node;
 
-	BCMutexUnlock(&ObjectDebugTracker.lock);
+	BCSpinlockUnlock(&ObjectDebugTracker.lock);
 }
 
 static void ObjectDebugMarkFreed(const BCObjectRef obj) {
 	if (!ObjectDebugTracker.enabled)
 		return;
 
-	BCMutexLock(&ObjectDebugTracker.lock);
+	BCSpinlockLock(&ObjectDebugTracker.lock);
 
 	BCObjectDebugNode* prev = NULL;
 	BCObjectDebugNode* curr = ObjectDebugTracker.head;
@@ -216,7 +217,7 @@ static void ObjectDebugMarkFreed(const BCObjectRef obj) {
 		curr = curr->next;
 	}
 
-	BCMutexUnlock(&ObjectDebugTracker.lock);
+	BCSpinlockUnlock(&ObjectDebugTracker.lock);
 }
 
 static const char* FlagsToString(const BCClassId cls, const uint16_t flags) {
@@ -224,40 +225,40 @@ static const char* FlagsToString(const BCClassId cls, const uint16_t flags) {
 	buffer[0] = '\0';
 
 	if (BC_FLAG_HAS(flags, BC_OBJECT_FLAG_REFCOUNT))
-		strcat(buffer, "REF ");
+		BC_strcat_s(buffer, sizeof(buffer), "REF ");
 	if (BC_FLAG_HAS(flags, BC_OBJECT_FLAG_CONSTANT))
-		strcat(buffer, "CST ");
+		BC_strcat_s(buffer, sizeof(buffer), "CST ");
 	if (BC_FLAG_HAS(flags, BC_OBJECT_FLAG_NON_DEFAULT_ALLOCATOR))
-		strcat(buffer, "ALL ");
+		BC_strcat_s(buffer, sizeof(buffer), "ALL ");
 	if (BC_FLAG_HAS(flags, BC_OBJECT_FLAG_INLINED))
-		strcat(buffer, "INL ");
+		BC_strcat_s(buffer, sizeof(buffer), "INL ");
 
 	if (cls == BCStringClassId()) {
 		if (flags & BC_OBJECT_FLAG_CLASS_MASK) {
-			strcat(buffer, "STR(");
+			BC_strcat_s(buffer, sizeof(buffer), "STR(");
 		}
 		if (BC_FLAG_HAS(flags, BC_STRING_FLAG_POOLED))
-			strcat(buffer, " POL");
+			BC_strcat_s(buffer, sizeof(buffer), " POL");
 		if (BC_FLAG_HAS(flags, BC_STRING_FLAG_STATIC))
-			strcat(buffer, " CST");
+			BC_strcat_s(buffer, sizeof(buffer), " CST");
 		if (flags & BC_OBJECT_FLAG_CLASS_MASK) {
-			strcat(buffer, " ) ");
+			BC_strcat_s(buffer, sizeof(buffer), " ) ");
 		}
 	}
 
 	if (cls == BCMapClassId()) {
 		if (flags & BC_OBJECT_FLAG_CLASS_MASK) {
-			strcat(buffer, "MAP(");
+			BC_strcat_s(buffer, sizeof(buffer), "MAP(");
 		}
 		if (BC_FLAG_HAS(flags, BC_MAP_FLAG_MUTABLE))
-			strcat(buffer, " MUT");
+			BC_strcat_s(buffer, sizeof(buffer), " MUT");
 		if (flags & BC_OBJECT_FLAG_CLASS_MASK) {
-			strcat(buffer, " ) ");
+			BC_strcat_s(buffer, sizeof(buffer), " ) ");
 		}
 	}
 
 	if (buffer[0] == '\0') {
-		strcpy(buffer, "NONE");
+		BC_strcat_s(buffer, sizeof(buffer),  "NONE");
 	}
 	else {
 		// Remove trailing space
@@ -285,7 +286,7 @@ void BCObjectDebugSetKeepFreed(const BC_bool keepFreed) {
 #define BOLD "\033[1m"
 
 void BCObjectDebugDump(void) {
-	BCMutexLock(&ObjectDebugTracker.lock);
+	BCSpinlockLock(&ObjectDebugTracker.lock);
 	const clock_t start = clock();
 
 	// --------------------------------------------------------------------------
@@ -373,7 +374,7 @@ void BCObjectDebugDump(void) {
 		   "    %zu entr%s (%zu freed, %fms)\n\n",
 		   count, count == 1 ? "y" : "ies", freedCount, elapsed);
 
-	BCMutexUnlock(&ObjectDebugTracker.lock);
+	BCSpinlockUnlock(&ObjectDebugTracker.lock);
 }
 #else
 void ___BCINTERNAL___ObjectDebugInitialize() {}

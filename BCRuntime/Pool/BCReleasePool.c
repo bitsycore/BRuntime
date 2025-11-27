@@ -3,7 +3,7 @@
 #include "../BCAllocator.h"
 #include "../BCClass.h"
 #include "../BCObject.h"
-#include "../Utilities/BCMacro.h"
+#include "../Utilities/BC_Macro.h"
 
 #include <stdio.h>
 

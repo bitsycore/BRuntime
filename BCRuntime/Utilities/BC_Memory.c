@@ -1,10 +1,10 @@
-#include "BCMemory.h"
+#include "BC_Memory.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "BCThreads.h"
+#include "BC_Threads.h"
 
 #if BC_SETTINGS_DEBUG_ALLOCATION_TRACK == 1
 

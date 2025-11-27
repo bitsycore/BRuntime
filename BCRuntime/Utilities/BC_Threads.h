@@ -14,30 +14,53 @@ extern "C" {
 #endif
 
 // =========================================================
-// MARK: Mutex
+// MARK: Locks
 // =========================================================
 
 #if BC_SETTINGS_ENABLE_THREAD_SAFETY == 1
-#define BC_THREAD_MAYBE_STATIC static
+
 #if defined(_WIN32)
+
 typedef CRITICAL_SECTION BCMutex;
+typedef struct { volatile LONG v; } BCSpinlock;
+
 #else
+
 typedef pthread_mutex_t BCMutex;
+typedef pthread_spinlock_t BCSpinlock;
+
 #endif
-void BCMutexInit(BCMutex *mutex);
-void BCMutexLock(BCMutex *mutex);
-void BCMutexUnlock(BCMutex *mutex);
-void BCMutexDestroy(BCMutex *mutex);
+
+void BCMutexInit(BCMutex* mutex);
+void BCMutexLock(BCMutex* mutex);
+void BCMutexUnlock(BCMutex* mutex);
+void BCMutexDestroy(BCMutex* mutex);
 #define BC_MUTEX_MAYBE(_lock_name_) BCMutex _lock_name_;
 #define BC_MUTEX_MAYBE_STATIC(_lock_name_) static BC_MUTEX_MAYBE(_lock_name_);
+
+void BCSpinlockInit(BCSpinlock* sl);
+void BCSpinlockLock(BCSpinlock* sl);
+void BCSpinlockUnlock(BCSpinlock* sl);
+void BCSpinlockDestroy(BCSpinlock* sl);
+#define BC_SPINLOCK_MAYBE(_lock_name_) BCSpinlock _lock_name_;
+#define BC_SPINLOCK_MAYBE_STATIC(_lock_name_) static BC_SPINLOCK_MAYBE(_lock_name_);
+
 #else
-#define MAYBE_STATIC
+
 #define BCMutexInit(_)
 #define BCMutexLock(_)
 #define BCMutexUnlock(_)
 #define BCMutexDestroy(_)
 #define BC_MUTEX_MAYBE(_)
 #define BC_MUTEX_MAYBE_STATIC(_)
+
+#define BCSpinlockInit(_)
+#define BCSpinlockLock(_)
+#define BCSpinlockUnlock(_)
+#define BCSpinlockDestroy(_)
+#define BC_SPINLOCK_MAYBE(_)
+#define BC_SPINLOCK_MAYBE_STATIC(_)
+
 #endif
 
 // =========================================================

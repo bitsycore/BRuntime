@@ -1,8 +1,8 @@
 #include "BCClassRegistry.h"
 
 #include "BCClass.h"
-#include "Utilities/BCMemory.h"
-#include "Utilities/BCThreads.h"
+#include "Utilities/BC_Memory.h"
+#include "Utilities/BC_Threads.h"
 
 #include <stddef.h>
 #include <string.h>
@@ -29,7 +29,7 @@
 // =========================================================
 
 static struct {
-	BC_MUTEX_MAYBE(lock)
+	BC_SPINLOCK_MAYBE(lock)
 	BCClass** segments[BC_CLASS_REGISTRY_MAX_SEGMENTS];
 	BCClassIdSize segment_count;
 	BCClassIdSize total_classes;
@@ -48,14 +48,14 @@ static inline BCClassIdSize GetSegmentSize(BCClassIdSize segment_index);
 // =========================================================
 
 void ___BCINTERNAL___ClassRegistryInitialize(void) {
-	BCMutexInit(&gClassRegistryState.lock);
+	BCSpinlockInit(&gClassRegistryState.lock);
 	memset(gClassRegistryState.segments, 0, sizeof(gClassRegistryState.segments));
 	gClassRegistryState.segment_count = 0;
 	gClassRegistryState.total_classes = 0;
 }
 
 void ___BCINTERNAL___ClassRegistryDeinitialize(void) {
-	BCMutexLock(&gClassRegistryState.lock);
+	BCSpinlockLock(&gClassRegistryState.lock);
 
 	// Free all allocated segments
 	for (BCClassIdSize i = 0; i < gClassRegistryState.segment_count; i++) {
@@ -68,8 +68,8 @@ void ___BCINTERNAL___ClassRegistryDeinitialize(void) {
 	gClassRegistryState.segment_count = 0;
 	gClassRegistryState.total_classes = 0;
 
-	BCMutexUnlock(&gClassRegistryState.lock);
-	BCMutexDestroy(&gClassRegistryState.lock);
+	BCSpinlockUnlock(&gClassRegistryState.lock);
+	BCSpinlockDestroy(&gClassRegistryState.lock);
 }
 
 // =========================================================
@@ -81,7 +81,7 @@ BCClassIdSize BCClassRegistryGetCount(void) {
 }
 
 BCClassId BCClassRegister(const BCClassRef cls) {
-	BCMutexLock(&gClassRegistryState.lock);
+	BCSpinlockLock(&gClassRegistryState.lock);
 
 	// Check if we need to allocate a new segment
 	const uint32_t current_index = gClassRegistryState.total_classes;
@@ -90,7 +90,7 @@ BCClassId BCClassRegister(const BCClassRef cls) {
 	// Allocate segments as needed
 	while (gClassRegistryState.segment_count <= required_segment) {
 		if (gClassRegistryState.segment_count >= BC_CLASS_REGISTRY_MAX_SEGMENTS) {
-			BCMutexUnlock(&gClassRegistryState.lock);
+			BCSpinlockUnlock(&gClassRegistryState.lock);
 			return BC_CLASS_ID_INVALID; // gClassRegistryState is full
 		}
 
@@ -99,7 +99,7 @@ BCClassId BCClassRegister(const BCClassRef cls) {
 			BCMalloc(segment_size * sizeof(BCClass*));
 
 		if (!gClassRegistryState.segments[gClassRegistryState.segment_count]) {
-			BCMutexUnlock(&gClassRegistryState.lock);
+			BCSpinlockUnlock(&gClassRegistryState.lock);
 			return BC_CLASS_ID_INVALID; // Allocation failed
 		}
 
@@ -116,7 +116,7 @@ BCClassId BCClassRegister(const BCClassRef cls) {
 	gClassRegistryState.segments[segment][offset] = cls;
 	gClassRegistryState.total_classes++;
 	cls->id = current_index;
-	BCMutexUnlock(&gClassRegistryState.lock);
+	BCSpinlockUnlock(&gClassRegistryState.lock);
 
 	return current_index;
 }
@@ -138,17 +138,17 @@ BCClassRef BCClassIdToRef(const BCClassId cid) {
 
 BCClassId BCClassRefToId(const BCClassRef cls) {
 	if (cls == NULL) { return BC_CLASS_ID_INVALID; }
-	BCMutexLock(&gClassRegistryState.lock);
+	BCSpinlockLock(&gClassRegistryState.lock);
 
 	// Slow Linear Search, only for debugging purposes
 	for (uint32_t i = 0; i < gClassRegistryState.total_classes; i++) {
 		if (BCClassIdToRef(i) == cls) {
-			BCMutexUnlock(&gClassRegistryState.lock);
+			BCSpinlockUnlock(&gClassRegistryState.lock);
 			return i;
 		}
 	}
 
-	BCMutexUnlock(&gClassRegistryState.lock);
+	BCSpinlockUnlock(&gClassRegistryState.lock);
 	return BC_CLASS_ID_INVALID;
 }
 

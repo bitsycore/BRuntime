@@ -1,8 +1,8 @@
 #include "BCAutoreleasePool.h"
 
 #include "../BCAllocator.h"
-#include "../Utilities/BCKeywords.h"
-#include "../Utilities/BCMemory.h"
+#include "../Utilities/BC_Keywords.h"
+#include "../Utilities/BC_Memory.h"
 
 #include <string.h>
 

@@ -9,8 +9,8 @@
 #include "Pool/BCAutoreleasePool.h"
 #include "Pool/BCReleasePool.h"
 #include "String/BCString.h"
-#include "Utilities/BCKeywords.h"
-#include "Utilities/BCMacro.h"
+#include "Utilities/BC_Keywords.h"
+#include "Utilities/BC_Macro.h"
 
 // ================================================
 // MARK: RUNTIME INITIALIZATION

@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 #include "BCClassRegistry.h"
-#include "Utilities/BCMemory.h"
+#include "Utilities/BC_Memory.h"
 
 // =========================================================
 // MARK: Initialize
