@@ -57,8 +57,8 @@ void testClassRegistry() {
 	{
 		TEST("Class decompression");
 
-		const BCClassId idx1 = BCClassGetId(&TestClass1);
-		const BCClassId idx2 = BCClassGetId(&TestClass2);
+		const BCClassId idx1 = BCDebugClassFindId(&TestClass1);
+		const BCClassId idx2 = BCDebugClassFindId(&TestClass2);
 
 		const BCClassRef cls1 = BCClassIdGetRef(idx1);
 		const BCClassRef cls2 = BCClassIdGetRef(idx2);
@@ -73,9 +73,9 @@ void testClassRegistry() {
 	{
 		TEST("Compression/decompression round-trip");
 
-		const BCClassId idx = BCClassGetId(&TestClass1);
+		const BCClassId idx = BCDebugClassFindId(&TestClass1);
 		const BCClassRef cls = BCClassIdGetRef(idx);
-		const BCClassId idx2 = BCClassGetId(cls);
+		const BCClassId idx2 = BCDebugClassFindId(cls);
 
 		ASSERT(idx == idx2, "Round-trip preserves index");
 		ASSERT(cls == &TestClass1, "Round-trip preserves class pointer");
@@ -83,7 +83,7 @@ void testClassRegistry() {
 
 	// Test 4: Test with many classes to trigger segment growth
 	{
-#define NUM_TEST_CLASSES 128
+#define NUM_TEST_CLASSES 60000
 #define MACRO_STRINGIFY(x) #x
 #define MACRO_TOSTRING(x) MACRO_STRINGIFY(x)
 		TEST("Segment growth (" MACRO_TOSTRING(NUM_TEST_CLASSES) " classes)");
@@ -106,9 +106,9 @@ void testClassRegistry() {
 
 		// Verify all can be decompressed correctly
 		for (int i = 0; i < NUM_TEST_CLASSES; i++) {
-			const BCClassId idx = BCClassGetId(&manyClasses[i]);
+			const BCClassId idx = manyClasses[i].id;
 			const BCClassRef cls = BCClassIdGetRef(idx);
-			ASSERT_SILENT(cls == &manyClasses[i], "Decompression after growth is correct");
+			ASSERT_SILENT(cls == &manyClasses[i], "Decompression after growth is incorrect");
 		}
 
 		const BCClassId total = BCClassRegistryGetCount();
@@ -120,8 +120,8 @@ void testClassRegistry() {
 		TEST("BCObject integration");
 
 		// Register a class if not already registered
-		uint32_t idx = BCClassGetId(&TestClass1);
-		if (idx == UINT32_MAX) {
+		BCClassId idx = BCDebugClassFindId(&TestClass1);
+		if (idx == BC_CLASS_ID_INVALID) {
 			idx = BCClassRegistryInsert(&TestClass1);
 		}
 
@@ -132,14 +132,15 @@ void testClassRegistry() {
 		// Verify the class can be retrieved
 		const BCClassRef cls = BCObjectClass(obj);
 		ASSERT(cls == &TestClass1, "BCObjectClass returns correct class");
-		ASSERT(strcmp(cls->name, "TestClass1") == 0,
-			   "Object has correct class name");
+		ASSERT(strcmp(cls->name, "TestClass1") == 0, "Object has correct class name");
 
 		// Verify compressed pointer
 		ASSERT(obj->cls == idx, "Object stores compressed index");
 
 		BCRelease(obj);
 	}
+
+	log_fmt("\n" BC_AE_BGREEN "✓ All ClassRegistry tests passed!"BC_AE_RESET"\n");
 
 	log_fmt("\n");
 }

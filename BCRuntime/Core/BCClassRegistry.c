@@ -135,7 +135,7 @@ BCClassRef BCClassIdGetRef(const BCClassId cid) {
 	return gClassRegistryState.segments[segment][offset];
 }
 
-BCClassId BCClassGetId(const BCClassRef cls) {
+BCClassId BCDebugClassFindId(const BCClassRef cls) {
 	if (cls == NULL) { return BC_CLASS_ID_INVALID; }
 	BCSpinlockLock(&gClassRegistryState.lock);
 

@@ -27,7 +27,7 @@ BCClassRef BCClassIdGetRef(BCClassId cid);
 // MARK: Class Ref
 // =========================================================
 
-BCClassId BCClassGetId(BCClassRef cls);
+BCClassId BCDebugClassFindId(BCClassRef cls);
 
 // =========================================================
 // MARK: Registry
