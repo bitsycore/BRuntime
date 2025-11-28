@@ -41,6 +41,8 @@ void BCMutexDestroy(BCMutex* mutex) {
 void BCSpinlockInit(BCSpinlock* sl) {
 #if defined(_WIN32)
 	sl->v = 0;
+#elif __APPLE__
+    *sl = OS_UNFAIR_LOCK_INIT;
 #else
 	pthread_spin_init(sl, 0);
 #endif
@@ -51,6 +53,8 @@ void BCSpinlockLock(BCSpinlock* sl) {
 	while (InterlockedCompareExchange(&sl->v, 1, 0) != 0) {
 		YieldProcessor();
 	}
+#elif __APPLE__
+    os_unfair_lock_lock(sl);
 #else
 	pthread_spin_lock(sl);
 #endif
@@ -59,6 +63,8 @@ void BCSpinlockLock(BCSpinlock* sl) {
 void BCSpinlockUnlock(BCSpinlock* sl) {
 #if defined(_WIN32)
 	InterlockedExchange(&sl->v, 0);
+#elif __APPLE__
+    os_unfair_lock_unlock(sl);
 #else
 	pthread_spin_unlock(sl);
 #endif
@@ -66,7 +72,7 @@ void BCSpinlockUnlock(BCSpinlock* sl) {
 
 void BCSpinlockDestroy(BCSpinlock* sl) {
 #if defined(_WIN32)
-	/* nothing to destroy */
+#elif __APPLE__
 #else
 	pthread_spin_destroy(sl);
 #endif
@@ -75,7 +81,6 @@ void BCSpinlockDestroy(BCSpinlock* sl) {
 // =========================================================
 // MARK: Run Once Implementation
 // =========================================================
-
 
 #if defined(_WIN32)
 static BOOL CALLBACK WinInitOnceCallback(PINIT_ONCE InitOnce, const PVOID Parameter, PVOID *Context) {

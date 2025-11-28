@@ -24,6 +24,10 @@ extern "C" {
 typedef CRITICAL_SECTION BCMutex;
 typedef struct { volatile LONG v; } BCSpinlock;
 
+#elif __APPLE__
+#include <os/lock.h>
+typedef pthread_mutex_t BCMutex;
+typedef os_unfair_lock BCSpinlock;
 #else
 
 typedef pthread_mutex_t BCMutex;
