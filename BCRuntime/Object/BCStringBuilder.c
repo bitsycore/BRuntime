@@ -249,7 +249,10 @@ void BCStringBuilderClear(const BCStringBuilderRef builder) {
 	builder->length = 0;
 }
 
-BCStringRef BCStringBuilderFinish(const BCStringBuilderRef builder) {
+BCStringRef BCStringBuilderFinish(const BCStringBuilderRef builder, const BC_bool pooled) {
 	if (!builder) return NULL;
-	return BCStringCreate("%.*s", (int)builder->length, builder->buffer);
+	if (!pooled) {
+		return BCStringCreate("%.*s", (int)builder->length, builder->buffer);
+	}
+	return BCStringPooledWithInfo(builder->buffer, builder->length, ___BCINTERNAL___StringHasher(builder->buffer), BC_false);
 }

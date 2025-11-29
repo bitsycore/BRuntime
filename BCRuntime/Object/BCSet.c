@@ -59,7 +59,7 @@ static BCStringRef SetToStringImpl(const BCObjectRef obj) {
 	}
 
 	BCStringBuilderAppend(sb, " }");
-	const BCStringRef result = BCStringBuilderFinish(sb);
+	const BCStringRef result = BCStringBuilderFinish(sb, BC_false);
 	BCRelease($OBJ sb);
 	return result;
 }

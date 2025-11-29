@@ -39,31 +39,14 @@ void demo(void) {
 			"InnerMap2", $$MAP("InnerKeyA", "InnerValueA", "InnerKeyB", "InnerValueB")
 		);
 
-		const char* buffer = BCAllocatorAlloc(kBCAllocatorRefSystem, 4096);
-		BCArenaRef arena = BCArenaCreate(NULL, buffer, 4096);
-		const BCAllocatorRef allocator = BCArenaAllocator(arena);
-
-		$LET sb = BCStringBuilderCreate(allocator);
-		BCAutorelease($OBJ sb);
-		BCStringBuilderAppend(sb, "Hello from SB");
-		BCStringBuilderAppendChar(sb, ' ');
-		BCStringBuilderAppendChar(sb, '!');
-		BCStringBuilderAppendChar(sb, ' ');
-		BCStringBuilderAppendString(sb, str);
-		BCStringBuilderAppendChar(sb, ' ');
-		BCStringBuilderAppendFormat(sb, "Number: %f", 3.141);
-		$LET buildedStr = BCStringBuilderFinish(sb);
-
-		printf("Str: %s", BCStringCPtr(buildedStr));
-
 		BCAutoreleaseAll(
 			$OBJ str,
 			$OBJ formatedStr,
 			$OBJ list,
-			$OBJ map,
-			$OBJ buildedStr
+			$OBJ map
 		);
 	}
+
 }
 
 int BCMain() {

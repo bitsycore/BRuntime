@@ -5,6 +5,8 @@ add_library(BCRuntime
 		Core/BCTypes.h
 		Core/BCAllocator.c
 		Core/BCAllocator.h
+		Core/BCArena.c
+		Core/BCArena.h
 		Core/BCAutoreleasePool.c
 		Core/BCAutoreleasePool.h
 		Core/BCClass.c

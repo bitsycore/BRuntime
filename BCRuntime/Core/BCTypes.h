@@ -18,6 +18,7 @@ typedef _Bool BC_bool;
 typedef struct BCClass *BCClassRef;
 typedef struct BCObject *BCObjectRef;
 typedef struct BCAllocator *BCAllocatorRef;
+typedef struct BCArena *BCArenaRef;
 
 #define BC_CLASS_ID_INVALID UINT16_MAX
 typedef uint16_t BCClassId;

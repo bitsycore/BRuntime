@@ -49,6 +49,6 @@ const char* BCStringBuilderCPtr(BCStringBuilderRef builder);
 
 void BCStringBuilderEnsureCapacity(BCStringBuilderRef builder, size_t requiredCapacity);
 void BCStringBuilderClear(BCStringBuilderRef builder);
-BCStringRef BCStringBuilderFinish(BCStringBuilderRef builder);
+BCStringRef BCStringBuilderFinish(BCStringBuilderRef builder, BC_bool pooled);
 
 #endif //BCRUNTIME_BCSTRINGBUILDER_H

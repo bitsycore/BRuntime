@@ -52,7 +52,7 @@ void testStringBuilder()
 	PRINT_ERR_IF_NOT(strcmp(BCStringBuilderCPtr(builder1), "Hello World - 5 + 3 = 8!") == 0);
 
 	// Test 4: Finalization
-	$LET finalStr = BCStringBuilderFinish(builder1);
+	$LET finalStr = BCStringBuilderFinish(builder1, BC_false);
 	BCAutorelease($OBJ finalStr);
 	log_fmt("Finalized BCString: \"%s\"\n", BCStringCPtr(finalStr));
 	log_fmt("Finalized toString: %s\n", TO_STR(finalStr));
@@ -88,7 +88,7 @@ void testStringBuilder()
 	// Test 8: Edge case - empty builder finalization
 	$LET builder3 = BCStringBuilderCreate(NULL);
 	BCAutorelease($OBJ builder3);
-	$LET emptyStr = BCStringBuilderFinish(builder3);
+	$LET emptyStr = BCStringBuilderFinish(builder3, BC_false);
 	BCAutorelease($OBJ emptyStr);
 	log_fmt("\nEmpty builder finalized: \"%s\" (Length: %zu)\n", BCStringCPtr(emptyStr), BCStringLength(emptyStr));
 	PRINT_ERR_IF_NOT(BCStringLength(emptyStr) == 0);

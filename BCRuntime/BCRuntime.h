@@ -6,6 +6,7 @@
 
 #include "Core/BCAutoreleasePool.h"
 #include "Core/BCBoxMacro.h"
+#include "Core/BCArena.h"
 
 #include "Object/BCList.h"
 #include "Object/BCMap.h"
