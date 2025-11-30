@@ -1,24 +1,19 @@
 #ifndef BCRUNTIME_BCOBJECT_H
 #define BCRUNTIME_BCOBJECT_H
 
-#include "../Core/BCAllocator.h"
 #include "../BCSettings.h"
+#include "../Core/BCAllocator.h"
 #include "../Core/BCTypes.h"
 #include "../Utilities/BC_Atomics.h"
 
 #include <stddef.h>
 
-#if BC_SETTINGS_UNALIGNED_ALLOCATOR_PTR == 1
-#define ALLOCATOR_PTR_SET uint8_t allocator_ptr[sizeof(uintptr_t)];
-#else
-#define ALLOCATOR_PTR_SET BCAllocatorRef allocator_ptr;
-#endif
-
 typedef struct BCObject {
 	BCClassId cls;
 	uint16_t flags;
+	uint16_t reserved;
 	BC_atomic_uint16 ref_count;
-	ALLOCATOR_PTR_SET;
+	BCAllocatorRef allocator_ptr;
 } BCObject;
 
 #define BC_OBJECT_DEFAULT_FLAGS (BC_OBJECT_FLAG_REFCOUNT)
@@ -29,7 +24,7 @@ typedef struct BCObject {
 // Object is constant and ignore free
 #define BC_OBJECT_FLAG_CONSTANT 1 << 1
 // Object uses non-default allocator meaning it use extended layout
-#define BC_OBJECT_FLAG_NON_DEFAULT_ALLOCATOR 1 << 2
+#define BC_OBJECT_FLAG_NON_SYSTEM_ALLOCATOR 1 << 2
 // Object uses non-default allocator meaning it use extended layout
 #define BC_OBJECT_FLAG_INLINED 1 << 3
 // Flags 8 -> 15 Free usage for class
@@ -53,47 +48,19 @@ BCClassRef BCObjectClass(BCObjectRef obj);
 // MARK: Allocator Handling
 // =========================================================
 
-#if BC_SETTINGS_UNALIGNED_ALLOCATOR_PTR == 1
-
-static inline void* ___BCINTERNAL_ObjectAllocatorLoad(const BCObjectRef o) {
-	uintptr_t v;
-	memcpy(&v, o->allocator_ptr, sizeof(v));
-	return (void*)v;
-}
-
-static inline void ___BCINTERNAL_ObjectAllocatorSave(const BCObjectRef o, const BCAllocatorRef p) {
-	memcpy(o->allocator_ptr, &p, sizeof(uintptr_t));
-}
-
-#define BCObjectGetAllocator(obj) ( BC_FLAG_HAS( (obj)->flags, BC_OBJECT_FLAG_NON_DEFAULT_ALLOCATOR ) ? ___BCINTERNAL_ObjectAllocatorLoad(obj) : BCAllocatorGetDefault() )
-
-#define BCObjectSetAllocator(obj, allocator) \
-    do { \
-        if ( allocator == NULL || allocator == BCAllocatorGetDefault() ) { \
-			BC_FLAG_CLEAR( (obj)->flags, BC_OBJECT_FLAG_NON_DEFAULT_ALLOCATOR ); \
-			___BCINTERNAL_ObjectAllocatorSave((obj), NULL); \
-        } else { \
-			BC_FLAG_SET( (obj)->flags, BC_OBJECT_FLAG_NON_DEFAULT_ALLOCATOR ); \
-            ___BCINTERNAL_ObjectAllocatorSave((obj), (allocator)); \
-        } \
-    } while (0)
-
-#else
-
-#define BCObjectGetAllocator(obj) ( BC_FLAG_HAS( (obj)->flags, BC_OBJECT_FLAG_NON_DEFAULT_ALLOCATOR ) ?  ( (obj)->allocator_ptr ) : BCAllocatorGetDefault() )
+#define BCObjectGetAllocator(obj) ( BC_FLAG_HAS( (obj)->flags, BC_OBJECT_FLAG_NON_SYSTEM_ALLOCATOR ) ?  ( (obj)->allocator_ptr ) : kBCAllocatorRefSystem )
 
 #define BCObjectSetAllocator(obj, allocator) \
 	do { \
-		if ( allocator == NULL || allocator == BCAllocatorGetDefault() ) { \
-			BC_FLAG_CLEAR( (obj)->flags, BC_OBJECT_FLAG_NON_DEFAULT_ALLOCATOR ); \
-			(obj)->allocator_ptr = NULL; \
+		__typeof__(allocator) temp_alloc = allocator ? allocator : BCAllocatorGetDefault();\
+		if ( allocator == kBCAllocatorRefSystem ) { \
+			BC_FLAG_CLEAR( (obj)->flags, BC_OBJECT_FLAG_NON_SYSTEM_ALLOCATOR ); \
+			(obj)->allocator_ptr = kBCAllocatorRefSystem; \
 		} else { \
-			BC_FLAG_SET( (obj)->flags, BC_OBJECT_FLAG_NON_DEFAULT_ALLOCATOR ); \
-			(obj)->allocator_ptr = (allocator); \
+			BC_FLAG_SET( (obj)->flags, BC_OBJECT_FLAG_NON_SYSTEM_ALLOCATOR ); \
+			(obj)->allocator_ptr = (temp_alloc); \
 		} \
 	} while (0)
-
-#endif
 
 // =========================================================
 // MARK: Debug

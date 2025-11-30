@@ -69,7 +69,7 @@ void BCRelease(const BCObjectRef obj) {
 		const BCClassRef cls = BCClassIdGetRef(obj->cls);
 		if (cls && cls->dealloc)
 			cls->dealloc(obj);
-		if (BC_FLAG_HAS(obj->flags, BC_OBJECT_FLAG_NON_DEFAULT_ALLOCATOR)) {
+		if (BC_FLAG_HAS(obj->flags, BC_OBJECT_FLAG_NON_SYSTEM_ALLOCATOR)) {
 			const BCAllocatorRef allocator = BCObjectGetAllocator(obj);
 			BCAllocatorFree(allocator, obj);
 		}
@@ -226,7 +226,7 @@ static const char* FlagsToString(const BCClassId cls, const uint16_t flags) {
 		BC_strcat_s(buffer, sizeof(buffer), "REF ");
 	if (BC_FLAG_HAS(flags, BC_OBJECT_FLAG_CONSTANT))
 		BC_strcat_s(buffer, sizeof(buffer), "CST ");
-	if (BC_FLAG_HAS(flags, BC_OBJECT_FLAG_NON_DEFAULT_ALLOCATOR))
+	if (BC_FLAG_HAS(flags, BC_OBJECT_FLAG_NON_SYSTEM_ALLOCATOR))
 		BC_strcat_s(buffer, sizeof(buffer), "ALL ");
 	if (BC_FLAG_HAS(flags, BC_OBJECT_FLAG_INLINED))
 		BC_strcat_s(buffer, sizeof(buffer), "INL ");
@@ -335,7 +335,7 @@ void BCObjectDebugDump(void) {
 
 		// Format allocator pointer
 		char allocatorPtr[18];
-		if (!BC_FLAG_HAS(obj->flags, BC_OBJECT_FLAG_NON_DEFAULT_ALLOCATOR)) {
+		if (!BC_FLAG_HAS(obj->flags, BC_OBJECT_FLAG_NON_SYSTEM_ALLOCATOR)) {
 			snprintf(allocatorPtr, sizeof(allocatorPtr), "DEFAULT");
 		}
 		else {
