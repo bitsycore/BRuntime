@@ -10,10 +10,9 @@
 
 typedef struct BCObject {
 	BCClassId cls;
-	uint16_t flags;
-	uint16_t reserved;
 	BC_atomic_uint16 ref_count;
-	BCAllocatorRef allocator_ptr;
+	uint16_t flags;
+	uint16_t class_reserved;
 } BCObject;
 
 #define BC_OBJECT_DEFAULT_FLAGS (BC_OBJECT_FLAG_REFCOUNT)
@@ -48,17 +47,16 @@ BCClassRef BCObjectClass(BCObjectRef obj);
 // MARK: Allocator Handling
 // =========================================================
 
-#define BCObjectGetAllocator(obj) ( BC_FLAG_HAS( (obj)->flags, BC_OBJECT_FLAG_NON_SYSTEM_ALLOCATOR ) ?  ( (obj)->allocator_ptr ) : kBCAllocatorRefSystem )
-
+#define BCObjectGetAllocator(obj) ( BC_FLAG_HAS( (obj)->flags, BC_OBJECT_FLAG_NON_SYSTEM_ALLOCATOR ) ?  ( ((BCAllocatorRef)(obj)) - 1 ) : kBCAllocatorRefSystem )
+#define BCObjectGetBasePointer(obj) ( BC_FLAG_HAS((obj)->flags, BC_OBJECT_FLAG_NON_SYSTEM_ALLOCATOR) ? ((BCAllocatorRef)(obj)) - 1 : (BCAllocatorRef)(obj) )
 #define BCObjectSetAllocator(obj, allocator) \
 	do { \
 		__typeof__(allocator) temp_alloc = allocator ? allocator : BCAllocatorGetDefault();\
 		if ( allocator == kBCAllocatorRefSystem ) { \
 			BC_FLAG_CLEAR( (obj)->flags, BC_OBJECT_FLAG_NON_SYSTEM_ALLOCATOR ); \
-			(obj)->allocator_ptr = kBCAllocatorRefSystem; \
 		} else { \
 			BC_FLAG_SET( (obj)->flags, BC_OBJECT_FLAG_NON_SYSTEM_ALLOCATOR ); \
-			(obj)->allocator_ptr = (temp_alloc); \
+			*(((BCAllocatorRef*)(obj)) - 1 ) = (temp_alloc); \
 		} \
 	} while (0)
 

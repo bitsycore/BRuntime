@@ -29,19 +29,29 @@ static void ObjectDebugMarkFreed(BCObjectRef obj);
 // =========================================================
 
 BCObjectRef BCObjectAllocWithConfig(const BCAllocatorRef alloc, const BCClassId cls, const size_t extraBytes, const uint16_t flags) {
+
 	const BCClassRef class = BCClassIdGetRef(cls);
+	const BCAllocatorRef selectedAlloc = alloc == NULL ? BCAllocatorGetDefault() : alloc;
+	const BC_bool isSystemAllocator = selectedAlloc == kBCAllocatorRefSystem;
+	const size_t allocSize = (isSystemAllocator ? 0 : sizeof(BCAllocatorRef)) + class->allocSize + extraBytes;
 
-	const BCObjectRef obj = BCAllocatorAlloc(alloc, class->allocSize + extraBytes);
+	BCAllocatorRef* allocatorRef = BCAllocatorAlloc(selectedAlloc, allocSize);
+	const BCObjectRef objRef = (BCObjectRef)( isSystemAllocator ? allocatorRef : allocatorRef + 1 );
 
-	obj->cls = cls;
-	obj->flags = flags;
-	obj->ref_count = 1;
+	objRef->cls = cls;
+	objRef->flags = flags;
+	objRef->ref_count = 1;
 
-	BCObjectSetAllocator(obj, alloc);
+	if (isSystemAllocator) {
+		BC_FLAG_CLEAR(objRef->flags, BC_OBJECT_FLAG_NON_SYSTEM_ALLOCATOR);
+	} else {
+		*allocatorRef = selectedAlloc;
+		BC_FLAG_SET(objRef->flags, BC_OBJECT_FLAG_NON_SYSTEM_ALLOCATOR);
+	}
 
-	ObjectDebugTrack(obj);
+	ObjectDebugTrack(objRef);
 
-	return obj;
+	return objRef;
 }
 
 BCObjectRef BCObjectAlloc(const BCAllocatorRef alloc, const BCClassId cls) {
@@ -69,14 +79,12 @@ void BCRelease(const BCObjectRef obj) {
 		const BCClassRef cls = BCClassIdGetRef(obj->cls);
 		if (cls && cls->dealloc)
 			cls->dealloc(obj);
-		if (BC_FLAG_HAS(obj->flags, BC_OBJECT_FLAG_NON_SYSTEM_ALLOCATOR)) {
-			const BCAllocatorRef allocator = BCObjectGetAllocator(obj);
-			BCAllocatorFree(allocator, obj);
-		}
-		else {
-			BCAllocatorFree(NULL, obj);
-		}
+
 		ObjectDebugMarkFreed(obj);
+
+		const BCAllocatorRef allocator = BCObjectGetAllocator(obj);
+		void* raw_ptr = BCObjectGetBasePointer(obj);
+		BCAllocatorFree(allocator, raw_ptr);
 	}
 }
 
@@ -173,7 +181,7 @@ void ___BCINTERNAL___ObjectDebugDeinitialize(void) {
 }
 
 static void ObjectDebugTrack(const BCObjectRef obj) {
-	if (!ObjectDebugTracker.enabled)
+	if (!ObjectDebugTracker.enabled || BC_FLAG_HAS(obj->flags,BC_OBJECT_FLAG_NON_SYSTEM_ALLOCATOR))
 		return;
 
 	BCSpinlockLock(&ObjectDebugTracker.lock);
@@ -188,7 +196,7 @@ static void ObjectDebugTrack(const BCObjectRef obj) {
 }
 
 static void ObjectDebugMarkFreed(const BCObjectRef obj) {
-	if (!ObjectDebugTracker.enabled)
+	if (!ObjectDebugTracker.enabled || BC_FLAG_HAS(obj->flags,BC_OBJECT_FLAG_NON_SYSTEM_ALLOCATOR))
 		return;
 
 	BCSpinlockLock(&ObjectDebugTracker.lock);
