@@ -13,10 +13,11 @@
 
 typedef struct BCReleasePool {
 	BCObject base;
-	uint16_t count;
 	uint16_t capacity;
 	BCObjectRef* stack;
 } BCReleasePool;
+
+#define COUNT base.class_reserved
 
 // =========================================================
 // MARK: Base Methods
@@ -25,7 +26,7 @@ typedef struct BCReleasePool {
 static void ReleasePoolDealloc(const BCObjectRef obj) {
 	const BCReleasePool* pool = (BCReleasePool*)obj;
 
-	for (uint16_t i = 0; i < pool->count; i++) {
+	for (uint16_t i = 0; i < pool->COUNT; i++) {
 		BCRelease(pool->stack[i]);
 	}
 
@@ -61,7 +62,7 @@ void ___BCINTERNAL___ReleasePoolInitialize(void) {
 
 BCReleasePoolRef BCReleasePoolCreate(const BCAllocatorRef allocator, const size_t initialCapacity) {
 	const BCReleasePoolRef pool = (BCReleasePoolRef)BCObjectAlloc(allocator, kBCReleasePoolClass.id);
-	pool->count = 0;
+	pool->COUNT = 0;
 	pool->capacity = initialCapacity;
 	pool->stack = BCAllocatorAlloc(allocator, sizeof(BCObjectRef) * initialCapacity);
 	return pool;
@@ -71,7 +72,7 @@ BCObjectRef BCReleasePoolAdd(const BCReleasePoolRef pool, const BCObjectRef obj)
 	if (!obj) return NULL;
 	if (!pool) return obj;
 
-	if (pool->count == pool->capacity) {
+	if (pool->COUNT == pool->capacity) {
 		const size_t newCapacity = pool->capacity * 2;
 
 		// overflow
@@ -91,14 +92,14 @@ BCObjectRef BCReleasePoolAdd(const BCReleasePoolRef pool, const BCObjectRef obj)
 		pool->capacity = newCapacity;
 	}
 
-	pool->stack[pool->count++] = obj;
+	pool->stack[pool->COUNT++] = obj;
 
 	return obj;
 }
 
 uint16_t BCReleasePoolCount(const BCReleasePoolRef pool) {
 	if (!pool) return 0;
-	return pool->count;
+	return pool->COUNT;
 }
 
 uint16_t BCReleasePoolCapacity(const BCReleasePoolRef pool) {
