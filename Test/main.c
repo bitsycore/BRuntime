@@ -1,6 +1,7 @@
 #define BC_RUNTIME_MAIN
 #include <BCRuntime/BCRuntime.h>
 
+#include "BCRuntime/Object/BCFormat.h"
 #include "tests/tests.h"
 
 int RETRY = 1;
@@ -11,7 +12,7 @@ void demo(void) {
 		$LET str = $("Boxed");
 		$LET strAutorelease = $$("Boxed Autoreleased");
 
-		$LET formatedStr = $("String with construction %d", 123);
+		$LET formatedStr = $("String with construction %@", str);
 		$LET stringInPool = BCStringPooledLiteral("String in global pool");
 
 
@@ -70,8 +71,9 @@ int BCMain() {
 
 			BCObjectDebugDump();
 			BCStringPoolDebugDump();
-		}
 
+		    BCPrintf("Hello world %@", $$LIST("Hello", 1, 3, 4));
+		}
 		BIG_TITLE("BC End");
 	}
 

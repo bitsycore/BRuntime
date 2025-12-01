@@ -18,6 +18,8 @@ add_library(BCRuntime
 		Object/BCList.c
 		Object/BCList.h
 		Object/BCMap.c
+		Object/BCFormat.c
+		Object/BCFormat.h
 		Object/BCMap.h
 		Object/BCNumber.c
 		Object/BCNumber.h

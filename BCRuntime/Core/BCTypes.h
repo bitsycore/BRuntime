@@ -1,6 +1,7 @@
 #ifndef BCRUNTIME_BCTYPES_H
 #define BCRUNTIME_BCTYPES_H
 
+#include <stdbool.h>
 #include <stdint.h>
 
 // =========================================================

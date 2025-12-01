@@ -25,14 +25,14 @@
 // MARK: Internal
 // =========================================================
 
-__attribute__((const, always_inline))
-static inline uint32_t ___BCINTERNAL___StringHasher(const char* s) {
-	uint32_t hash = 2166136261u;
-	while (*s) {
-		hash ^= (uint8_t)*s++;
-		hash *= 16777619;
-	}
-	return hash == BC_HASH_UNSET ? 1 : hash;
+__attribute__((const, always_inline)) static inline uint32_t
+___BCINTERNAL___StringHasher(const char *s) {
+  uint32_t hash = 2166136261u;
+  while (*s) {
+    hash ^= (uint8_t)*s++;
+    hash *= 16777619;
+  }
+  return hash == BC_HASH_UNSET ? 1 : hash;
 }
 
 // =========================================================
@@ -45,13 +45,15 @@ BCClassId BCStringClassId();
 // MARK: Constructor
 // =========================================================
 
-__attribute__((format(printf, 1, 2)))
-BCStringRef BCStringCreate(const char* fmt, ...);
+BCStringRef BCStringCreate(const char *fmt, ...);
 
-BCStringPooledRef BCStringPooled(const char* text);
-BCStringPooledRef BCStringPooledWithInfo(const char* text, size_t len, uint32_t hash, BC_bool static_string);
-#define           BCStringPooledLiteral(__text__) \
-    BCStringPooledWithInfo( BC_REQUIRE_LITERAL(__text__), sizeof(__text__) / sizeof((__text__)[0]) - 1, ___BCINTERNAL___StringHasher((__text__)), BC_true )
+BCStringPooledRef BCStringPooled(const char *text);
+BCStringPooledRef BCStringPooledWithInfo(const char *text, size_t len,
+                                         uint32_t hash, BC_bool static_string);
+#define BCStringPooledLiteral(__text__)                                        \
+  BCStringPooledWithInfo(BC_REQUIRE_LITERAL(__text__),                         \
+                         sizeof(__text__) / sizeof((__text__)[0]) - 1,         \
+                         ___BCINTERNAL___StringHasher((__text__)), BC_true)
 
 // =========================================================
 // MARK: Properties
@@ -59,7 +61,7 @@ BCStringPooledRef BCStringPooledWithInfo(const char* text, size_t len, uint32_t 
 
 size_t BCStringLength(BCStringRef str);
 uint32_t BCStringHash(BCStringRef str);
-const char* BCStringCPtr(BCStringRef str);
+const char *BCStringCPtr(BCStringRef str);
 
 // =========================================================
 // MARK: Debug
@@ -67,4 +69,4 @@ const char* BCStringCPtr(BCStringRef str);
 
 void BCStringPoolDebugDump(void);
 
-#endif //BCRUNTIME_BCSTRING_H
+#endif // BCRUNTIME_BCSTRING_H
