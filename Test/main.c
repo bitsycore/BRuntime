@@ -1,7 +1,7 @@
 #define BC_RUNTIME_MAIN
 #include <BCRuntime/BCRuntime.h>
 
-#include "BCRuntime/Object/BCFormat.h"
+#include "../BCRuntime/Core/BCFormat.h"
 #include "tests/tests.h"
 
 int RETRY = 1;

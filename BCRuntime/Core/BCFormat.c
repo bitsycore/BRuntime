@@ -1,7 +1,7 @@
 #include "BCFormat.h"
 
-#include "BCObject.h"
-#include "BCString.h"
+#include "../Object/BCObject.h"
+#include "../Object/BCString.h"
 #include "../Utilities/BC_Memory.h"
 
 #include <stdarg.h>

@@ -179,7 +179,7 @@ static BCStringRef StringPoolGetOrInsert(const char *text, const size_t len,
 // MARK: Constructors
 // =========================================================
 
-#include "BCFormat.h"
+#include "../Core/BCFormat.h"
 
 BCStringRef BCStringCreate(const char *fmt, ...) {
   va_list args, copy;
