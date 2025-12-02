@@ -53,5 +53,6 @@ void testMap();
 void testReleasePool();
 void testClassRegistry();
 void benchmarkAutoreleasePool();
+void testBytesArray();
 
 #endif // BCRUNTIME_TESTS_H

@@ -4,7 +4,7 @@
 #include "../BCRuntime/Core/BCFormat.h"
 #include "tests/tests.h"
 
-int RETRY = 0;
+int RETRY = 1;
 
 void demo(void) {
 	BCAutoreleaseScope() {
@@ -66,6 +66,7 @@ int BCMain() {
 			testStringBuilder();
 			testReleasePool();
 			testClassRegistry();
+			testBytesArray();
 
 			demo();
 
@@ -77,7 +78,7 @@ int BCMain() {
 		BIG_TITLE("BC End");
 	}
 
-	benchmarkAutoreleasePool();
+	//benchmarkAutoreleasePool();
 
 	return 0;
 }
