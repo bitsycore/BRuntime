@@ -185,14 +185,14 @@ BCStringRef BCStringCreate(const char *fmt, ...) {
   va_list args, copy;
   va_start(args, fmt);
   va_copy(copy, args);
-  const int len = BCVSnprintf(NULL, 0, fmt, copy);
+  const int len = BC_vsnprintf(NULL, 0, fmt, copy);
   va_end(copy);
 
   const BCStringRef str = (BCStringRef)BCObjectAllocWithConfig(
       NULL, kBCStringClass.id, len + 1, BC_OBJECT_FLAG_REFCOUNT);
   str->buffer = (char *)(&str->buffer + 1);
 
-  BCVSnprintf(str->buffer, len + 1, fmt, args);
+  BC_vsnprintf(str->buffer, len + 1, fmt, args);
   va_end(args);
 
   str->length = BC_LEN_UNSET;

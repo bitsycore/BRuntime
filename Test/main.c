@@ -72,7 +72,7 @@ int BCMain() {
 			BCObjectDebugDump();
 			BCStringPoolDebugDump();
 
-		    BCPrintf("Hello world %@", $$LIST("Hello", 1, 3, 4));
+		    BC_printf("Hello world %@", $$LIST("Hello", 1, 3, 4));
 		}
 		BIG_TITLE("BC End");
 	}
