@@ -2,6 +2,7 @@
 #define BCRUNTIME_BCNUMBER_H
 
 #include "../Core/BCTypes.h"
+#include <limits.h>
 
 // =========================================================
 // MARK: Singletons
@@ -71,6 +72,27 @@ static inline BCBoolRef ___BCINTERNAL___BoolSelect(const BC_bool val) { return v
     double: BCNumberCreateDouble, \
     BC_bool: ___BCINTERNAL___BoolSelect \
 )(val)
+
+// =========================================================
+// MARK: Type-Specific Macros
+// =========================================================
+
+#define BCNumberCreateByte(val)  BCNumberCreateInt8(val)
+#define BCNumberCreateShort(val) BCNumberCreateInt16(val)
+#define BCNumberCreateInt(val)   BCNumberCreateInt32(val)
+#define BCNumberGetByte(num)  BCNumberGetInt8(num)
+#define BCNumberGetShort(num) BCNumberGetInt16(num)
+#define BCNumberGetInt(num)   BCNumberGetInt32(num)
+
+#if LONG_MAX > 0x7FFFFFFF
+    // 64-bit long
+    #define BCNumberCreateLong(val) BCNumberCreateInt64(val)
+    #define BCNumberGetLong(num)    BCNumberGetInt64(num)
+#else
+    // 32-bit long
+    #define BCNumberCreateLong(val) BCNumberCreateInt32(val)
+    #define BCNumberGetLong(num)    BCNumberGetInt32(num)
+#endif
 
 // =========================================================
 // MARK: Methods
