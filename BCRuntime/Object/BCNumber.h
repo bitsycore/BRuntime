@@ -2,6 +2,7 @@
 #define BCRUNTIME_BCNUMBER_H
 
 #include "../Core/BCTypes.h"
+
 #include <limits.h>
 
 // =========================================================
