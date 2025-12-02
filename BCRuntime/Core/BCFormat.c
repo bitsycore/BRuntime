@@ -12,79 +12,154 @@
 // MARK: Core Parser
 // =========================================================
 
-static void AdvanceVAList(va_list* args, const char specifier, const char* lengthMod) {
-	// Handle length modifiers
+static void VaListNext(va_list* args, const char specifier, const char* lengthMod) {
+
+	// =========================================================
+	// LENGTH MODIFIER
 	if (lengthMod[0] == 'L') {
-		// Long double
-		if (specifier == 'f' || specifier == 'F' || specifier == 'e' ||
-			specifier == 'E' || specifier == 'g' || specifier == 'G' ||
-			specifier == 'a' || specifier == 'A') {
+		if (
+			specifier == 'f'
+			|| specifier == 'F'
+			|| specifier == 'e'
+			|| specifier == 'E'
+			|| specifier == 'g'
+			|| specifier == 'G'
+			|| specifier == 'a'
+			|| specifier == 'A'
+		) {
 			va_arg(*args, long double);
 			return;
 		}
 	}
 
-	// Handle integer types with length modifiers
-	if (specifier == 'd' || specifier == 'i' || specifier == 'u' ||
-		specifier == 'o' || specifier == 'x' || specifier == 'X') {
-		if (strcmp(lengthMod, "ll") == 0) {
-			va_arg(*args, long long);
-		}
-		else if (strcmp(lengthMod, "l") == 0) {
-			va_arg(*args, long);
-		}
-		else if (strcmp(lengthMod, "j") == 0) {
-			va_arg(*args, intmax_t);
-		}
-		else if (strcmp(lengthMod, "z") == 0) {
-			va_arg(*args, size_t);
-		}
-		else if (strcmp(lengthMod, "t") == 0) {
-			va_arg(*args, ptrdiff_t);
-		}
-		else {
-			// Default int (hh, h are promoted to int)
-			va_arg(*args, int);
-		}
+	// =========================================================
+	// INTEGER TYPES
+	if (
+		specifier == 'd'
+		|| specifier == 'i'
+		|| specifier == 'u'
+		|| specifier == 'o'
+		|| specifier == 'x'
+		|| specifier == 'X'
+	) {
+		if (strcmp(lengthMod, "ll") == 0) { va_arg(*args, long long); }
+		else if (strcmp(lengthMod, "l") == 0) { va_arg(*args, long); }
+		else if (strcmp(lengthMod, "j") == 0) { va_arg(*args, intmax_t); }
+		else if (strcmp(lengthMod, "z") == 0) { va_arg(*args, size_t); }
+		else if (strcmp(lengthMod, "t") == 0) { va_arg(*args, ptrdiff_t); }
+		else { va_arg(*args, int); }
 		return;
 	}
 
-	// Handle floating point types
-	if (specifier == 'f' || specifier == 'F' || specifier == 'e' ||
-		specifier == 'E' || specifier == 'g' || specifier == 'G' ||
-		specifier == 'a' || specifier == 'A') {
+	// =========================================================
+	// FLOATING POINT TYPE
+	if (
+		specifier == 'f'
+		|| specifier == 'F'
+		|| specifier == 'e'
+		|| specifier == 'E'
+		|| specifier == 'g'
+		|| specifier == 'G'
+		|| specifier == 'a'
+		|| specifier == 'A'
+	) {
 		va_arg(*args, double);
 		return;
 	}
 
-	// Handle characters and strings
-	if (specifier == 'c') {
-		va_arg(*args, int); // char is promoted to int
-		return;
+	// =========================================================
+	// CHAR & STRING
+	if (specifier == 'c') { va_arg(*args, int); return; }
+	if (specifier == 's') { va_arg(*args, char *); return; }
+	if (specifier == 'p') { va_arg(*args, void *); return; }
+	if (specifier == 'n') { va_arg(*args, int *); }
+
+}
+
+// =========================================================
+// MARK: String Output
+// =========================================================
+
+typedef struct StringContext {
+	char* buffer;
+	size_t capacity;
+	size_t current;
+} StringContext;
+
+static void StringOutput(void* context, const char* data, const size_t length) {
+	StringContext* ctx = context;
+	if (ctx->current + length < ctx->capacity) {
+		memcpy(ctx->buffer + ctx->current, data, length);
+		ctx->current += length;
+		ctx->buffer[ctx->current] = '\0';
 	}
-	if (specifier == 's') {
-		va_arg(*args, char *);
-		return;
-	}
-	if (specifier == 'p') {
-		va_arg(*args, void *);
-		return;
-	}
-	if (specifier == 'n') {
-		va_arg(*args, int *);
+	else if (ctx->capacity > 0) {
+		// Truncate
+		const size_t available = ctx->capacity - ctx->current - 1;
+		if (available > 0) {
+			memcpy(ctx->buffer + ctx->current, data, available);
+			ctx->current += available;
+			ctx->buffer[ctx->current] = '\0';
+		}
 	}
 }
 
+// =========================================================
+// MARK: BufferedFile Output
+// =========================================================
+
+#define BUFFERED_FILE_BUFFER_SIZE 8192
+
+typedef struct BufferedFileContext {
+	FILE* stream;
+	char buffer[BUFFERED_FILE_BUFFER_SIZE];
+	size_t used;
+} BufferedFileContext;
+
+static void FlushBufferedFile(BufferedFileContext* ctx) {
+	if (ctx->used > 0) {
+		fwrite(ctx->buffer, 1, ctx->used, ctx->stream);
+		ctx->used = 0;
+	}
+}
+
+static void BufferedFileOutput(void* context, const char* data, const size_t length) {
+	BufferedFileContext* ctx = context;
+
+	// ========================================================
+	// DATA LARGER THAN BUFFER SIZE
+	if (length >= BUFFERED_FILE_BUFFER_SIZE) {
+		FlushBufferedFile(ctx);
+		fwrite(data, 1, length, ctx->stream);
+		return;
+	}
+
+	// ========================================================
+	// NOT ENOUGH SPACE IN BUFFER SO FLUSH IT
+	if (ctx->used + length > BUFFERED_FILE_BUFFER_SIZE) { FlushBufferedFile(ctx); }
+
+	// ========================================================
+	// COPY TO BUFFER
+	memcpy(ctx->buffer + ctx->used, data, length);
+	ctx->used += length;
+}
+
+// =========================================================
+// MARK: Public
+// =========================================================
+
 int BCFormat(const BCFormatOutputFunc outFunc, void* context, const char* fmt, va_list args) {
-	if (!fmt)
-		return 0;
+	if (!fmt) return 0;
 
 	const char* cursor = fmt;
 	int totalWritten = 0;
 
 	while (*cursor) {
+
+		// =========================================================
+		// FIND NEXT %
 		if (*cursor != '%') {
-			// Find next % or end
+
 			const char* start = cursor;
 			while (*cursor && *cursor != '%') {
 				cursor++;
@@ -95,27 +170,28 @@ int BCFormat(const BCFormatOutputFunc outFunc, void* context, const char* fmt, v
 			continue;
 		}
 
-		// Found '%'
+		// =========================================================
+		// FOUND % THEN SKIP IT
 		const char* specStart = cursor;
+		cursor++;
 
-		// Capture args state before parsing specifier (for vsnprintf)
-		va_list copy;
-		va_copy(copy, args);
-
-		cursor++; // Skip '%'
-
-		// Check for literal %
+		// =========================================================
+		// LITERAL %%
 		if (*cursor == '%') {
 			outFunc(context, "%", 1);
 			totalWritten++;
 			cursor++;
-			va_end(copy); // Clean up
 			continue;
 		}
 
-		// Check for Custom Object Specifier %@
+		// =========================================================
+		// CAPTURE ARGS STATE BEFORE CONSUMING IT (for vsnprintf)
+		va_list copy;
+		va_copy(copy, args);
+
+		// =========================================================
+		// BCObject %@
 		if (*cursor == '@') {
-			va_end(copy); // Clean up, not needed for %@
 			const BCObjectRef obj = va_arg(args, BCObjectRef);
 			const BCStringRef str = BCToString(obj);
 			const char* cStr = BCStringCPtr(str);
@@ -127,29 +203,37 @@ int BCFormat(const BCFormatOutputFunc outFunc, void* context, const char* fmt, v
 			continue;
 		}
 
-		// Parse Standard Specifier
-		// Flags
-		while (*cursor == '-' || *cursor == '+' || *cursor == ' ' ||
-			*cursor == '#' || *cursor == '0') {
+		// =========================================================
+		// FLAGS SPECIFIER
+		while (
+			*cursor == '-'
+			|| *cursor == '+'
+			|| *cursor == ' '
+			|| *cursor == '#'
+			|| *cursor == '0'
+		) {
 			cursor++;
 		}
 
-		// Width
+		// =========================================================
+		// WIDTH
 		if (*cursor == '*') {
 			cursor++;
-			va_arg(args, int); // Consume width arg
+			// Consume width
+			va_arg(args, int);
 		}
 		else {
-			while (*cursor >= '0' && *cursor <= '9')
-				cursor++;
+			while (*cursor >= '0' && *cursor <= '9') cursor++;
 		}
 
-		// Precision
+		// =========================================================
+		// PRECISION
 		if (*cursor == '.') {
 			cursor++;
 			if (*cursor == '*') {
 				cursor++;
-				va_arg(args, int); // Consume precision arg
+				// Consume precision
+				va_arg(args, int);
 			}
 			else {
 				while (*cursor >= '0' && *cursor <= '9')
@@ -157,7 +241,8 @@ int BCFormat(const BCFormatOutputFunc outFunc, void* context, const char* fmt, v
 			}
 		}
 
-		// Length Modifier
+		// =========================================================
+		// LENGTH
 		char lengthMod[3] = {0};
 		if (*cursor == 'h') {
 			lengthMod[0] = 'h';
@@ -192,89 +277,86 @@ int BCFormat(const BCFormatOutputFunc outFunc, void* context, const char* fmt, v
 			cursor++;
 		}
 
+		// =========================================================
 		// Specifier
 		const char specifier = *cursor;
 		cursor++;
 
-		// Construct specifier string
+		// =========================================================
+		// Buffer Stack or Heap for format specifier
 		const size_t specLen = cursor - specStart;
-		char* specBuf = BCMalloc(specLen + 1);
+		char specStackBuf[64];
+		char* specBuf;
+
+		if (specLen < sizeof(specStackBuf)) {
+			specBuf = specStackBuf;
+		} else {
+			specBuf = BCMalloc(specLen + 1);
+		}
+
 		memcpy(specBuf, specStart, specLen);
 		specBuf[specLen] = '\0';
 
+		// ========================================================
 		// Format using vsnprintf
 		// Use 'copy' which points to start of args for this specifier
-
-		// First determine size
 		va_list copy2;
 		va_copy(copy2, copy);
+		// Size Calculation
 		const int needed = vsnprintf(NULL, 0, specBuf, copy2);
 		va_end(copy2);
 
 		if (needed >= 0) {
-			char* outBuf = BCMalloc(needed + 1);
+
+			// ======================================
+			// Buffer Stack or Heap
+			char outStackBuf[512];
+			char* outBuf;
+			if (needed < sizeof(outStackBuf)) {
+				outBuf = outStackBuf;
+			} else {
+				outBuf = BCMalloc(needed + 1);
+			}
+
 			// Use copy again
 			vsnprintf(outBuf, needed + 1, specBuf, copy);
 			outFunc(context, outBuf, needed);
 			totalWritten += needed;
-			BCFree(outBuf);
+
+			// ========================================================
+			// CLEANUP
+			if (outBuf != outStackBuf) { BCFree(outBuf); }
 		}
 
-		BCFree(specBuf);
+
+		// ========================================================
+		// CLEANUP
+		if (specBuf != specStackBuf) { BCFree(specBuf); } // Free only if heap allocated
 		va_end(copy);
 
+		// ========================================================
 		// Advance args
-		AdvanceVAList(&args, specifier, lengthMod);
+		VaListNext(&args, specifier, lengthMod);
 	}
 
 	return totalWritten;
 }
 
-// =========================================================
-// MARK: Output Helpers
-// =========================================================
-
-typedef struct {
-	char* buffer;
-	size_t capacity;
-	size_t current;
-} StringContext;
-
-static void StringOutput(void* context, const char* data, const size_t length) {
-	StringContext* ctx = context;
-	if (ctx->current + length < ctx->capacity) {
-		memcpy(ctx->buffer + ctx->current, data, length);
-		ctx->current += length;
-		ctx->buffer[ctx->current] = '\0';
-	}
-	else if (ctx->capacity > 0) {
-		// Truncate
-		const size_t available = ctx->capacity - ctx->current - 1;
-		if (available > 0) {
-			memcpy(ctx->buffer + ctx->current, data, available);
-			ctx->current += available;
-			ctx->buffer[ctx->current] = '\0';
-		}
-	}
+int BC_vprintf(const char* fmt, va_list args) {
+	BufferedFileContext ctx = {stdout, {0}, 0};
+	const int result = BCFormat(BufferedFileOutput, &ctx, fmt, args);
+	FlushBufferedFile(&ctx);
+	return result;
 }
 
-static void FileOutput(void* context, const char* data, const size_t length) {
-	fwrite(data, 1, length, context);
+int BC_vfprintf(FILE* stream, const char* fmt, va_list args) {
+	BufferedFileContext ctx = {stream, {0}, 0};
+	const int result = BCFormat(BufferedFileOutput, &ctx, fmt, args);
+	FlushBufferedFile(&ctx);
+	return result;
 }
 
-// =========================================================
-// MARK: Implementations
-// =========================================================
-
-int BC_vprintf(const char* fmt, const va_list args) {
-	return BCFormat(FileOutput, stdout, fmt, args);
-}
-
-int BC_vfprintf(FILE* stream, const char* fmt, const va_list args) {
-	return BCFormat(FileOutput, stream, fmt, args);
-}
-
-int BC_vsnprintf(char* str, const size_t size, const char* fmt, const va_list args) {
+int BC_vsnprintf(char* str, const size_t size, const char* fmt, va_list args) {
 	StringContext ctx = {str, size, 0};
 	return BCFormat(StringOutput, &ctx, fmt, args);
 }

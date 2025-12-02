@@ -4,6 +4,7 @@
 #include <BCRuntime/BCRuntime.h>
 #include <BCRuntime/Core/BCAutoreleasePool.h>
 #include <BCRuntime/Core/BCClass.h>
+#include <BCRuntime/Core/BCFormat.h>
 #include <BCRuntime/Object/BCList.h>
 #include <BCRuntime/Object/BCMap.h>
 #include <BCRuntime/Object/BCNumber.h>
@@ -14,7 +15,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define log_fmt(...) printf(__VA_ARGS__)
+#define log_fmt(...) BC_printf(__VA_ARGS__)
 
 #define TO_STR(_x_) \
   BCStringCPtr((BCStringRef)(BCAutorelease($OBJ BCToString($OBJ(_x_)))))

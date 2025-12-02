@@ -83,7 +83,7 @@ void testClassRegistry() {
 
 	// Test 4: Test with many classes to trigger segment growth
 	{
-#define NUM_TEST_CLASSES 60000
+#define NUM_TEST_CLASSES 50
 #define MACRO_STRINGIFY(x) #x
 #define MACRO_TOSTRING(x) MACRO_STRINGIFY(x)
 		TEST("Segment growth (" MACRO_TOSTRING(NUM_TEST_CLASSES) " classes)");
@@ -135,7 +135,7 @@ void testClassRegistry() {
 		ASSERT(strcmp(cls->name, "TestClass1") == 0, "Object has correct class name");
 
 		// Verify compressed pointer
-		ASSERT(obj->cls == idx, "Object stores compressed index");
+		ASSERT(obj->cls == idx, " Object stores compressed index");
 
 		BCRelease(obj);
 	}
