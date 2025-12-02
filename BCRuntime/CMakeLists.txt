@@ -43,6 +43,5 @@ add_library(BCRuntime
 		Utilities/BC_Memory.h
 		Utilities/BC_Threads.c
 		Utilities/BC_Threads.h
-		Struct/BCRange.c
 		Struct/BCRange.h
 )

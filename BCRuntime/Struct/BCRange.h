@@ -1,6 +1,8 @@
 #ifndef BCRUNTIME_BCRANGE_H
 #define BCRUNTIME_BCRANGE_H
 
+#include "../Core/BCTypes.h"
+
 #include <stdio.h>
 
 typedef struct BCRange {
@@ -24,11 +26,11 @@ static inline size_t BCRangeEndInclusive(const BCRange range) {
 	return range.start + range.length - 1;
 }
 
-static inline bool BCRangeContains(const BCRange range, const size_t loc) {
+static inline BC_bool BCRangeContains(const BCRange range, const size_t loc) {
 	return (loc >= range.start) && (loc < BCRangeEndExclusive(range));
 }
 
-static inline bool BCRangeEqual(const BCRange range1, const BCRange range2) {
+static inline BC_bool BCRangeEqual(const BCRange range1, const BCRange range2) {
 	return (range1.start == range2.start) && (range1.length == range2.length);
 }
 

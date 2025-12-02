@@ -9,7 +9,7 @@
 // MARK: Settings
 // =========================================================
 
-#define BC_STRING_BUILDER_DEFAULT_CAPACITY 64
+#define BC_STRING_BUILDER_DEFAULT_CAPACITY 128
 
 // =========================================================
 // MARK: Class

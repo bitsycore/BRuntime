@@ -150,7 +150,3 @@ int8_t BCBytesArrayCompare(const BCBytesArrayRef arr1, const BCBytesArrayRef arr
     if (arr1->count > arr2->count) return 1;
     return 0;
 }
-
-bool BCBytesArrayIsEqual(const BCBytesArrayRef arr1, const BCBytesArrayRef arr2) {
-    return BCBytesArrayEqual(arr1, arr2);
-}
