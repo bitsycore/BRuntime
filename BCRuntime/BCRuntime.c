@@ -10,19 +10,20 @@
 
 extern void ___BCINTERNAL___MemoryInitialize();
 extern void ___BCINTERNAL___ClassRegistryInitialize();
-extern void ___BCINTERNAL___ReleasePoolInitialize();
+extern void ___BCINTERNAL___AutoreleaseInitialize();
 
+extern void ___BCINTERNAL___ReleasePoolInitialize();
 extern void ___BCINTERNAL___NumberInitialize();
 extern void ___BCINTERNAL___MapInitialize();
 extern void ___BCINTERNAL___SetInitialize();
 extern void ___BCINTERNAL___ListInitialize();
 extern void ___BCINTERNAL___BytesArrayClassInit();
-
 extern void ___BCINTERNAL___StringPoolInitialize();
 extern void ___BCINTERNAL___StringInitialize();
 extern void ___BCINTERNAL___StringBuilderInitialize();
 
 extern void ___BCINTERNAL___ObjectDebugInitialize();
+
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -68,6 +69,7 @@ void BCInitialize(const int argc, char** argv) {
 
 	___BCINTERNAL___MemoryInitialize();
 	___BCINTERNAL___ClassRegistryInitialize();
+	___BCINTERNAL___AutoreleaseInitialize();
 	___BCINTERNAL___ReleasePoolInitialize();
 
 	___BCINTERNAL___NumberInitialize();
@@ -89,6 +91,7 @@ void BCInitialize(const int argc, char** argv) {
 // MARK: Deinitialize
 // =========================================================
 
+extern void ___BCINTERNAL___AutoreleaseDeinitialize();
 extern void ___BCINTERNAL___StringPoolDeinitialize();
 extern void ___BCINTERNAL___ObjectDebugDeinitialize();
 extern void ___BCINTERNAL___ClassRegistryDeinitialize();
@@ -101,6 +104,7 @@ void BCDeinitialize(void) {
 
 	___BCINTERNAL___StringPoolDeinitialize();
 	___BCINTERNAL___ObjectDebugDeinitialize();
+	___BCINTERNAL___AutoreleaseDeinitialize();
 	___BCINTERNAL___ClassRegistryDeinitialize();
 
 	BCMemoryInfoPrint();

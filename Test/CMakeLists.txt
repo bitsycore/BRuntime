@@ -9,6 +9,7 @@ add_executable(
 		tests/tests.h
 		tests/test_pool.c
 		tests/test_class_registry.c
+		tests/test_pool_benchmark.c
 )
 
 target_include_directories(

@@ -52,5 +52,6 @@ void testNumber();
 void testMap();
 void testReleasePool();
 void testClassRegistry();
+void benchmarkAutoreleasePool();
 
 #endif // BCRUNTIME_TESTS_H
