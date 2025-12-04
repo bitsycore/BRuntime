@@ -11,7 +11,7 @@ static double GetTimeMicroseconds(clock_t start, clock_t end) {
 void benchmarkAutoreleasePool(void) {
 	clock_t start, end;
 	double elapsed;
-
+	double totalElapsed = 0.0;
 	TITLE("Autorelease Pool Benchmark");
 
 	// =========================================================
@@ -25,6 +25,7 @@ void benchmarkAutoreleasePool(void) {
 	}
 	end = clock();
 	elapsed = GetTimeMicroseconds(start, end);
+	totalElapsed += elapsed;
 	log_fmt("    %d push/pop pairs: %.2f μs (%.2f ns per operation)\n",
 		BENCHMARK_ITERATIONS, elapsed, (elapsed * 1000.0) / BENCHMARK_ITERATIONS);
 
@@ -47,6 +48,7 @@ void benchmarkAutoreleasePool(void) {
 	}
 	end = clock();
 	elapsed = GetTimeMicroseconds(start, end);
+	totalElapsed += elapsed;
 	log_fmt("    %d iterations (5 levels each): %.2f μs (%.2f ns per push/pop)\n",
 		BENCHMARK_ITERATIONS, elapsed, (elapsed * 1000.0) / (BENCHMARK_ITERATIONS * 10));
 
@@ -66,6 +68,7 @@ void benchmarkAutoreleasePool(void) {
 	end = clock();
 	BCAutoreleasePoolPop();
 	elapsed = GetTimeMicroseconds(start, end);
+	totalElapsed += elapsed;
 	log_fmt("    %d pools × 10 objects: %.2f μs (%.2f ns per autorelease)\n",
 		BENCHMARK_ITERATIONS, elapsed, (elapsed * 1000.0) / (BENCHMARK_ITERATIONS * 10));
 
@@ -85,6 +88,7 @@ void benchmarkAutoreleasePool(void) {
 	end = clock();
 	BCAutoreleasePoolPop();
 	elapsed = GetTimeMicroseconds(start, end);
+	totalElapsed += elapsed;
 	log_fmt("    %d pools × 100 objects: %.2f μs (%.2f ns per autorelease)\n",
 		BENCHMARK_ITERATIONS / 10, elapsed, (elapsed * 1000.0) / ((BENCHMARK_ITERATIONS / 10) * 100));
 
@@ -104,6 +108,7 @@ void benchmarkAutoreleasePool(void) {
 	end = clock();
 	BCAutoreleasePoolPop();
 	elapsed = GetTimeMicroseconds(start, end);
+	totalElapsed += elapsed;
 	log_fmt("    %d pools × 200 objects: %.2f μs (%.2f ns per autorelease)\n",
 		BENCHMARK_ITERATIONS / 100, elapsed, (elapsed * 1000.0) / ((BENCHMARK_ITERATIONS / 100) * 200));
 
@@ -138,6 +143,7 @@ void benchmarkAutoreleasePool(void) {
 	end = clock();
 	BCAutoreleasePoolPop();
 	elapsed = GetTimeMicroseconds(start, end);
+	totalElapsed += elapsed;
 	log_fmt("    %d iterations (mixed sizes): %.2f μs total\n",
 		BENCHMARK_ITERATIONS / 10, elapsed);
 
@@ -157,6 +163,7 @@ void benchmarkAutoreleasePool(void) {
 	end = clock();
 	BCAutoreleasePoolPop();
 	elapsed = GetTimeMicroseconds(start, end);
+	totalElapsed += elapsed;
 	log_fmt("    %d pools × 20 strings: %.2f μs\n",
 		BENCHMARK_ITERATIONS / 10, elapsed);
 
@@ -203,10 +210,10 @@ void benchmarkAutoreleasePool(void) {
 	}
 	end = clock();
 	elapsed = GetTimeMicroseconds(start, end);
+	totalElapsed += elapsed;
 	log_fmt("    %d iterations (20 levels): %.2f μs\n",
 		BENCHMARK_ITERATIONS / 100, elapsed);
 
 	log_fmt("\n" BC_AE_GREEN "✓ Benchmark Complete" BC_AE_RESET "\n");
-	log_fmt("Note: Lower times indicate better performance\n");
-	log_fmt("Pool reuse should show consistent performance across iterations\n\n");
+	log_fmt("Total elapsed time: %.2f ms\n", totalElapsed / 1000.0);
 }

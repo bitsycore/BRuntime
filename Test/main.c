@@ -4,8 +4,6 @@
 #include "../BCRuntime/Core/BCFormat.h"
 #include "tests/tests.h"
 
-int RETRY = 1;
-
 void demo(void) {
 	BCAutoreleaseScope() {
 
@@ -50,6 +48,8 @@ void demo(void) {
 
 }
 
+int RETRY = 1;
+
 int BCMain() {
 	BCObjectDebugSetEnabled(BC_true);
 	BCObjectDebugSetKeepFreed(BC_false);
@@ -78,7 +78,7 @@ int BCMain() {
 		BIG_TITLE("BC End");
 	}
 
-	//benchmarkAutoreleasePool();
+	benchmarkAutoreleasePool();
 
 	return 0;
 }
