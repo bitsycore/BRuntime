@@ -44,4 +44,8 @@ add_library(BCRuntime
 		Utilities/BC_Threads.c
 		Utilities/BC_Threads.h
 		Struct/BCRange.h
+        Utilities/BC_LazyTable.c
+        Utilities/BC_LazyTable.h
+        Utilities/BC_StrBuilder.c
+        Utilities/BC_StrBuilder.h
 )
