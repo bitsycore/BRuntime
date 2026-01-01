@@ -1,17 +1,21 @@
-#define BC_RUNTIME_MAIN
-#include <BCRuntime/BCRuntime.h>
+#define BF_RUNTIME_MAIN
+#include <BFramework/BF.h>
 
-#include "../BCRuntime/Core/BCFormat.h"
+#include "BCore/BC_Macro.h"
+
+#include "../BFramework/BF_Format.h"
+#include "BFramework/Object/BO_String.h"
+
 #include "tests/tests.h"
 
 void demo(void) {
-	BCAutoreleaseScope() {
+	BF_AutoreleaseScope() {
 
 		$LET str = $("Boxed");
 		$LET strAutorelease = $$("Boxed Autoreleased");
 
 		$LET formatedStr = $("String with construction %@", str);
-		$LET stringInPool = BCStringPooledLiteral("String in global pool");
+		$LET stringInPool = BO_StringPooledLiteral("String in global pool");
 
 
 		$LET list = $LIST("List Demo", 1, 2, 3, 4, 5);
@@ -38,7 +42,7 @@ void demo(void) {
 			"InnerMap2", $$MAP("InnerKeyA", "InnerValueA", "InnerKeyB", "InnerValueB")
 		);
 
-		BCAutoreleaseAll(
+		BFAutoreleaseAll(
 			$OBJ str,
 			$OBJ formatedStr,
 			$OBJ list,
@@ -51,14 +55,14 @@ void demo(void) {
 int RETRY = 1;
 
 int BCMain() {
-	BCObjectDebugSetEnabled(BC_true);
-	BCObjectDebugSetKeepFreed(BC_false);
+	BO_ObjectDebugSetEnabled(BC_true);
+	BO_ObjectDebugSetKeepFreed(BC_false);
 
 	for (int i = 0; i < RETRY; i++) {
 
 		BIG_TITLE("BC Startup");
 
-		BCAutoreleaseScope() {
+		BF_AutoreleaseScope() {
 			testNumber();
 			testString();
 			testArray();
@@ -70,10 +74,10 @@ int BCMain() {
 
 			demo();
 
-			BCObjectDebugDump();
-			BCStringPoolDebugDump();
+			BO_ObjectDebugDump();
+			BF_StringPoolDebugDump();
 
-		    BC_printf("Hello world %@", $$LIST("Hello", 1, 3, 4));
+		    BF_printf("Hello world %@", $$LIST("Hello", 1, 3, 4));
 		}
 		BIG_TITLE("BC End");
 	}

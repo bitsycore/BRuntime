@@ -1,24 +1,25 @@
 #ifndef BCRUNTIME_TESTS_H
 #define BCRUNTIME_TESTS_H
 
-#include <BCRuntime/BCRuntime.h>
-#include <BCRuntime/Core/BCAutoreleasePool.h>
-#include <BCRuntime/Core/BCClass.h>
-#include <BCRuntime/Core/BCFormat.h>
-#include <BCRuntime/Object/BCList.h>
-#include <BCRuntime/Object/BCMap.h>
-#include <BCRuntime/Object/BCNumber.h>
-#include <BCRuntime/Object/BCString.h>
-#include <BCRuntime/Object/BCStringBuilder.h>
-#include <BCRuntime/Utilities/BC_AnsiEscape.h>
+#include <BCore/Console/BC_AnsiEscape.h>
+
+#include <BFramework/BF.h>
+#include <BFramework/BF_AutoreleasePool.h>
+#include <BFramework/BF_Class.h>
+#include <BFramework/BF_Format.h>
+#include <BFramework/Object/BO_List.h>
+#include <BFramework/Object/BO_Map.h>
+#include <BFramework/Object/BO_Number.h>
+#include <BFramework/Object/BO_String.h>
+#include <BFramework/Object/BO_StringBuilder.h>
 
 #include <stdio.h>
 #include <string.h>
 
-#define log_fmt(...) BC_printf(__VA_ARGS__)
+#define log_fmt(...) BF_printf(__VA_ARGS__)
 
 #define TO_STR(_x_) \
-  BCStringCPtr((BCStringRef)(BCAutorelease($OBJ BCToString($OBJ(_x_)))))
+  BO_StringCPtr((BO_StringRef)(BFAutorelease($OBJ BO_ToString($OBJ(_x_)))))
 
 #define PRINT_ERR_IF_NOT(_cond_) \
     if (!(_cond_)) { \

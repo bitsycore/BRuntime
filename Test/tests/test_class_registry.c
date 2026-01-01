@@ -1,36 +1,36 @@
 #include "../tests/tests.h"
 
-#include <BCRuntime/Core/BCClass.h>
-#include <BCRuntime/Object/BCObject.h>
+#include <BFramework/BF_Class.h>
+#include <BFramework/Object/BO_Object.h>
 
-static BCClass TestClass1 = {
+static BF_Class TestClass1 = {
 	.name = "TestClass1",
 	.dealloc = NULL,
 	.hash = NULL,
 	.equal = NULL,
 	.toString = NULL,
 	.copy = NULL,
-	.allocSize = sizeof(BCObject)
+	.allocSize = sizeof(BO_Object)
 };
 
-static BCClass TestClass2 = {
+static BF_Class TestClass2 = {
 	.name = "TestClass2",
 	.dealloc = NULL,
 	.hash = NULL,
 	.equal = NULL,
 	.toString = NULL,
 	.copy = NULL,
-	.allocSize = sizeof(BCObject)
+	.allocSize = sizeof(BO_Object)
 };
 
-static BCClass TestClass3 = {
+static BF_Class TestClass3 = {
 	.name = "TestClass3",
 	.dealloc = NULL,
 	.hash = NULL,
 	.equal = NULL,
 	.toString = NULL,
 	.copy = NULL,
-	.allocSize = sizeof(BCObject)
+	.allocSize = sizeof(BO_Object)
 };
 
 void testClassRegistry() {
@@ -40,13 +40,13 @@ void testClassRegistry() {
 	{
 		TEST("Basic class registration");
 
-		const BCClassId idx1 = BCClassRegistryInsert(&TestClass1);
-		const BCClassId idx2 = BCClassRegistryInsert(&TestClass2);
-		const BCClassId idx3 = BCClassRegistryInsert(&TestClass3);
+		const BF_ClassId idx1 = BF_ClassRegistryInsert(&TestClass1);
+		const BF_ClassId idx2 = BF_ClassRegistryInsert(&TestClass2);
+		const BF_ClassId idx3 = BF_ClassRegistryInsert(&TestClass3);
 
-		ASSERT(idx1 != BC_CLASS_ID_INVALID, "Class 1 registered successfully");
-		ASSERT(idx2 != BC_CLASS_ID_INVALID, "Class 2 registered successfully");
-		ASSERT(idx3 != BC_CLASS_ID_INVALID, "Class 3 registered successfully");
+		ASSERT(idx1 != BF_CLASS_ID_INVALID, "Class 1 registered successfully");
+		ASSERT(idx2 != BF_CLASS_ID_INVALID, "Class 2 registered successfully");
+		ASSERT(idx3 != BF_CLASS_ID_INVALID, "Class 3 registered successfully");
 
 		ASSERT(idx1 != idx2, "Indices are unique");
 		ASSERT(idx2 != idx3, "Indices are unique");
@@ -57,11 +57,11 @@ void testClassRegistry() {
 	{
 		TEST("Class decompression");
 
-		const BCClassId idx1 = BCDebugClassFindId(&TestClass1);
-		const BCClassId idx2 = BCDebugClassFindId(&TestClass2);
+		const BF_ClassId idx1 = BCDebugClassFindId(&TestClass1);
+		const BF_ClassId idx2 = BCDebugClassFindId(&TestClass2);
 
-		const BCClassRef cls1 = BCClassIdGetRef(idx1);
-		const BCClassRef cls2 = BCClassIdGetRef(idx2);
+		const BF_Class* cls1 = BF_ClassIdGetRef(idx1);
+		const BF_Class* cls2 = BF_ClassIdGetRef(idx2);
 
 		ASSERT(cls1 == &TestClass1, "Decompression returns correct class 1");
 		ASSERT(cls2 == &TestClass2, "Decompression returns correct class 2");
@@ -73,9 +73,9 @@ void testClassRegistry() {
 	{
 		TEST("Compression/decompression round-trip");
 
-		const BCClassId idx = BCDebugClassFindId(&TestClass1);
-		const BCClassRef cls = BCClassIdGetRef(idx);
-		const BCClassId idx2 = BCDebugClassFindId(cls);
+		const BF_ClassId idx = BCDebugClassFindId(&TestClass1);
+		const BF_Class* cls = BF_ClassIdGetRef(idx);
+		const BF_ClassId idx2 = BCDebugClassFindId(cls);
 
 		ASSERT(idx == idx2, "Round-trip preserves index");
 		ASSERT(cls == &TestClass1, "Round-trip preserves class pointer");
@@ -88,7 +88,7 @@ void testClassRegistry() {
 #define MACRO_TOSTRING(x) MACRO_STRINGIFY(x)
 		TEST("Segment growth (" MACRO_TOSTRING(NUM_TEST_CLASSES) " classes)");
 
-		static BCClass manyClasses[NUM_TEST_CLASSES];
+		static BF_Class manyClasses[NUM_TEST_CLASSES];
 
 		// Initialize and register many classes
 		for (int i = 0; i < NUM_TEST_CLASSES; i++) {
@@ -98,46 +98,46 @@ void testClassRegistry() {
 			manyClasses[i].equal = NULL;
 			manyClasses[i].toString = NULL;
 			manyClasses[i].copy = NULL;
-			manyClasses[i].allocSize = sizeof(BCObject);
+			manyClasses[i].allocSize = sizeof(BO_Object);
 
-			const BCClassId idx = BCClassRegistryInsert(&manyClasses[i]);
-			ASSERT_SILENT(idx != BC_CLASS_ID_INVALID, "Class registered in segment growth");
+			const BF_ClassId idx = BF_ClassRegistryInsert(&manyClasses[i]);
+			ASSERT_SILENT(idx != BF_CLASS_ID_INVALID, "Class registered in segment growth");
 		}
 
 		// Verify all can be decompressed correctly
 		for (int i = 0; i < NUM_TEST_CLASSES; i++) {
-			const BCClassId idx = manyClasses[i].id;
-			const BCClassRef cls = BCClassIdGetRef(idx);
+			const BF_ClassId idx = manyClasses[i].id;
+			const BF_Class* cls = BF_ClassIdGetRef(idx);
 			ASSERT_SILENT(cls == &manyClasses[i], "Decompression after growth is incorrect");
 		}
 
-		const BCClassId total = BCClassRegistryGetCount();
+		const BF_ClassId total = BF_ClassRegistryGetCount();
 		ASSERT(total > NUM_TEST_CLASSES, "Registry contains many classes");
 	}
 
-	// Test 5: Integration with BCObject
+	// Test 5: Integration with BO_Object
 	{
-		TEST("BCObject integration");
+		TEST("BO_Object integration");
 
 		// Register a class if not already registered
-		BCClassId idx = BCDebugClassFindId(&TestClass1);
-		if (idx == BC_CLASS_ID_INVALID) {
-			idx = BCClassRegistryInsert(&TestClass1);
+		BF_ClassId idx = BCDebugClassFindId(&TestClass1);
+		if (idx == BF_CLASS_ID_INVALID) {
+			idx = BF_ClassRegistryInsert(&TestClass1);
 		}
 
 		// Create an object with this class
-		const BCObjectRef obj = BCObjectAlloc(NULL, TestClass1.id);
+		const BO_ObjectRef obj = BO_ObjectAlloc(NULL, TestClass1.id);
 		ASSERT(obj != NULL, "Object allocated");
 
 		// Verify the class can be retrieved
-		const BCClassRef cls = BCObjectClass(obj);
-		ASSERT(cls == &TestClass1, "BCObjectClass returns correct class");
+		const BF_Class* cls = BO_ObjectClass(obj);
+		ASSERT(cls == &TestClass1, "BO_ObjectClass returns correct class");
 		ASSERT(strcmp(cls->name, "TestClass1") == 0, "Object has correct class name");
 
 		// Verify compressed pointer
 		ASSERT(obj->cls == idx, " Object stores compressed index");
 
-		BCRelease(obj);
+		BO_Release(obj);
 	}
 
 	log_fmt("\n" BC_AE_BGREEN "✓ All ClassRegistry tests passed!"BC_AE_RESET"\n");

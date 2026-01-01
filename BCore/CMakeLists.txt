@@ -1,0 +1,23 @@
+add_library(BCore
+		Console/BC_AnsiEscape.h
+		Thread/BC_Atomics.h
+		Strings/BC_StringCompat.c
+		Strings/BC_StringCompat.h
+		BC_Keywords.h
+		BC_Macro.h
+		Memory/BC_Memory.c
+		Memory/BC_Memory.h
+		Thread/BC_Threads.c
+		Thread/BC_Threads.h
+		BC_range.h
+		Console/BC_LazyTable.c
+		Console/BC_LazyTable.h
+		Strings/BC_StringBuilder.c
+		Strings/BC_StringBuilder.h
+		BC_Settings.h
+		BC_Types.h
+		Memory/BC_Allocator.c
+		Memory/BC_Allocator.h
+		Memory/BC_Arena.c
+		Memory/BC_Arena.h
+)

@@ -1,0 +1,41 @@
+add_library(BFramework
+		BF_Boxing.h
+		BF_Settings.h
+		BF.c
+		BF.h
+		BF_AutoreleasePool.c
+		BF_AutoreleasePool.h
+		BF_Class.c
+		BF_Class.h
+		BF_ClassRegistry.c
+		BF_Format.c
+		BF_Format.h
+		BF_Types.h
+		Object/BO_BytesArray.c
+		Object/BO_BytesArray.h
+		Object/BO_List.c
+		Object/BO_List.h
+		Object/BO_Map.c
+		Object/BO_Map.h
+		Object/BO_Number.c
+		Object/BO_Number.h
+		Object/BO_Object.c
+		Object/BO_Object.h
+		Object/BO_ReleasePool.c
+		Object/BO_ReleasePool.h
+		Object/BO_Set.c
+		Object/BO_Set.h
+		Object/BO_String.c
+		Object/BO_String.h
+		Object/BO_StringBuilder.c
+		Object/BO_StringBuilder.h
+)
+
+target_include_directories(BFramework
+		PUBLIC
+		${CMAKE_CURRENT_SOURCE_DIR}/../
+)
+
+target_link_libraries(BFramework
+	BCore
+)

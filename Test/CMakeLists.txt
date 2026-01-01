@@ -17,4 +17,5 @@ target_include_directories(
 		TestBCRuntime PRIVATE
 		${CMAKE_CURRENT_SOURCE_DIR}/../
 )
-target_link_libraries(TestBCRuntime BCRuntime)
+
+target_link_libraries(TestBCRuntime BCore BFramework)

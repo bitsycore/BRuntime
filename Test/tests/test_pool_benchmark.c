@@ -20,8 +20,8 @@ void benchmarkAutoreleasePool(void) {
 	TEST("Push/Pop Performance");
 	start = clock();
 	for (int i = 0; i < BENCHMARK_ITERATIONS; i++) {
-		BCAutoreleasePoolPush();
-		BCAutoreleasePoolPop();
+		BFAutoreleasePoolPush();
+		BFAutoreleasePoolPop();
 	}
 	end = clock();
 	elapsed = GetTimeMicroseconds(start, end);
@@ -35,16 +35,16 @@ void benchmarkAutoreleasePool(void) {
 	TEST("Pool Reuse Efficiency (5 nested levels)");
 	start = clock();
 	for (int i = 0; i < BENCHMARK_ITERATIONS; i++) {
-		BCAutoreleasePoolPush();
-		BCAutoreleasePoolPush();
-		BCAutoreleasePoolPush();
-		BCAutoreleasePoolPush();
-		BCAutoreleasePoolPush();
-		BCAutoreleasePoolPop();
-		BCAutoreleasePoolPop();
-		BCAutoreleasePoolPop();
-		BCAutoreleasePoolPop();
-		BCAutoreleasePoolPop();
+		BFAutoreleasePoolPush();
+		BFAutoreleasePoolPush();
+		BFAutoreleasePoolPush();
+		BFAutoreleasePoolPush();
+		BFAutoreleasePoolPush();
+		BFAutoreleasePoolPop();
+		BFAutoreleasePoolPop();
+		BFAutoreleasePoolPop();
+		BFAutoreleasePoolPop();
+		BFAutoreleasePoolPop();
 	}
 	end = clock();
 	elapsed = GetTimeMicroseconds(start, end);
@@ -56,17 +56,17 @@ void benchmarkAutoreleasePool(void) {
 	// Benchmark 3: Autorelease Performance
 	// =========================================================
 	TEST("Autorelease 10 Objects per Pool");
-	BCAutoreleasePoolPush();
+	BFAutoreleasePoolPush();
 	start = clock();
 	for (int i = 0; i < BENCHMARK_ITERATIONS; i++) {
-		BCAutoreleasePoolPush();
+		BFAutoreleasePoolPush();
 		for (int j = 0; j < 10; j++) {
-			BCAutorelease($OBJ BCNumberCreateInt32(j));
+			BFAutorelease($OBJ BO_NumberCreateInt32(j));
 		}
-		BCAutoreleasePoolPop();
+		BFAutoreleasePoolPop();
 	}
 	end = clock();
-	BCAutoreleasePoolPop();
+	BFAutoreleasePoolPop();
 	elapsed = GetTimeMicroseconds(start, end);
 	totalElapsed += elapsed;
 	log_fmt("    %d pools × 10 objects: %.2f μs (%.2f ns per autorelease)\n",
@@ -76,17 +76,17 @@ void benchmarkAutoreleasePool(void) {
 	// Benchmark 4: High Object Count per Pool
 	// =========================================================
 	TEST("Autorelease 100 Objects per Pool");
-	BCAutoreleasePoolPush();
+	BFAutoreleasePoolPush();
 	start = clock();
 	for (int i = 0; i < BENCHMARK_ITERATIONS / 10; i++) {
-		BCAutoreleasePoolPush();
+		BFAutoreleasePoolPush();
 		for (int j = 0; j < 100; j++) {
-			BCAutorelease($OBJ BCNumberCreateInt32(j));
+			BFAutorelease($OBJ BO_NumberCreateInt32(j));
 		}
-		BCAutoreleasePoolPop();
+		BFAutoreleasePoolPop();
 	}
 	end = clock();
-	BCAutoreleasePoolPop();
+	BFAutoreleasePoolPop();
 	elapsed = GetTimeMicroseconds(start, end);
 	totalElapsed += elapsed;
 	log_fmt("    %d pools × 100 objects: %.2f μs (%.2f ns per autorelease)\n",
@@ -96,17 +96,17 @@ void benchmarkAutoreleasePool(void) {
 	// Benchmark 5: Overflow Chain Performance
 	// =========================================================
 	TEST("Pool Overflow (200 objects, 2× capacity)");
-	BCAutoreleasePoolPush();
+	BFAutoreleasePoolPush();
 	start = clock();
 	for (int i = 0; i < BENCHMARK_ITERATIONS / 100; i++) {
-		BCAutoreleasePoolPush();
+		BFAutoreleasePoolPush();
 		for (int j = 0; j < 200; j++) {  // Force overflow chain creation
-			BCAutorelease($OBJ BCNumberCreateInt32(j));
+			BFAutorelease($OBJ BO_NumberCreateInt32(j));
 		}
-		BCAutoreleasePoolPop();
+		BFAutoreleasePoolPop();
 	}
 	end = clock();
-	BCAutoreleasePoolPop();
+	BFAutoreleasePoolPop();
 	elapsed = GetTimeMicroseconds(start, end);
 	totalElapsed += elapsed;
 	log_fmt("    %d pools × 200 objects: %.2f μs (%.2f ns per autorelease)\n",
@@ -116,32 +116,32 @@ void benchmarkAutoreleasePool(void) {
 	// Benchmark 6: Mixed Workload (Realistic Usage Pattern)
 	// =========================================================
 	TEST("Mixed Workload (varying object counts)");
-	BCAutoreleasePoolPush();
+	BFAutoreleasePoolPush();
 	start = clock();
 	for (int i = 0; i < BENCHMARK_ITERATIONS / 10; i++) {
 		// Small pool
-		BCAutoreleasePoolPush();
+		BFAutoreleasePoolPush();
 		for (int j = 0; j < 5; j++) {
-			BCAutorelease($OBJ BCNumberCreateInt32(j));
+			BFAutorelease($OBJ BO_NumberCreateInt32(j));
 		}
-		BCAutoreleasePoolPop();
+		BFAutoreleasePoolPop();
 
 		// Medium pool
-		BCAutoreleasePoolPush();
+		BFAutoreleasePoolPush();
 		for (int j = 0; j < 50; j++) {
-			BCAutorelease($OBJ BCNumberCreateInt32(j));
+			BFAutorelease($OBJ BO_NumberCreateInt32(j));
 		}
-		BCAutoreleasePoolPop();
+		BFAutoreleasePoolPop();
 
 		// Large pool
-		BCAutoreleasePoolPush();
+		BFAutoreleasePoolPush();
 		for (int j = 0; j < 150; j++) {
-			BCAutorelease($OBJ BCNumberCreateInt32(j));
+			BFAutorelease($OBJ BO_NumberCreateInt32(j));
 		}
-		BCAutoreleasePoolPop();
+		BFAutoreleasePoolPop();
 	}
 	end = clock();
-	BCAutoreleasePoolPop();
+	BFAutoreleasePoolPop();
 	elapsed = GetTimeMicroseconds(start, end);
 	totalElapsed += elapsed;
 	log_fmt("    %d iterations (mixed sizes): %.2f μs total\n",
@@ -151,17 +151,17 @@ void benchmarkAutoreleasePool(void) {
 	// Benchmark 7: String Creation (Common Real-World Usage)
 	// =========================================================
 	TEST("String Creation with Autorelease");
-	BCAutoreleasePoolPush();
+	BFAutoreleasePoolPush();
 	start = clock();
 	for (int i = 0; i < BENCHMARK_ITERATIONS / 10; i++) {
-		BCAutoreleasePoolPush();
+		BFAutoreleasePoolPush();
 		for (int j = 0; j < 20; j++) {
-			BCAutorelease($OBJ BCStringCreate("Test string %d", j));
+			BFAutorelease($OBJ BO_StringCreate("Test string %d", j));
 		}
-		BCAutoreleasePoolPop();
+		BFAutoreleasePoolPop();
 	}
 	end = clock();
-	BCAutoreleasePoolPop();
+	BFAutoreleasePoolPop();
 	elapsed = GetTimeMicroseconds(start, end);
 	totalElapsed += elapsed;
 	log_fmt("    %d pools × 20 strings: %.2f μs\n",
@@ -173,39 +173,39 @@ void benchmarkAutoreleasePool(void) {
 	TEST("Deep Nesting Stress Test (20 levels)");
 	start = clock();
 	for (int iter = 0; iter < BENCHMARK_ITERATIONS / 100; iter++) {
-		BCAutoreleasePoolPush();
-		BCAutoreleasePoolPush();
-		BCAutoreleasePoolPush();
-		BCAutoreleasePoolPush();
-		BCAutoreleasePoolPush();
-		BCAutoreleasePoolPush();
-		BCAutoreleasePoolPush();
-		BCAutoreleasePoolPush();
-		BCAutoreleasePoolPush();
-		BCAutoreleasePoolPush();
+		BFAutoreleasePoolPush();
+		BFAutoreleasePoolPush();
+		BFAutoreleasePoolPush();
+		BFAutoreleasePoolPush();
+		BFAutoreleasePoolPush();
+		BFAutoreleasePoolPush();
+		BFAutoreleasePoolPush();
+		BFAutoreleasePoolPush();
+		BFAutoreleasePoolPush();
+		BFAutoreleasePoolPush();
 
 		for (int i = 0; i < 10; i++) {
-			BCAutorelease($OBJ BCNumberCreateInt32(i));
+			BFAutorelease($OBJ BO_NumberCreateInt32(i));
 		}
 
-		BCAutoreleasePoolPush();
-		BCAutoreleasePoolPush();
-		BCAutoreleasePoolPush();
-		BCAutoreleasePoolPush();
-		BCAutoreleasePoolPush();
-		BCAutoreleasePoolPush();
-		BCAutoreleasePoolPush();
-		BCAutoreleasePoolPush();
-		BCAutoreleasePoolPush();
-		BCAutoreleasePoolPush();
+		BFAutoreleasePoolPush();
+		BFAutoreleasePoolPush();
+		BFAutoreleasePoolPush();
+		BFAutoreleasePoolPush();
+		BFAutoreleasePoolPush();
+		BFAutoreleasePoolPush();
+		BFAutoreleasePoolPush();
+		BFAutoreleasePoolPush();
+		BFAutoreleasePoolPush();
+		BFAutoreleasePoolPush();
 
 		for (int i = 0; i < 10; i++) {
-			BCAutorelease($OBJ BCNumberCreateInt32(i));
+			BFAutorelease($OBJ BO_NumberCreateInt32(i));
 		}
 
 		// Pop all 20 levels
 		for (int i = 0; i < 20; i++) {
-			BCAutoreleasePoolPop();
+			BFAutoreleasePoolPop();
 		}
 	}
 	end = clock();

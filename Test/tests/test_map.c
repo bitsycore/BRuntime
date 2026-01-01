@@ -6,32 +6,32 @@ void testMap() {
 	// ================================
 
 	$VAR array = $LIST("username", "password");
-	BCAutorelease($OBJ array);
+	BFAutorelease($OBJ array);
 
-	const BCStringRef str1 = BCStringPooledLiteral("username");
-	const BCStringRef str2 = BCStringPooledLiteral("username");
+	const BO_StringRef str1 = BO_StringPooledLiteral("username");
+	const BO_StringRef str2 = BO_StringPooledLiteral("username");
 
 	$LET numInt2 = $$("%d", 10);
-	const BCMutableMapRef dictionary = BCMutableMapCreate();
-	BCAutorelease($OBJ dictionary);
+	const BO_MutableMapRef dictionary = BCMutableMapCreate();
+	BFAutorelease($OBJ dictionary);
 
-	const BCStringRef key = BCStringCreate("id");
-	BCAutorelease($OBJ key);
-	const BCStringRef value = BCStringCreate("10%d", 1);
-	BCAutorelease($OBJ value);
+	const BO_StringRef key = BO_StringCreate("id");
+	BFAutorelease($OBJ key);
+	const BO_StringRef value = BO_StringCreate("10%d", 1);
+	BFAutorelease($OBJ value);
 
-	BCMapSet(dictionary, $OBJ str1, $OBJ array);
-	BCMapSet(dictionary, $OBJ BCStringPooledLiteral("test"), $OBJ numInt2);
-	BCMapSet(dictionary, $OBJ key, $OBJ value);
+	BO_MapSet(dictionary, $OBJ str1, $OBJ array);
+	BO_MapSet(dictionary, $OBJ BO_StringPooledLiteral("test"), $OBJ numInt2);
+	BO_MapSet(dictionary, $OBJ key, $OBJ value);
 
 	// Description of Map
 	log_fmt("%s\n", TO_STR(dictionary));
 
 	// Get Value by Key
-	const BCObjectRef found = BCMapGet( dictionary, $OBJ str2); // Look up using pooled string
+	const BO_ObjectRef found = BO_MapGet( dictionary, $OBJ str2); // Look up using pooled string
 	if (found) {
 		log_fmt("\"username\": %s\n", TO_STR(found));
-		BCRelease(found);
+		BO_Release(found);
 	}
 
 	$VAR nine = $$(9);
