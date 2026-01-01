@@ -39,9 +39,4 @@ target_include_directories(BFramework-STATIC
 		${CMAKE_CURRENT_SOURCE_DIR}/../
 )
 
-#add_library(BFramework-SHARED SHARED ${BFRAMEWORK_SOURCES})
-#
-#target_include_directories(BFramework-SHARED
-#		PUBLIC
-#		${CMAKE_CURRENT_SOURCE_DIR}/../
-#)
+target_link_libraries(BFramework-STATIC BCore-STATIC)

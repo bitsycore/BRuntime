@@ -24,5 +24,4 @@ set(BCORE_SOURCES
 		Thread/BC_Threads.h
 )
 
-#add_library(BCore-SHARED SHARED ${BCORE_SOURCES})
 add_library(BCore-STATIC STATIC ${BCORE_SOURCES})
