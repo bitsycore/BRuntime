@@ -1,4 +1,5 @@
-#include "tests.h"
+#include "BT_Benchmarks.h"
+
 #include <time.h>
 
 #define BENCHMARK_ITERATIONS 100000

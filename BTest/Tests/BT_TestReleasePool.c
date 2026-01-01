@@ -1,4 +1,4 @@
-#include "tests.h"
+#include "BT_Tests.h"
 
 void testReleasePool(void) {
 	$LET pool = BO_ReleasePoolCreate(NULL, 16);

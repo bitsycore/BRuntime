@@ -1,4 +1,4 @@
-#include "../tests/tests.h"
+#include "../Tests/BT_Tests.h"
 
 #include <BFramework/BF_Class.h>
 #include <BFramework/BObject/BO_Object.h>

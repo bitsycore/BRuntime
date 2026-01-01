@@ -1,12 +1,10 @@
+#include <BCore/BC_Macro.h>
+
 #define BF_RUNTIME_MAIN
 #include <BFramework/BF.h>
 
-#include <BCore/BC_Macro.h>
-
-#include <BFramework/BF_Format.h>
-#include <BFramework/BObject/BO_String.h>
-
-#include "tests/tests.h"
+#include "Benchmarks/BT_Benchmarks.h"
+#include "Tests/BT_Tests.h"
 
 void demo(void) {
 	BF_AutoreleaseScope() {

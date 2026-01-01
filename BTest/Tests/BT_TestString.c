@@ -1,4 +1,4 @@
-#include "tests.h"
+#include "BT_Tests.h"
 
 void testString() {
 	// ================================

@@ -1,5 +1,5 @@
-#ifndef BCRUNTIME_TESTS_H
-#define BCRUNTIME_TESTS_H
+#ifndef BRUNTIME_BT_COMMON_H
+#define BRUNTIME_BT_COMMON_H
 
 #include <BCore/Console/BC_AnsiEscape.h>
 
@@ -15,6 +15,9 @@
 
 #include <stdio.h>
 #include <string.h>
+
+void BIG_TITLE(const char* _x_);
+void SUB_TITLE(const char* _x_);
 
 #define log_fmt(...) BF_Print(__VA_ARGS__)
 
@@ -43,17 +46,4 @@
         log_fmt(BC_AE_RED "    ✗ " BC_AE_RESET "%s\n", _msg_); \
     }
 
-void BIG_TITLE(const char* _x_);
-void SUB_TITLE(const char* _x_);
-
-void testArray();
-void testString();
-void testStringBuilder();
-void testNumber();
-void testMap();
-void testReleasePool();
-void testClassRegistry();
-void benchmarkAutoreleasePool();
-void testBytesArray();
-
-#endif // BCRUNTIME_TESTS_H
+#endif //BRUNTIME_BT_COMMON_H

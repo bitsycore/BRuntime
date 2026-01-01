@@ -1,15 +1,17 @@
 add_executable(BTest
+		Benchmarks/BT_BenchmarkAutoreleasePool.c
+		Benchmarks/BT_Benchmarks.h
+		Commons/BT_Common.c
+		Commons/BT_Common.h
+		Tests/BT_TestArray.c
+		Tests/BT_TestBytesArray.c
+		Tests/BT_TestClass.c
+		Tests/BT_TestMap.c
+		Tests/BT_TestNumbers.c
+		Tests/BT_TestReleasePool.c
+		Tests/BT_TestString.c
+		Tests/BT_Tests.h
 		main.c
-		tests/common.c
-		tests/test_array.c
-		tests/test_bytes_array.c
-		tests/test_class_registry.c
-		tests/test_map.c
-		tests/test_numbers.c
-		tests/test_pool.c
-		tests/test_pool_benchmark.c
-		tests/test_string.c
-		tests/tests.h
 )
 
 target_include_directories(
