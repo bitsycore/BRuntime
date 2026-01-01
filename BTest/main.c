@@ -1,4 +1,4 @@
-#define BF_RUNTIME_MAIN
+#define BF_IMPLEMENT_MAIN
 #include <BFramework/BF.h>
 
 #include "Benchmarks/BT_Benchmarks.h"
