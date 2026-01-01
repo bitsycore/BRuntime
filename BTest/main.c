@@ -6,7 +6,7 @@
 #include "Benchmarks/BT_Benchmarks.h"
 #include "Tests/BT_Tests.h"
 
-void demo(void) {
+void BT_Demo(void) {
 	BF_AutoreleaseScope() {
 
 		$LET str = $("Boxed");
@@ -70,7 +70,7 @@ int BF_Main() {
 			BT_TestClassRegistry();
 			BT_TestBytesArray();
 
-			demo();
+			BT_Demo();
 
 			BO_ObjectDebugDump();
 			BO_StringPoolDebugDump();

@@ -72,7 +72,7 @@ static BF_Class kBO_StringClass = {
 
 BF_ClassId BO_StringClassId() { return kBO_StringClass.id; }
 
-void ___BO_INTERNAL___StringInitialize(void) {
+void INTERNAL_BO_StringInitialize(void) {
 	BF_ClassRegistryInsert(&kBO_StringClass);
 }
 
@@ -90,12 +90,12 @@ static struct {
 	StringPoolNode *buckets[BC_STRING_POOL_SIZE];
 } StringPool;
 
-void ___BO_INTERNAL___StringPoolInitialize(void) {
+void INTERNAL_BO_StringPoolInitialize(void) {
 	BC_SpinlockInit(&StringPool.lock);
 	memset(StringPool.buckets, 0, sizeof(StringPool.buckets));
 }
 
-void ___BO_INTERNAL___StringPoolDeinitialize(void) {
+void INTERNAL_BO_StringPoolDeinitialize(void) {
 	BC_SpinlockDestroy(&StringPool.lock);
 	for (size_t i = 0; i < BC_STRING_POOL_SIZE; i++) {
 		const StringPoolNode *node = StringPool.buckets[i];
@@ -217,7 +217,7 @@ BO_StringRef BO_StringPooled(const char *text) {
 	return PRIV_StringPoolGetOrInsert(
 		text,
 		strlen(text),
-		___BF_INTERNAL___StringHasher(text),
+		INTERNAL_BO_StringHasher(text),
 		BC_false
 	);
 }
@@ -250,7 +250,7 @@ uint32_t BO_StringHash(const BO_StringRef str) {
 	if (!str) return 0;
 	uint32_t hash = BC_atomic_load(&str->hash);
 	if (hash == BC_HASH_UNSET) {
-		hash = ___BF_INTERNAL___StringHasher(str->buffer);
+		hash = INTERNAL_BO_StringHasher(str->buffer);
 		BC_atomic_store(&str->hash, hash);
 	}
 	return hash;

@@ -159,14 +159,14 @@ static struct {
 	BC_atomic_bool keepFreedObjects;
 } PRIV_ObjectDebugTracker;
 
-void ___BO_INTERNAL___ObjectInitialize(void) {
+void INTERNAL_BO_ObjectInitialize(void) {
 	BC_SpinlockInit(&PRIV_ObjectDebugTracker.lock);
 	PRIV_ObjectDebugTracker.head = NULL;
 	PRIV_ObjectDebugTracker.enabled = BC_false;
 	PRIV_ObjectDebugTracker.keepFreedObjects = BC_false;
 }
 
-void ___BO_INTERNAL___ObjectDebugDeinitialize(void) {
+void INTERNAL_BO_ObjectDebugDeinitialize(void) {
 	BC_SpinlockLock(&PRIV_ObjectDebugTracker.lock);
 
 	BO_ObjectDebugNode* node = PRIV_ObjectDebugTracker.head;
@@ -384,6 +384,6 @@ void BO_ObjectDebugDump(void) {
 	BC_SpinlockUnlock(&PRIV_ObjectDebugTracker.lock);
 }
 #else
-void ___BF_INTERNAL___ObjectDebugInitialize() {}
-void ___BF_INTERNAL___ObjectDebugDeinitialize() {}
+void INTERNAL_BF_ObjectDebugInitialize() {}
+void INTERNAL_BF_ObjectDebugDeinitialize() {}
 #endif

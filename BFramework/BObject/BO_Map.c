@@ -96,7 +96,7 @@ BF_ClassId BO_MapClassId() {
 	return kBO_MapClass.id;
 }
 
-void ___BO_INTERNAL___MapInitialize(void) {
+void INTERNAL_BO_MapInitialize(void) {
 	BF_ClassRegistryInsert(&kBO_MapClass);
 }
 

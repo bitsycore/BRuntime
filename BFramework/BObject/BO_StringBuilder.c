@@ -61,7 +61,7 @@ void IMPL_StringBuilderDealloc(const BO_ObjectRef obj) {
 }
 
 uint32_t IMPL_StringBuilderHash(const BO_ObjectRef obj) {
-	return ___BF_INTERNAL___StringHasher(((BO_StringBuilder*)obj)->buffer);
+	return INTERNAL_BO_StringHasher(((BO_StringBuilder*)obj)->buffer);
 }
 
 BC_bool IMPL_StringBuilderEqual(const BO_ObjectRef a, const BO_ObjectRef b) {
@@ -119,7 +119,7 @@ BF_ClassId BO_StringBuilderClassId() {
 	return kBO_StringBuilderClass.id;
 }
 
-void ___BO_INTERNAL___StringBuilderInitialize(void) {
+void INTERNAL_BO_StringBuilderInitialize(void) {
 	BF_ClassRegistryInsert(&kBO_StringBuilderClass);
 }
 
@@ -254,5 +254,5 @@ BO_StringRef BO_StringBuilderFinish(const BO_StringBuilderRef builder, const BC_
 	if (!pooled) {
 		return BO_StringCreate("%.*s", (int)builder->length, builder->buffer);
 	}
-	return BO_StringPooledWithInfo(builder->buffer, builder->length, ___BF_INTERNAL___StringHasher(builder->buffer), BC_false);
+	return BO_StringPooledWithInfo(builder->buffer, builder->length, INTERNAL_BO_StringHasher(builder->buffer), BC_false);
 }

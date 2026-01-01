@@ -46,33 +46,33 @@ static void PRIV_PlatformInitialize() {
 // MARK: INITIALIZE
 // =========================================================
 
-extern void ___BC_INTERNAL___MemoryInitialize();
+extern void INTERNAL_BC_MemoryInitialize();
 
-static BC_bool ___BC_INTERNAL___Initialized = BC_false;
+static BC_bool BC_IsInitialized = BC_false;
 
 void BC_Initialize(const int argc, char** argv) {
-	if (___BC_INTERNAL___Initialized) return;
+	if (BC_IsInitialized) return;
 
 	gArgc = argc;
 	gArgv = argv;
 
 	PRIV_PlatformInitialize();
 
-	___BC_INTERNAL___MemoryInitialize();
+	INTERNAL_BC_MemoryInitialize();
 
-	___BC_INTERNAL___Initialized = BC_true;
+	BC_IsInitialized = BC_true;
 }
 
 // =========================================================
 // MARK: DEINITIALIZE
 // =========================================================
 
-static BC_bool ___BC_INTERNAL___Deinitialized = BC_false;
+static BC_bool BC_IsDeinitialized = BC_false;
 
 void BC_Deinitialize(void) {
-	if (___BC_INTERNAL___Deinitialized || !___BC_INTERNAL___Initialized) return;
+	if (BC_IsDeinitialized || !BC_IsInitialized) return;
 
 	BC_MemoryInfoPrint();
 
-	___BC_INTERNAL___Deinitialized = BC_true;
+	BC_IsDeinitialized = BC_true;
 }

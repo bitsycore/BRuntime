@@ -104,7 +104,7 @@ static inline void PRIV_FreeOrRecyclePool(PRIV_AutoreleasePool* pool) {
 // MARK: Runtime Lifecycle
 // =========================================================
 
-void ___BF_INTERNAL___AutoreleaseInitialize(void) {
+void INTERNAL_BF_AutoreleaseInitialize(void) {
 	// Reset the root pool
 	gRootPool.parent = NULL;
 	gRootPool.hot = NULL;
@@ -118,7 +118,7 @@ void ___BF_INTERNAL___AutoreleaseInitialize(void) {
 	gFreePoolCount = 0;
 }
 
-void ___BF_INTERNAL___AutoreleaseDeinitialize(void) {
+void INTERNAL_BF_AutoreleaseDeinitialize(void) {
 	// Clean up any active pools first
 	if (gCurrentAutoReleasePool) {
 		while (gCurrentAutoReleasePool) {

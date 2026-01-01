@@ -207,7 +207,7 @@ BF_ClassId BO_NumberClassId(const BO_NumberType type) {
 	return cls ? cls->id : BF_CLASS_ID_INVALID;
 }
 
-void ___BO_INTERNAL___NumberInitialize(void) {
+void INTERNAL_BO_NumberInitialize(void) {
 	for (size_t i = 0; i < CLASS_COUNT; i++) { BF_ClassRegistryInsert(&kClassList[i]); }
 	const uint32_t flags = BC_OBJECT_FLAG_CONSTANT;
 	const BF_ClassId boolClassId = kClassList[BO_NumberTypeBool].id;

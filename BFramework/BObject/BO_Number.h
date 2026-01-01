@@ -49,21 +49,21 @@ BO_NumberUInt64Ref BO_NumberCreateUInt64(uint64_t value);
 BO_NumberFloatRef BO_NumberCreateFloat(float value);
 BO_NumberDoubleRef BO_NumberCreateDouble(double value);
 
-static inline BO_BoolRef ___BO_INTERNAL___BoolSelect(const BC_bool val) { return val ? kBO_True : kBO_False; }
+static inline BO_BoolRef INTERNAL_BO_BoolSelect(const BC_bool val) { return val ? kBO_True : kBO_False; }
 
 #define BCBool(_val_) ((_val_) ? kBO_True : kBO_False)
 
 #if defined(WIN32) || defined(__APPLE__)
-#define ___BO_INTERNAL___NUMBER_CREATE_EXTRA
+#define INTERNAL_BO_NUMBER_CREATE_EXTRA
 #else
-#define ___BO_INTERNAL___NUMBER_CREATE_EXTRA long long: BO_NumberCreateInt64,
+#define INTERNAL_BO_NUMBER_CREATE_EXTRA long long: BO_NumberCreateInt64,
 #endif
 
 #define BO_NumberCreate(val) _Generic((val), \
     int8_t: BO_NumberCreateInt8, \
     int16_t: BO_NumberCreateInt16, \
     int32_t: BO_NumberCreateInt32, \
-    ___BO_INTERNAL___NUMBER_CREATE_EXTRA \
+    INTERNAL_BO_NUMBER_CREATE_EXTRA \
     int64_t: BO_NumberCreateInt64, \
     uint8_t: BO_NumberCreateUInt8, \
     uint16_t: BO_NumberCreateUInt16, \
@@ -71,7 +71,7 @@ static inline BO_BoolRef ___BO_INTERNAL___BoolSelect(const BC_bool val) { return
     uint64_t: BO_NumberCreateUInt64, \
     float: BO_NumberCreateFloat, \
     double: BO_NumberCreateDouble, \
-    BC_bool: ___BO_INTERNAL___BoolSelect \
+    BC_bool: INTERNAL_BO_BoolSelect \
 )(val)
 
 // =========================================================
@@ -99,20 +99,20 @@ static inline BO_BoolRef ___BO_INTERNAL___BoolSelect(const BC_bool val) { return
 // MARK: Methods
 // =========================================================
 
-#define ___BO_INTERNAL___DECLARE_NUMBER_GET(Type, Name) \
+#define INTERNAL_BO_DECLARE_NUMBER_GET(Type, Name) \
 	Type BO_NumberGet##Name(BO_NumberRef num);
 
-___BO_INTERNAL___DECLARE_NUMBER_GET(int8_t, Int8)
-___BO_INTERNAL___DECLARE_NUMBER_GET(int16_t, Int16)
-___BO_INTERNAL___DECLARE_NUMBER_GET(int32_t, Int32)
-___BO_INTERNAL___DECLARE_NUMBER_GET(int64_t, Int64)
-___BO_INTERNAL___DECLARE_NUMBER_GET(uint8_t, UInt8)
-___BO_INTERNAL___DECLARE_NUMBER_GET(uint16_t, UInt16)
-___BO_INTERNAL___DECLARE_NUMBER_GET(uint32_t, UInt32)
-___BO_INTERNAL___DECLARE_NUMBER_GET(uint64_t, UInt64)
-___BO_INTERNAL___DECLARE_NUMBER_GET(float, Float)
-___BO_INTERNAL___DECLARE_NUMBER_GET(double, Double)
-___BO_INTERNAL___DECLARE_NUMBER_GET(BC_bool, Bool)
+INTERNAL_BO_DECLARE_NUMBER_GET(int8_t, Int8)
+INTERNAL_BO_DECLARE_NUMBER_GET(int16_t, Int16)
+INTERNAL_BO_DECLARE_NUMBER_GET(int32_t, Int32)
+INTERNAL_BO_DECLARE_NUMBER_GET(int64_t, Int64)
+INTERNAL_BO_DECLARE_NUMBER_GET(uint8_t, UInt8)
+INTERNAL_BO_DECLARE_NUMBER_GET(uint16_t, UInt16)
+INTERNAL_BO_DECLARE_NUMBER_GET(uint32_t, UInt32)
+INTERNAL_BO_DECLARE_NUMBER_GET(uint64_t, UInt64)
+INTERNAL_BO_DECLARE_NUMBER_GET(float, Float)
+INTERNAL_BO_DECLARE_NUMBER_GET(double, Double)
+INTERNAL_BO_DECLARE_NUMBER_GET(BC_bool, Bool)
 
 static void BO_NumberGetExplicit(const BO_NumberRef num, void* value, const BO_NumberType dstType) {
 	if (!num || !value) return;

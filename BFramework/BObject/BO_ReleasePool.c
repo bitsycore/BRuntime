@@ -53,7 +53,7 @@ BF_ClassId BO_ReleasePoolClassId() {
 	return kBO_ReleasePoolClass.id;
 }
 
-void ___BO_INTERNAL___ReleasePoolInitialize(void) {
+void INTERNAL_BO_ReleasePoolInitialize(void) {
 	BF_ClassRegistryInsert((BF_Class*)&kBO_ReleasePoolClass);
 }
 

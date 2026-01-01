@@ -1,5 +1,5 @@
-#ifndef BCRUNTIME_BCSTRING_H
-#define BCRUNTIME_BCSTRING_H
+#ifndef BOBJECT_STRING_H
+#define BOBJECT_STRING_H
 
 #include "BCore/BC_Macro.h"
 
@@ -26,14 +26,14 @@
 // MARK: Internal
 // =========================================================
 
-__attribute__((const, always_inline)) static inline uint32_t
-___BF_INTERNAL___StringHasher(const char *s) {
-  uint32_t hash = 2166136261u;
-  while (*s) {
-    hash ^= (uint8_t)*s++;
-    hash *= 16777619;
-  }
-  return hash == BC_HASH_UNSET ? 1 : hash;
+__attribute__((const, always_inline))
+static inline uint32_t INTERNAL_BO_StringHasher(const char* s) {
+	uint32_t hash = 2166136261u;
+	while (*s) {
+		hash ^= (uint8_t)*s++;
+		hash *= 16777619;
+	}
+	return hash == BC_HASH_UNSET ? 1 : hash;
 }
 
 // =========================================================
@@ -46,15 +46,18 @@ BF_ClassId BO_StringClassId();
 // MARK: Constructor
 // =========================================================
 
-BO_StringRef BO_StringCreate(const char *fmt, ...);
+BO_StringRef BO_StringCreate(const char* fmt, ...);
 
-BO_StringPooledRef BO_StringPooled(const char *text);
-BO_StringPooledRef BO_StringPooledWithInfo(const char *text, size_t len,
-                                         uint32_t hash, BC_bool static_string);
-#define BO_StringPooledLiteral(__text__)                                        \
-  BO_StringPooledWithInfo(BC_REQUIRE_LITERAL(__text__),                         \
-                         sizeof(__text__) / sizeof((__text__)[0]) - 1,         \
-                         ___BF_INTERNAL___StringHasher((__text__)), BC_true)
+BO_StringPooledRef BO_StringPooled(const char* text);
+BO_StringPooledRef BO_StringPooledWithInfo(const char* text, size_t len, uint32_t hash, BC_bool static_string);
+
+#define BO_StringPooledLiteral(__text__) \
+	BO_StringPooledWithInfo( \
+		BC_REQUIRE_LITERAL(__text__), \
+		sizeof(__text__) / sizeof((__text__)[0]) - 1, \
+		INTERNAL_BO_StringHasher((__text__)), \
+		BC_true \
+)
 
 // =========================================================
 // MARK: Properties
@@ -62,7 +65,7 @@ BO_StringPooledRef BO_StringPooledWithInfo(const char *text, size_t len,
 
 size_t BO_StringLength(BO_StringRef str);
 uint32_t BO_StringHash(BO_StringRef str);
-const char *BO_StringCPtr(BO_StringRef str);
+const char* BO_StringCPtr(BO_StringRef str);
 
 // =========================================================
 // MARK: Debug
@@ -70,4 +73,4 @@ const char *BO_StringCPtr(BO_StringRef str);
 
 void BO_StringPoolDebugDump(void);
 
-#endif // BCRUNTIME_BCSTRING_H
+#endif //BOBJECT_STRING_H

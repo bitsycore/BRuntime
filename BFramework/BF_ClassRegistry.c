@@ -46,14 +46,14 @@ static inline BF_ClassId PRIV_GetSegmentSize(BF_ClassId segment_index);
 // MARK: Initialization
 // =========================================================
 
-void ___BF_INTERNAL___ClassRegistryInitialize(void) {
+void INTERNAL_BF_ClassRegistryInitialize(void) {
 	BC_SpinlockInit(&gClassRegistryState.lock);
 	memset(gClassRegistryState.segments, 0, sizeof(gClassRegistryState.segments));
 	gClassRegistryState.segment_count = 0;
 	gClassRegistryState.total_classes = 0;
 }
 
-void ___BF_INTERNAL___ClassRegistryDeinitialize(void) {
+void INTERNAL_BF_ClassRegistryDeinitialize(void) {
 	BC_SpinlockLock(&gClassRegistryState.lock);
 
 	// Free all allocated segments

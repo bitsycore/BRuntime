@@ -75,7 +75,7 @@ static BF_Class kBO_SetClass = {
 
 BF_ClassId BO_SetClassId(void) { return kBO_SetClass.id; }
 
-void ___BO_INTERNAL___SetInitialize(void) { BF_ClassRegistryInsert(&kBO_SetClass); }
+void INTERNAL_BO_SetInitialize(void) { BF_ClassRegistryInsert(&kBO_SetClass); }
 
 // =========================================================
 // MARK: Constructors

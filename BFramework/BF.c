@@ -7,65 +7,65 @@
 // MARK: Initialize
 // =========================================================
 
-extern void ___BF_INTERNAL___ClassRegistryInitialize();
-extern void ___BF_INTERNAL___AutoreleaseInitialize();
+extern void INTERNAL_BF_ClassRegistryInitialize();
+extern void INTERNAL_BF_AutoreleaseInitialize();
 
-extern void ___BO_INTERNAL___ObjectInitialize();
-extern void ___BO_INTERNAL___ReleasePoolInitialize();
-extern void ___BO_INTERNAL___NumberInitialize();
-extern void ___BO_INTERNAL___MapInitialize();
-extern void ___BO_INTERNAL___SetInitialize();
-extern void ___BO_INTERNAL___ListInitialize();
-extern void ___BO_INTERNAL___BytesArrayInitialize();
-extern void ___BO_INTERNAL___StringPoolInitialize();
-extern void ___BO_INTERNAL___StringInitialize();
-extern void ___BO_INTERNAL___StringBuilderInitialize();
+extern void INTERNAL_BO_ObjectInitialize();
+extern void INTERNAL_BO_ReleasePoolInitialize();
+extern void INTERNAL_BO_NumberInitialize();
+extern void INTERNAL_BO_MapInitialize();
+extern void INTERNAL_BO_SetInitialize();
+extern void INTERNAL_BO_ListInitialize();
+extern void INTERNAL_BO_BytesArrayInitialize();
+extern void INTERNAL_BO_StringPoolInitialize();
+extern void INTERNAL_BO_StringInitialize();
+extern void INTERNAL_BO_StringBuilderInitialize();
 
-static BC_bool ___BF_INTERNAL___Initialized = BC_false;
+static BC_bool BF_IsInitialized = BC_false;
 
 void BF_Initialize(const int argc, char** argv) {
-	if (___BF_INTERNAL___Initialized) return;
+	if (BF_IsInitialized) return;
 
 	BC_Initialize(argc, argv);
 
-	___BF_INTERNAL___ClassRegistryInitialize();
-	___BF_INTERNAL___AutoreleaseInitialize();
+	INTERNAL_BF_ClassRegistryInitialize();
+	INTERNAL_BF_AutoreleaseInitialize();
 
-	___BO_INTERNAL___ObjectInitialize();
-	___BO_INTERNAL___ReleasePoolInitialize();
-	___BO_INTERNAL___NumberInitialize();
-	___BO_INTERNAL___MapInitialize();
-	___BO_INTERNAL___SetInitialize();
-	___BO_INTERNAL___ListInitialize();
-	___BO_INTERNAL___BytesArrayInitialize();
-	___BO_INTERNAL___StringPoolInitialize();
-	___BO_INTERNAL___StringInitialize();
-	___BO_INTERNAL___StringBuilderInitialize();
+	INTERNAL_BO_ObjectInitialize();
+	INTERNAL_BO_ReleasePoolInitialize();
+	INTERNAL_BO_NumberInitialize();
+	INTERNAL_BO_MapInitialize();
+	INTERNAL_BO_SetInitialize();
+	INTERNAL_BO_ListInitialize();
+	INTERNAL_BO_BytesArrayInitialize();
+	INTERNAL_BO_StringPoolInitialize();
+	INTERNAL_BO_StringInitialize();
+	INTERNAL_BO_StringBuilderInitialize();
 
-	___BF_INTERNAL___Initialized = BC_true;
+	BF_IsInitialized = BC_true;
 }
 
 // =========================================================
 // MARK: Deinitialize
 // =========================================================
 
-extern void ___BF_INTERNAL___AutoreleaseDeinitialize();
-extern void ___BO_INTERNAL___StringPoolDeinitialize();
-extern void ___BO_INTERNAL___ObjectDebugDeinitialize();
-extern void ___BF_INTERNAL___ClassRegistryDeinitialize();
+extern void INTERNAL_BF_AutoreleaseDeinitialize();
+extern void INTERNAL_BO_StringPoolDeinitialize();
+extern void INTERNAL_BO_ObjectDebugDeinitialize();
+extern void INTERNAL_BF_ClassRegistryDeinitialize();
 
-BC_bool ___BF_INTERNAL___Deinitialized = BC_false;
+BC_bool BF_IsDeinitialized = BC_false;
 
 void BF_Deinitialize(void) {
-	if (___BF_INTERNAL___Deinitialized || !___BF_INTERNAL___Initialized) return;
+	if (BF_IsDeinitialized || !BF_IsInitialized) return;
 
-	___BO_INTERNAL___StringPoolDeinitialize();
-	___BO_INTERNAL___ObjectDebugDeinitialize();
+	INTERNAL_BO_StringPoolDeinitialize();
+	INTERNAL_BO_ObjectDebugDeinitialize();
 
-	___BF_INTERNAL___AutoreleaseDeinitialize();
-	___BF_INTERNAL___ClassRegistryDeinitialize();
+	INTERNAL_BF_AutoreleaseDeinitialize();
+	INTERNAL_BF_ClassRegistryDeinitialize();
 
 	BC_Deinitialize();
 
-	___BF_INTERNAL___Deinitialized = BC_true;
+	BF_IsDeinitialized = BC_true;
 }

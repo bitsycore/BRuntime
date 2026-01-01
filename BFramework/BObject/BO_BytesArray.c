@@ -81,7 +81,7 @@ BF_ClassId BO_BytesArrayClassId(void) {
 	return kBO_BytesArrayClass.id;
 }
 
-void ___BO_INTERNAL___BytesArrayInitialize(void) {
+void INTERNAL_BO_BytesArrayInitialize(void) {
 	BF_ClassRegistryInsert(&kBO_BytesArrayClass);
 }
 

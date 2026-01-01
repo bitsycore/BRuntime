@@ -24,7 +24,7 @@ typedef struct {
     void* data;
 } BC_MemoryBlock;
 
-void ___BC_INTERNAL___MemoryInitialize() {
+void INTERNAL_BC_MemoryInitialize() {
 	BC_MutexInit(&gMemoryMutex);
 }
 
@@ -123,7 +123,7 @@ void BC_MemoryInfoHeapReset(void) {
 	BC_MutexUnlock(&gMemoryMutex);
 }
 #else
-void ___BC_INTERNAL___MemoryInitialize() {}
+void INTERNAL_BC_MemoryInitialize() {}
 #endif
 
 #if defined(_WIN32) || defined(_WIN64)

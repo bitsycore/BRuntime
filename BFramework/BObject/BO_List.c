@@ -74,7 +74,7 @@ BF_ClassId BO_ListClassId(void) {
 	return kBO_ListClass.id;
 }
 
-void ___BO_INTERNAL___ListInitialize(void) {
+void INTERNAL_BO_ListInitialize(void) {
 	BF_ClassRegistryInsert(&kBO_ListClass);
 }
 
