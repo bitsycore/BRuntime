@@ -2,7 +2,7 @@
 
 #include "BCore/BC_Keywords.h"
 #include "BCore/Memory/BC_Memory.h"
-#include "BFramework/Object/BO_Object.h"
+#include "BFramework/BObject/BO_Object.h"
 
 // =========================================================
 // MARK: Configuration

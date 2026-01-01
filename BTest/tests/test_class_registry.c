@@ -1,7 +1,7 @@
 #include "../tests/tests.h"
 
 #include <BFramework/BF_Class.h>
-#include <BFramework/Object/BO_Object.h>
+#include <BFramework/BObject/BO_Object.h>
 
 static BF_Class TestClass1 = {
 	.name = "TestClass1",

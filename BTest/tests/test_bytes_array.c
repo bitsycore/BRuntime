@@ -1,6 +1,6 @@
 #include "tests.h"
 #include "../../BFramework/BF_Format.h"
-#include "../../BFramework/Object/BO_BytesArray.h"
+#include "../../BFramework/BObject/BO_BytesArray.h"
 
 #define BC_assert(p) ASSERT_SILENT(p, "Failed: " #p)
 
@@ -54,7 +54,7 @@ void testBytesArray(void) {
     const BO_StringRef str = BO_ToString((BO_ObjectRef)arr2);
 	BFAutorelease($OBJ str);
     const char* cStr = BO_StringCPtr(str);
-    BF_printf("ToString: %s\n", cStr);
+    BF_Print("ToString: %s\n", cStr);
     // We can't easily assert the string content without a string compare function,
     // but we can visually verify or use strcmp if available.
     // Assuming standard strcmp is available or we can use BO_StringIsEqual
@@ -68,5 +68,5 @@ void testBytesArray(void) {
     BC_assert(BO_BytesArrayCompare(arr3, arr2) < 0);
     BC_assert(BO_BytesArrayCompare(arr2, arr3) > 0);
 
-    BF_printf("BO_BytesArray tests passed\n");
+    BF_Print("BO_BytesArray tests passed\n");
 }

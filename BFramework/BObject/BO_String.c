@@ -192,7 +192,7 @@ BO_StringRef BO_StringCreate(const char *fmt, ...) {
 	va_list args, copy;
 	va_start(args, fmt);
 	va_copy(copy, args);
-	const int len = BF_vsnprintf(NULL, 0, fmt, copy);
+	const int len = BF_PrintStringVa(NULL, 0, fmt, copy);
 	va_end(copy);
 
 	const BO_StringRef str = (BO_StringRef) BO_ObjectAllocWithConfig(
@@ -203,7 +203,7 @@ BO_StringRef BO_StringCreate(const char *fmt, ...) {
 	);
 	str->buffer = (char *) (&str->buffer + 1);
 
-	BF_vsnprintf(str->buffer, len + 1, fmt, args);
+	BF_PrintStringVa(str->buffer, len + 1, fmt, args);
 	va_end(args);
 
 	str->length = BC_LEN_UNSET;

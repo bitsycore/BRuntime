@@ -7,16 +7,16 @@
 #include <BFramework/BF_AutoreleasePool.h>
 #include <BFramework/BF_Class.h>
 #include <BFramework/BF_Format.h>
-#include <BFramework/Object/BO_List.h>
-#include <BFramework/Object/BO_Map.h>
-#include <BFramework/Object/BO_Number.h>
-#include <BFramework/Object/BO_String.h>
-#include <BFramework/Object/BO_StringBuilder.h>
+#include <BFramework/BObject/BO_List.h>
+#include <BFramework/BObject/BO_Map.h>
+#include <BFramework/BObject/BO_Number.h>
+#include <BFramework/BObject/BO_String.h>
+#include <BFramework/BObject/BO_StringBuilder.h>
 
 #include <stdio.h>
 #include <string.h>
 
-#define log_fmt(...) BF_printf(__VA_ARGS__)
+#define log_fmt(...) BF_Print(__VA_ARGS__)
 
 #define TO_STR(_x_) \
   BO_StringCPtr((BO_StringRef)(BFAutorelease($OBJ BO_ToString($OBJ(_x_)))))

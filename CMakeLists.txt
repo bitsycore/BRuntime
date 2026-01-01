@@ -9,4 +9,4 @@ endif()
 add_subdirectory(BCore)
 add_subdirectory(BFramework)
 
-add_subdirectory(Test)
+add_subdirectory(BTest)

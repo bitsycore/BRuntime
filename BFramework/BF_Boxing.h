@@ -1,8 +1,10 @@
 #ifndef BFRAMEWORK_BOX_MACRO_H
 #define BFRAMEWORK_BOX_MACRO_H
 
+#include "BCore/BC_Keywords.h"
+
 #include "BF_Types.h"
-#include "Object/BO_Object.h"
+#include "BObject/BO_Object.h"
 
 // ================================================
 // MARK: BOXING $

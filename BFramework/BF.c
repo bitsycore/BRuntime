@@ -1,14 +1,11 @@
 #include "BF.h"
 
-#include "BCore/Memory/BC_Memory.h"
-
-#include <stdio.h>
+#include "BCore/BC.h"
+#include "BCore/BC_Types.h"
 
 // =========================================================
 // MARK: Initialize
 // =========================================================
-
-extern void ___BC_INTERNAL___MemoryInitialize();
 
 extern void ___BF_INTERNAL___ClassRegistryInitialize();
 extern void ___BF_INTERNAL___AutoreleaseInitialize();
@@ -24,49 +21,12 @@ extern void ___BO_INTERNAL___StringPoolInitialize();
 extern void ___BO_INTERNAL___StringInitialize();
 extern void ___BO_INTERNAL___StringBuilderInitialize();
 
-#ifdef _WIN32
-#include <Windows.h>
-static void PlatformSpecificInitialize() {
-	// For UTF-8 output
-	SetConsoleOutputCP(CP_UTF8);
-
-	// For ANSI escape sequences
-	const HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-	if (hOut == INVALID_HANDLE_VALUE)
-		return;
-	DWORD dwMode = 0;
-	if (!GetConsoleMode(hOut, &dwMode))
-		return;
-	dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-	SetConsoleMode(hOut, dwMode);
-}
-#else
-#define PlatformSpecificInitialize()
-#endif
-
 static BC_bool ___BF_INTERNAL___Initialized = BC_false;
 
-static int gArgc;
-static char** gArgv;
+void BF_Initialize(const int argc, char** argv) {
+	if (___BF_INTERNAL___Initialized) return;
 
-int BFArgc(void) {
-	return gArgc;
-}
-
-char** BFArgv(void) {
-	return gArgv;
-}
-
-void BFInitialize(const int argc, char** argv) {
-	if (___BF_INTERNAL___Initialized)
-		return;
-
-	gArgc = argc;
-	gArgv = argv;
-
-	PlatformSpecificInitialize();
-
-	___BC_INTERNAL___MemoryInitialize();
+	BC_Initialize(argc, argv);
 
 	___BF_INTERNAL___ClassRegistryInitialize();
 	___BF_INTERNAL___AutoreleaseInitialize();
@@ -96,9 +56,8 @@ extern void ___BF_INTERNAL___ClassRegistryDeinitialize();
 
 BC_bool ___BF_INTERNAL___Deinitialized = BC_false;
 
-void BFDeinitialize(void) {
-	if (___BF_INTERNAL___Deinitialized)
-		return;
+void BF_Deinitialize(void) {
+	if (___BF_INTERNAL___Deinitialized || !___BF_INTERNAL___Initialized) return;
 
 	___BO_INTERNAL___StringPoolDeinitialize();
 	___BO_INTERNAL___ObjectDebugDeinitialize();
@@ -106,7 +65,7 @@ void BFDeinitialize(void) {
 	___BF_INTERNAL___AutoreleaseDeinitialize();
 	___BF_INTERNAL___ClassRegistryDeinitialize();
 
-	BC_MemoryInfoPrint();
+	BC_Deinitialize();
 
 	___BF_INTERNAL___Deinitialized = BC_true;
 }

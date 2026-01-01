@@ -2,8 +2,8 @@
 
 #include "BCore/Memory/BC_Memory.h"
 
-#include "Object/BO_Object.h"
-#include "Object/BO_String.h"
+#include "BObject/BO_Object.h"
+#include "BObject/BO_String.h"
 
 #include <stdarg.h>
 #include <stdlib.h>
@@ -149,7 +149,7 @@ static void BufferedFileOutput(void* context, const char* data, const size_t len
 // MARK: Public
 // =========================================================
 
-int BFFormat(const BFFormatOutputFunc outFunc, void* context, const char* fmt, va_list args) {
+int BF_Format(const BF_FormatOutputFunc outFunc, void* context, const char* fmt, va_list args) {
 	if (!fmt) return 0;
 
 	const char* cursor = fmt;
@@ -343,45 +343,45 @@ int BFFormat(const BFFormatOutputFunc outFunc, void* context, const char* fmt, v
 	return totalWritten;
 }
 
-int BF_vprintf(const char* fmt, va_list args) {
+int BF_PrintVa(const char* fmt, va_list args) {
 	BufferedFileContext ctx = {stdout, {0}, 0};
-	const int result = BFFormat(BufferedFileOutput, &ctx, fmt, args);
+	const int result = BF_Format(BufferedFileOutput, &ctx, fmt, args);
 	FlushBufferedFile(&ctx);
 	return result;
 }
 
-int BF_vfprintf(FILE* stream, const char* fmt, va_list args) {
+int BF_PrintFileVa(FILE* stream, const char* fmt, va_list args) {
 	BufferedFileContext ctx = {stream, {0}, 0};
-	const int result = BFFormat(BufferedFileOutput, &ctx, fmt, args);
+	const int result = BF_Format(BufferedFileOutput, &ctx, fmt, args);
 	FlushBufferedFile(&ctx);
 	return result;
 }
 
-int BF_vsnprintf(char* str, const size_t size, const char* fmt, va_list args) {
+int BF_PrintStringVa(char* str, const size_t size, const char* fmt, va_list args) {
 	StringContext ctx = {str, size, 0};
-	return BFFormat(StringOutput, &ctx, fmt, args);
+	return BF_Format(StringOutput, &ctx, fmt, args);
 }
 
-int BF_printf(const char* fmt, ...) {
+int BF_Print(const char* fmt, ...) {
 	va_list args;
 	va_start(args, fmt);
-	const int ret = BF_vprintf(fmt, args);
+	const int ret = BF_PrintVa(fmt, args);
 	va_end(args);
 	return ret;
 }
 
-int BF_fprintf(FILE* stream, const char* fmt, ...) {
+int BF_PrintFile(FILE* stream, const char* fmt, ...) {
 	va_list args;
 	va_start(args, fmt);
-	const int ret = BF_vfprintf(stream, fmt, args);
+	const int ret = BF_PrintFileVa(stream, fmt, args);
 	va_end(args);
 	return ret;
 }
 
-int BF_snprintf(char* str, const size_t size, const char* fmt, ...) {
+int BF_PrintString(char* str, const size_t size, const char* fmt, ...) {
 	va_list args;
 	va_start(args, fmt);
-	const int ret = BF_vsnprintf(str, size, fmt, args);
+	const int ret = BF_PrintStringVa(str, size, fmt, args);
 	va_end(args);
 	return ret;
 }

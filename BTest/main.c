@@ -1,10 +1,10 @@
 #define BF_RUNTIME_MAIN
 #include <BFramework/BF.h>
 
-#include "BCore/BC_Macro.h"
+#include <BCore/BC_Macro.h>
 
-#include "../BFramework/BF_Format.h"
-#include "BFramework/Object/BO_String.h"
+#include <BFramework/BF_Format.h>
+#include <BFramework/BObject/BO_String.h>
 
 #include "tests/tests.h"
 
@@ -54,7 +54,7 @@ void demo(void) {
 
 int RETRY = 1;
 
-int BCMain() {
+int BF_Main() {
 	BO_ObjectDebugSetEnabled(BC_true);
 	BO_ObjectDebugSetKeepFreed(BC_false);
 
@@ -77,7 +77,7 @@ int BCMain() {
 			BO_ObjectDebugDump();
 			BF_StringPoolDebugDump();
 
-		    BF_printf("Hello world %@", $$LIST("Hello", 1, 3, 4));
+		    BF_Print("Hello world %@", $$LIST("Hello", 1, 3, 4));
 		}
 		BIG_TITLE("BC End");
 	}

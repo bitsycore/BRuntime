@@ -1,41 +1,47 @@
-add_library(BFramework
-		BF_Boxing.h
-		BF_Settings.h
+set(BFRAMEWORK_SOURCES
 		BF.c
 		BF.h
 		BF_AutoreleasePool.c
 		BF_AutoreleasePool.h
+		BF_Boxing.h
 		BF_Class.c
 		BF_Class.h
 		BF_ClassRegistry.c
 		BF_Format.c
 		BF_Format.h
+		BF_Settings.h
 		BF_Types.h
-		Object/BO_BytesArray.c
-		Object/BO_BytesArray.h
-		Object/BO_List.c
-		Object/BO_List.h
-		Object/BO_Map.c
-		Object/BO_Map.h
-		Object/BO_Number.c
-		Object/BO_Number.h
-		Object/BO_Object.c
-		Object/BO_Object.h
-		Object/BO_ReleasePool.c
-		Object/BO_ReleasePool.h
-		Object/BO_Set.c
-		Object/BO_Set.h
-		Object/BO_String.c
-		Object/BO_String.h
-		Object/BO_StringBuilder.c
-		Object/BO_StringBuilder.h
+		BObject/BO.h
+		BObject/BO_BytesArray.c
+		BObject/BO_BytesArray.h
+		BObject/BO_List.c
+		BObject/BO_List.h
+		BObject/BO_Map.c
+		BObject/BO_Map.h
+		BObject/BO_Number.c
+		BObject/BO_Number.h
+		BObject/BO_Object.c
+		BObject/BO_Object.h
+		BObject/BO_ReleasePool.c
+		BObject/BO_ReleasePool.h
+		BObject/BO_Set.c
+		BObject/BO_Set.h
+		BObject/BO_String.c
+		BObject/BO_String.h
+		BObject/BO_StringBuilder.c
+		BObject/BO_StringBuilder.h
 )
 
-target_include_directories(BFramework
+add_library(BFramework-STATIC STATIC ${BFRAMEWORK_SOURCES})
+
+target_include_directories(BFramework-STATIC
 		PUBLIC
 		${CMAKE_CURRENT_SOURCE_DIR}/../
 )
 
-target_link_libraries(BFramework
-	BCore
-)
+#add_library(BFramework-SHARED SHARED ${BFRAMEWORK_SOURCES})
+#
+#target_include_directories(BFramework-SHARED
+#		PUBLIC
+#		${CMAKE_CURRENT_SOURCE_DIR}/../
+#)
