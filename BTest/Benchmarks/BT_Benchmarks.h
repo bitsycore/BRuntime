@@ -1,8 +1,8 @@
 #ifndef BRUNTIME_BT_BENCHMARKS_H
 #define BRUNTIME_BT_BENCHMARKS_H
 
-#include "BTest/Commons/BT_Common.h"
+#include "../Commons/BT_Common.h"
 
-void benchmarkAutoreleasePool();
+void BT_BenchmarkAutoreleasePool();
 
 #endif //BRUNTIME_BT_BENCHMARKS_H

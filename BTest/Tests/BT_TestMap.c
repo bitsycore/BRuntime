@@ -1,36 +1,36 @@
 #include "BT_Tests.h"
 
-void testMap() {
+void BT_TestMap() {
 	// ================================
-	SUB_TITLE("Test Map");
+	BT_PrintSubTitle("Test Map");
 	// ================================
 
 	$VAR array = $LIST("username", "password");
-	BFAutorelease($OBJ array);
+	BF_Autorelease($OBJ array);
 
 	const BO_StringRef str1 = BO_StringPooledLiteral("username");
 	const BO_StringRef str2 = BO_StringPooledLiteral("username");
 
 	$LET numInt2 = $$("%d", 10);
-	const BO_MutableMapRef dictionary = BCMutableMapCreate();
-	BFAutorelease($OBJ dictionary);
+	const BO_MutableMapRef dictionary = BO_MutableMapCreate();
+	BF_Autorelease($OBJ dictionary);
 
 	const BO_StringRef key = BO_StringCreate("id");
-	BFAutorelease($OBJ key);
+	BF_Autorelease($OBJ key);
 	const BO_StringRef value = BO_StringCreate("10%d", 1);
-	BFAutorelease($OBJ value);
+	BF_Autorelease($OBJ value);
 
 	BO_MapSet(dictionary, $OBJ str1, $OBJ array);
 	BO_MapSet(dictionary, $OBJ BO_StringPooledLiteral("test"), $OBJ numInt2);
 	BO_MapSet(dictionary, $OBJ key, $OBJ value);
 
 	// Description of Map
-	log_fmt("%s\n", TO_STR(dictionary));
+	BT_Print("%s\n", BT_ToStr(dictionary));
 
 	// Get Value by Key
 	const BO_ObjectRef found = BO_MapGet( dictionary, $OBJ str2); // Look up using pooled string
 	if (found) {
-		log_fmt("\"username\": %s\n", TO_STR(found));
+		BT_Print("\"username\": %s\n", BT_ToStr(found));
 		BO_Release(found);
 	}
 
@@ -44,7 +44,7 @@ void testMap() {
 		"innerDic", $$MAP("abc", nine),
 		"innerArr", $$LIST(nine, three)
 	);
-	log_fmt("%s\n", TO_STR(autoDic));
+	BT_Print("%s\n", BT_ToStr(autoDic));
 
 	$LET dic = $$MAP(
 		"title", "Test Map",
@@ -52,5 +52,5 @@ void testMap() {
 		"author", "Beej",
 		"isActive", BC_true
 	);
-	log_fmt("%s\n", TO_STR(dic));
+	BT_Print("%s\n", BT_ToStr(dic));
 }

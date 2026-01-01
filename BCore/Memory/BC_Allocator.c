@@ -9,20 +9,20 @@
 // MARK: Default Allocator
 // =========================================================
 
-static void* AllocatorDefaultAlloc(const size_t size, const void* ctx) {
+static void* IMPL_AllocatorDefaultAlloc(const size_t size, const void* ctx) {
 	(void)ctx;
-	return BCMalloc(size);
+	return BC_Malloc(size);
 }
 
-static void AllocatorDefaultFree(void* ptr, const void* ctx) {
+static void IMPL_AllocatorDefaultFree(void* ptr, const void* ctx) {
 	(void)ctx;
-	BCFree(ptr);
+	BC_Free(ptr);
 }
 
-static BC_Allocator const kBC_AllocatorSystem = {AllocatorDefaultAlloc, AllocatorDefaultFree, NULL};
-const BC_AllocatorRef kBC_AllocatorRefSystem = (BC_AllocatorRef)&kBC_AllocatorSystem;
+static BC_Allocator const PRIV_kAllocatorSystem = {IMPL_AllocatorDefaultAlloc, IMPL_AllocatorDefaultFree, NULL};
+const BC_AllocatorRef kBC_AllocatorRefSystem = (BC_AllocatorRef)&PRIV_kAllocatorSystem;
 
-BC_TLS BC_AllocatorRef gBC_AllocatorDefault = kBC_AllocatorRefSystem;
+BC_TLS BC_AllocatorRef PRIV_gAllocatorDefault = kBC_AllocatorRefSystem;
 
 // =========================================================
 // MARK: Public
@@ -50,9 +50,9 @@ void BC_AllocatorFree(BC_AllocatorRef allocator, void* ptr) {
 }
 
 BC_AllocatorRef BC_AllocatorGetDefault() {
-	return gBC_AllocatorDefault;
+	return PRIV_gAllocatorDefault;
 }
 
 void BC_AllocatorSetDefault(const BC_AllocatorRef allocator) {
-	gBC_AllocatorDefault = allocator ? allocator : kBC_AllocatorRefSystem;
+	PRIV_gAllocatorDefault = allocator ? allocator : kBC_AllocatorRefSystem;
 }

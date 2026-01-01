@@ -5,10 +5,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../Memory/BC_Memory.h"
+
 void BC_StringBuilderInit(BC_StringBuilder *sb) {
 	sb->cap = 1024;
 	sb->len = 0;
-	sb->data = malloc(sb->cap);
+	sb->data = BC_Malloc(sb->cap);
 	sb->data[0] = '\0';
 }
 
@@ -16,7 +18,7 @@ void BC_StringBuilderAppend(BC_StringBuilder *sb, const char *fmt, ...) {
 	va_list args;
 
 	va_start(args, fmt);
-	int required = vsnprintf(NULL, 0, fmt, args);
+	const int required = vsnprintf(NULL, 0, fmt, args);
 	va_end(args);
 
 	if (required < 0) return;
@@ -25,7 +27,7 @@ void BC_StringBuilderAppend(BC_StringBuilder *sb, const char *fmt, ...) {
 		while (sb->len + required + 1 > sb->cap) {
 			sb->cap *= 2;
 		}
-		sb->data = realloc(sb->data, sb->cap);
+		sb->data = BC_Realloc(sb->data, sb->cap);
 	}
 
 	// 3. Write data
@@ -42,7 +44,7 @@ void BC_StringBuilderRepeat(BC_StringBuilder *sb, const char *str, const size_t 
 
 	if (sb->len + total_len + 1 > sb->cap) {
 		while (sb->len + total_len + 1 > sb->cap) sb->cap *= 2;
-		sb->data = realloc(sb->data, sb->cap);
+		sb->data = BC_Realloc(sb->data, sb->cap);
 	}
 
 	for (size_t i = 0; i < count; i++) {
@@ -53,5 +55,5 @@ void BC_StringBuilderRepeat(BC_StringBuilder *sb, const char *str, const size_t 
 }
 
 void BC_StringBuilderFree(const BC_StringBuilder *sb) {
-	free(sb->data);
+	BC_Free(sb->data);
 }

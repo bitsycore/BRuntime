@@ -31,13 +31,13 @@ typedef struct BO_Map {
 // MARK: Forward
 // =========================================================
 
-static void MapPut(MapEntry* buckets, size_t cap, BO_ObjectRef key, BO_ObjectRef val);
+static void PRIV_MapPut(MapEntry* buckets, size_t cap, BO_ObjectRef key, BO_ObjectRef val);
 
 // =========================================================
 // MARK: Methods
 // =========================================================
 
-static void MapDeallocImpl(const BO_ObjectRef obj) {
+static void IMPL_MapDealloc(const BO_ObjectRef obj) {
 	const BO_MapRef d = (BO_MapRef)obj;
 	for (size_t i = 0; i < d->capacity; i++) {
 		if (d->buckets[i].key) {
@@ -45,10 +45,10 @@ static void MapDeallocImpl(const BO_ObjectRef obj) {
 			BO_Release(d->buckets[i].value);
 		}
 	}
-	BCFree(d->buckets);
+	BC_Free(d->buckets);
 }
 
-BO_StringRef MapToStringImpl(const BO_ObjectRef obj) {
+BO_StringRef IMPL_MapToString(const BO_ObjectRef obj) {
 	const BO_MapRef d = (BO_MapRef)obj;
 	const BO_StringBuilderRef sb = BO_StringBuilderCreate(NULL);
 	BO_StringBuilderAppend(sb, "{ ");
@@ -84,10 +84,10 @@ BO_StringRef MapToStringImpl(const BO_ObjectRef obj) {
 static BF_Class kBO_MapClass = {
 	.name = "BO_Map",
 	.id = BF_CLASS_ID_INVALID,
-	.dealloc = MapDeallocImpl,
+	.dealloc = IMPL_MapDealloc,
 	.hash = NULL,
 	.equal = NULL,
-	.toString = MapToStringImpl,
+	.toString = IMPL_MapToString,
 	.copy = NULL,
 	.allocSize = sizeof(BO_Map)
 };
@@ -105,21 +105,21 @@ void ___BO_INTERNAL___MapInitialize(void) {
 // =========================================================
 
 BO_MapRef BO_MapCreate() {
-	const BO_MutableMapRef dic = BCMutableMapCreate();
+	const BO_MutableMapRef dic = BO_MutableMapCreate();
 	BC_FLAG_CLEAR(dic->base.flags, BO_MAP_FLAG_MUTABLE);
 	return dic;
 }
 
-BO_MutableMapRef BCMutableMapCreate() {
+BO_MutableMapRef BO_MutableMapCreate() {
 	const BO_MapRef d = (BO_MapRef)BO_ObjectAllocWithConfig(NULL, kBO_MapClass.id, 0, BC_OBJECT_DEFAULT_FLAGS | BO_MAP_FLAG_MUTABLE);
 	d->capacity = 8;
 	d->count = 0;
-	d->buckets = BCCalloc(d->capacity, sizeof(MapEntry));
+	d->buckets = BC_Calloc(d->capacity, sizeof(MapEntry));
 	return d;
 }
 
 BO_MapRef BO_MapCreateWithObjects(const BC_bool retain, const size_t count, ...) {
-	const BO_MutableMapRef d = BCMutableMapCreate();
+	const BO_MutableMapRef d = BO_MutableMapCreate();
 	va_list args;
 	va_start(args, count);
 	for (size_t i = 0; i < count / 2; i++) {
@@ -147,14 +147,14 @@ void BO_MapSet(const BO_MutableMapRef d, const BO_ObjectRef key, const BO_Object
 	// Resize Check
 	if (dict->count >= (size_t)((double)dict->capacity * 0.75)) {
 		const size_t newCap = dict->capacity * 2;
-		MapEntry* newBuckets = BCCalloc(newCap, sizeof(MapEntry));
+		MapEntry* newBuckets = BC_Calloc(newCap, sizeof(MapEntry));
 		if (!newBuckets) return;
 		for (size_t i = 0; i < dict->capacity; i++) {
 			if (dict->buckets[i].key) {
-				MapPut(newBuckets, newCap, dict->buckets[i].key, dict->buckets[i].value);
+				PRIV_MapPut(newBuckets, newCap, dict->buckets[i].key, dict->buckets[i].value);
 			}
 		}
-		BCFree(dict->buckets);
+		BC_Free(dict->buckets);
 		dict->buckets = newBuckets;
 		dict->capacity = newCap;
 	}
@@ -257,7 +257,7 @@ void BO_MapRemove(const BO_MutableMapRef d, const BO_ObjectRef key) {
 				BO_ObjectRef rehashVal = dict->buckets[nextIdx].value;
 				dict->buckets[nextIdx].key = NULL;
 				dict->buckets[nextIdx].value = NULL;
-				MapPut(dict->buckets, dict->capacity, rehashKey, rehashVal);
+				PRIV_MapPut(dict->buckets, dict->capacity, rehashKey, rehashVal);
 				nextIdx = (nextIdx + 1) % dict->capacity;
 			}
 			return;
@@ -304,7 +304,7 @@ void BO_MapForEach(const BO_MapRef d, void (*block)(BO_ObjectRef key, BO_ObjectR
 // MARK: Internal
 // =========================================================
 
-static void MapPut(MapEntry* buckets, const size_t cap, const BO_ObjectRef key, const BO_ObjectRef val) {
+static void PRIV_MapPut(MapEntry* buckets, const size_t cap, const BO_ObjectRef key, const BO_ObjectRef val) {
 	const uint32_t hash = BO_Hash(key);
 	size_t idx = hash % cap;
 	while (buckets[idx].key) {

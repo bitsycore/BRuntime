@@ -21,7 +21,7 @@ BF_ClassId BO_SetClassId(void);
 // =========================================================
 
 BO_SetRef BO_SetCreate(void);
-BO_MutableSetRef BCMutableSetCreate(void);
+BO_MutableSetRef BO_MutableSetCreate(void);
 BO_SetRef BO_SetCreateWithObjects(BC_bool retain, size_t count, ...);
 
 // =========================================================

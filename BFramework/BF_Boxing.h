@@ -40,7 +40,7 @@ static inline BO_ObjectRef ___BF_INTERNAL___Retain(void* obj) { return BO_Retain
 		BO_MapRef: ___BF_INTERNAL___Retain,                                                                                                                                          \
 		BO_ObjectRef: ___BF_INTERNAL___Retain)(__VA_ARGS__)
 
-#define ___BF_INTERNAL___$$_IMPL(__result__, __type__) ((__type__)BFAutorelease($OBJ(__result__)))
+#define ___BF_INTERNAL___$$_IMPL(__result__, __type__) ((__type__)BF_Autorelease($OBJ(__result__)))
 #define $$(...) ___BF_INTERNAL___$$_IMPL($(__VA_ARGS__), BC_TYPE($(__VA_ARGS__)))
 
 // ================================================
@@ -48,50 +48,50 @@ static inline BO_ObjectRef ___BF_INTERNAL___Retain(void* obj) { return BO_Retain
 // ================================================
 
 #define ___BF_INTERNAL___ARR_IMPL(_name_, ...) ({ \
-	BFAutoreleasePoolPush(); \
+	BF_AutoreleasePoolPush(); \
 	BO_ListRef _name_ = BO_ListCreateWithObjects( \
 		BC_false, /*NO RETAIN*/ \
 		BC_ARG_COUNT(__VA_ARGS__), \
 		BC_ARG_MAP($, __VA_ARGS__)); \
-	BFAutoreleasePoolPop(); \
+	BF_AutoreleasePoolPop(); \
 	_name_; \
 })
 
 #define $LIST(...) ___BF_INTERNAL___ARR_IMPL(BC_M_CAT(___temp_arr_impl___, __COUNTER__), __VA_ARGS__)
-#define $$LIST(...) ((BO_ListRef)BFAutorelease($OBJ $LIST(__VA_ARGS__)))
+#define $$LIST(...) ((BO_ListRef)BF_Autorelease($OBJ $LIST(__VA_ARGS__)))
 
 // ================================================
 // MARK: MAP
 // ================================================
 
 #define ___BF_INTERNAL___MAP_IMPL(_name_, ...) ({ \
-	BFAutoreleasePoolPush(); \
+	BF_AutoreleasePoolPush(); \
 	_Static_assert(((BC_ARG_COUNT(__VA_ARGS__)) % 2) == 0, "Map requires an even number of arguments"); \
 	BO_MapRef _name_ = BO_MapCreateWithObjects( \
 		BC_false, /*NO RETAIN*/ \
 		BC_ARG_COUNT(__VA_ARGS__), BC_ARG_MAP($, __VA_ARGS__)); \
-	BFAutoreleasePoolPop(); \
+	BF_AutoreleasePoolPop(); \
 	_name_; \
 })
 
 #define $MAP(...) ___BF_INTERNAL___MAP_IMPL(BC_M_CAT(___temp_dic_impl___, __COUNTER__), __VA_ARGS__)
-#define $$MAP(...) ((BO_MapRef)BFAutorelease($OBJ $MAP(__VA_ARGS__)))
+#define $$MAP(...) ((BO_MapRef)BF_Autorelease($OBJ $MAP(__VA_ARGS__)))
 
 // ================================================
 // MARK: SET
 // ================================================
 
 #define ___BF_INTERNAL___SET_IMPL(_name_, ...) ({                                                                                                                                                                             \
-	BFAutoreleasePoolPush(); \
+	BF_AutoreleasePoolPush(); \
 	BO_SetRef _name_ = BO_SetCreateWithObjects( \
 		BC_false, /*NO RETAIN*/ \
 		BC_ARG_COUNT(__VA_ARGS__), \
 		BC_ARG_MAP($, __VA_ARGS__)); \
-	BFAutoreleasePoolPop();                                                                                                                                                    \
+	BF_AutoreleasePoolPop();                                                                                                                                                    \
 	_name_;                                                                                                                                                                    \
 })
 
 #define $SET(...) ___BF_INTERNAL___SET_IMPL(BC_M_CAT(___temp_set_impl___, __COUNTER__), __VA_ARGS__)
-#define $$SET(...) ((BO_SetRef)BFAutorelease($OBJ $SET(__VA_ARGS__)))
+#define $$SET(...) ((BO_SetRef)BF_Autorelease($OBJ $SET(__VA_ARGS__)))
 
 #endif //BFRAMEWORK_BOX_MACRO_H

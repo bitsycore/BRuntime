@@ -25,7 +25,7 @@ typedef struct BO_StringBuilder {
 // MARK: Internal
 // =========================================================
 
-static inline size_t NextPowerOfTwo(size_t x) {
+static inline size_t PRIV_NextPowerOfTwo(size_t x) {
 	if (x <= 1) return 1;
 	x--;
 	x |= x >> 1;
@@ -40,7 +40,7 @@ static inline size_t NextPowerOfTwo(size_t x) {
 	return x;
 }
 
-static inline void AppendStr(const BO_StringBuilderRef builder, const char* str, const size_t strLen) {
+static inline void PRIV_AppendStr(const BO_StringBuilderRef builder, const char* str, const size_t strLen) {
 	if (strLen == 0) return;
 	BO_StringBuilderEnsureCapacity(builder, builder->length + strLen);
 	memcpy(builder->buffer + builder->length, str, strLen);
@@ -51,7 +51,7 @@ static inline void AppendStr(const BO_StringBuilderRef builder, const char* str,
 // MARK: Class Methods
 // =========================================================
 
-void StringBuilderDeallocImpl(const BO_ObjectRef obj) {
+void IMPL_StringBuilderDealloc(const BO_ObjectRef obj) {
 	const BO_StringBuilderRef builder = (BO_StringBuilderRef)obj;
 	if (builder->buffer) {
 		const BC_AllocatorRef alloc = BO_ObjectGetAllocator(obj);
@@ -60,11 +60,11 @@ void StringBuilderDeallocImpl(const BO_ObjectRef obj) {
 	}
 }
 
-uint32_t StringBuilderHashImpl(const BO_ObjectRef obj) {
+uint32_t IMPL_StringBuilderHash(const BO_ObjectRef obj) {
 	return ___BF_INTERNAL___StringHasher(((BO_StringBuilder*)obj)->buffer);
 }
 
-BC_bool StringBuilderEqualImpl(const BO_ObjectRef a, const BO_ObjectRef b) {
+BC_bool IMPL_StringBuilderEqual(const BO_ObjectRef a, const BO_ObjectRef b) {
 	if (a == b) return BC_true;
 
 	if (a->cls == BO_StringBuilderClassId() && b->cls == BO_StringBuilderClassId()) {
@@ -85,12 +85,12 @@ BC_bool StringBuilderEqualImpl(const BO_ObjectRef a, const BO_ObjectRef b) {
 	return result;
 }
 
-BO_StringRef StringBuilderToStringImpl(const BO_ObjectRef obj) {
+BO_StringRef IMPL_StringBuilderToString(const BO_ObjectRef obj) {
 	const BO_StringBuilderRef builder = (BO_StringBuilderRef)obj;
 	return BO_StringCreate("%.*s", (int)builder->length, builder->buffer);
 }
 
-BO_ObjectRef StringBuilderCopyImpl(const BO_ObjectRef obj) {
+BO_ObjectRef IMPL_StringBuilderCopy(const BO_ObjectRef obj) {
 	const BO_StringBuilderRef original = (BO_StringBuilderRef)obj;
 	const BO_StringBuilderRef copy = BO_StringBuilderCreateWithCapacity(BO_ObjectGetAllocator(obj), original->capacity);
 
@@ -107,11 +107,11 @@ BO_ObjectRef StringBuilderCopyImpl(const BO_ObjectRef obj) {
 static BF_Class kBO_StringBuilderClass = {
 	.name = "BO_StringBuilder",
 	.id = BF_CLASS_ID_INVALID,
-	.dealloc = StringBuilderDeallocImpl,
-	.hash = StringBuilderHashImpl,
-	.equal = StringBuilderEqualImpl,
-	.toString = StringBuilderToStringImpl,
-	.copy = StringBuilderCopyImpl,
+	.dealloc = IMPL_StringBuilderDealloc,
+	.hash = IMPL_StringBuilderHash,
+	.equal = IMPL_StringBuilderEqual,
+	.toString = IMPL_StringBuilderToString,
+	.copy = IMPL_StringBuilderCopy,
 	.allocSize = sizeof(BO_StringBuilder)
 };
 
@@ -149,12 +149,12 @@ BO_StringBuilderRef BO_StringBuilderCreateWithCapacity(const BC_AllocatorRef all
 
 void BO_StringBuilderAppend(const BO_StringBuilderRef builder, const char* str) {
 	if (!builder || !str) return;
-	AppendStr(builder, str, strlen(str));
+	PRIV_AppendStr(builder, str, strlen(str));
 }
 
 void BO_StringBuilderAppendString(const BO_StringBuilderRef builder, const BO_StringRef str) {
 	if (!builder || !str) return;
-	AppendStr(builder, BO_StringCPtr(str), BO_StringLength(str));
+	PRIV_AppendStr(builder, BO_StringCPtr(str), BO_StringLength(str));
 }
 
 void BO_StringBuilderAppendChar(const BO_StringBuilderRef builder, const char c) {
@@ -224,7 +224,7 @@ void BO_StringBuilderEnsureCapacity(const BO_StringBuilderRef builder, const siz
 
 	size_t newCapacity = builder->capacity;
 	if (newCapacity < requiredCapacity) {
-		newCapacity = NextPowerOfTwo(requiredCapacity);
+		newCapacity = PRIV_NextPowerOfTwo(requiredCapacity);
 	}
 
 	// Reallocate buffer

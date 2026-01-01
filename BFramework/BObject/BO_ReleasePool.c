@@ -24,7 +24,7 @@ typedef struct BO_ReleasePool {
 // MARK: Base Methods
 // =========================================================
 
-static void ReleasePoolDealloc(const BO_ObjectRef obj) {
+static void IMPL_ReleasePoolDealloc(const BO_ObjectRef obj) {
 	const BO_ReleasePool* pool = (BO_ReleasePool*)obj;
 
 	for (uint16_t i = 0; i < pool->COUNT; i++) {
@@ -41,7 +41,7 @@ static void ReleasePoolDealloc(const BO_ObjectRef obj) {
 
 static BF_Class kBO_ReleasePoolClass = {
 	.name = "BO_ReleasePool",
-	.dealloc = ReleasePoolDealloc,
+	.dealloc = IMPL_ReleasePoolDealloc,
 	.hash = NULL,
 	.equal = NULL,
 	.toString = NULL,

@@ -23,19 +23,19 @@ typedef struct BO_List {
 // MARK: Forwards
 // =========================================================
 
-static void ListAdd(BO_ListRef arr, BO_ObjectRef item, BC_bool retain);
+static void PRIV_ListAdd(BO_ListRef arr, BO_ObjectRef item, BC_bool retain);
 
 // =========================================================
 // MARK: Impl
 // =========================================================
 
-static void ArrayDeallocImpl(const BO_ObjectRef obj) {
+static void IMPL_ArrayDealloc(const BO_ObjectRef obj) {
 	const BO_ListRef arr = (BO_ListRef)obj;
 	for (size_t i = 0; i < arr->count; i++) BO_Release(arr->items[i]);
-	BCFree(arr->items);
+	BC_Free(arr->items);
 }
 
-static BO_StringRef ArrayToStringImpl(const BO_ObjectRef obj) {
+static BO_StringRef IMPL_ArrayToString(const BO_ObjectRef obj) {
 	const BO_ListRef arr = (BO_ListRef)obj;
 	const BO_StringBuilderRef sb = BO_StringBuilderCreate(NULL);
 	BO_StringBuilderAppendChar(sb, '[');
@@ -62,10 +62,10 @@ static BO_StringRef ArrayToStringImpl(const BO_ObjectRef obj) {
 static BF_Class kBO_ListClass = {
 	.name = "BO_List",
 	.id = BF_CLASS_ID_INVALID,
-	.dealloc = ArrayDeallocImpl,
+	.dealloc = IMPL_ArrayDealloc,
 	.hash = NULL,
 	.equal = NULL,
-	.toString = ArrayToStringImpl,
+	.toString = IMPL_ArrayToString,
 	.copy = NULL,
 	.allocSize = sizeof(BO_List)
 };
@@ -86,7 +86,7 @@ BO_ListRef BO_ListCreate(void) {
 	const BO_ListRef arr = (BO_ListRef)BO_ObjectAlloc(NULL, kBO_ListClass.id);
 	arr->capacity = 8;
 	arr->count = 0;
-	arr->items = BCCalloc(arr->capacity, sizeof(BO_ObjectRef));
+	arr->items = BC_Calloc(arr->capacity, sizeof(BO_ObjectRef));
 	return arr;
 }
 
@@ -101,7 +101,7 @@ BO_ListRef BO_ListCreateWithObjects(const BC_bool retain, const size_t count, ..
 	va_start(args, count);
 	for (size_t i = 0; i < count; i++) {
 		const BO_ObjectRef item = va_arg(args, BO_ObjectRef);
-		ListAdd(arr, item, retain);
+		PRIV_ListAdd(arr, item, retain);
 	}
 	va_end(args);
 	return arr;
@@ -111,7 +111,7 @@ BO_ListRef BO_ListCreateWithObjects(const BC_bool retain, const size_t count, ..
 // MARK: Methods
 // =========================================================
 
-void BO_ListAdd(const BO_ListRef list, const BO_ObjectRef obj) { ListAdd(list, obj, BC_true); }
+void BO_ListAdd(const BO_ListRef list, const BO_ObjectRef obj) { PRIV_ListAdd(list, obj, BC_true); }
 
 size_t BO_ListCount(const BO_ListRef list) { return list->count; }
 
@@ -204,10 +204,10 @@ BO_ListRef BO_ListFilter(const BO_ListRef list, BC_bool (*predicate)(BO_ObjectRe
 // MARK: Internal
 // =========================================================
 
-static void ListAdd(const BO_ListRef arr, const BO_ObjectRef item, const BC_bool retain) {
+static void PRIV_ListAdd(const BO_ListRef arr, const BO_ObjectRef item, const BC_bool retain) {
 	if (arr->count == arr->capacity) {
 		arr->capacity *= 2;
-		void* newBuff = BCRealloc(arr->items, arr->capacity * sizeof(BO_ObjectRef));
+		void* newBuff = BC_Realloc(arr->items, arr->capacity * sizeof(BO_ObjectRef));
 		if (!newBuff)
 			return;
 		arr->items = newBuff;

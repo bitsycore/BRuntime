@@ -22,12 +22,12 @@ typedef struct BC_Arena {
 // MARK: Arena Allocator Implementation
 // =========================================================
 
-static void* ArenaAlloc(const size_t size, const void* ctx) {
-	BC_ArenaRef arena = (BC_ArenaRef)ctx;
+static void* IMPL_ArenaAlloc(const size_t size, const void* ctx) {
+	const BC_ArenaRef arena = (BC_ArenaRef)ctx;
 
 	// Align to 8 bytes
 	const size_t alignment = 8;
-	size_t alignedOffset = (arena->offset + alignment - 1) & ~(alignment - 1);
+	const size_t alignedOffset = (arena->offset + alignment - 1) & ~(alignment - 1);
 
 	// Check if we have enough space
 	if (alignedOffset + size > arena->size) {
@@ -46,7 +46,7 @@ static void* ArenaAlloc(const size_t size, const void* ctx) {
 	return ptr;
 }
 
-static void ArenaFree(void* ptr, const void* ctx) {
+static void IMPL_ArenaFree(void* ptr, const void* ctx) {
 	// Arena allocations are freed all at once when the arena is reset or destroyed
 	// Individual frees are no-ops
 	(void)ptr;
@@ -96,8 +96,8 @@ BC_ArenaRef BC_ArenaCreateWithBuffer(BC_AllocatorRef allocator, void* buffer, co
 	arena->size = size;
 	arena->offset = 0;
 	arena->allocatorRef = allocator;
-	arena->allocator.alloc = ArenaAlloc;
-	arena->allocator.free = ArenaFree;
+	arena->allocator.alloc = IMPL_ArenaAlloc;
+	arena->allocator.free = IMPL_ArenaFree;
 	arena->allocator.context = arena;
 
 	return arena;

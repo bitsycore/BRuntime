@@ -25,10 +25,10 @@ typedef struct {
 } BC_MemoryBlock;
 
 void ___BC_INTERNAL___MemoryInitialize() {
-	BCMutexInit(&gMemoryMutex);
+	BC_MutexInit(&gMemoryMutex);
 }
 
-void* BCMalloc(const size_t size) {
+void* BC_Malloc(const size_t size) {
     if (size == 0) return NULL;
 
     BC_MemoryBlock* block = malloc(sizeof(BC_MemoryBlock) + size);
@@ -37,7 +37,7 @@ void* BCMalloc(const size_t size) {
     block->size = size;
     block->data = (char*)block + sizeof(BC_MemoryBlock);
 
-    BCMutexLock(&gMemoryMutex);
+    BC_MutexLock(&gMemoryMutex);
     gMemoryStats.totalAllocated += size;
     gMemoryStats.currentUsage += size;
     gMemoryStats.allocationCount++;
@@ -45,14 +45,14 @@ void* BCMalloc(const size_t size) {
     if (gMemoryStats.currentUsage > gMemoryStats.peakUsage) {
         gMemoryStats.peakUsage = gMemoryStats.currentUsage;
     }
-    BCMutexUnlock(&gMemoryMutex);
+    BC_MutexUnlock(&gMemoryMutex);
 
     return block->data;
 }
 
-void* BCCalloc(const size_t count, const size_t size) {
+void* BC_Calloc(const size_t count, const size_t size) {
     const size_t totalSize = count * size;
-    void* ptr = BCMalloc(totalSize);
+    void* ptr = BC_Malloc(totalSize);
 
     if (ptr) {
         memset(ptr, 0, totalSize);
@@ -61,10 +61,10 @@ void* BCCalloc(const size_t count, const size_t size) {
     return ptr;
 }
 
-void* BCRealloc(void* ptr, const size_t newSize) {
-    if (!ptr) return BCMalloc(newSize);
+void* BC_Realloc(void* ptr, const size_t newSize) {
+    if (!ptr) return BC_Malloc(newSize);
     if (newSize == 0) {
-        BCFree(ptr);
+        BC_Free(ptr);
         return NULL;
     }
 
@@ -77,47 +77,50 @@ void* BCRealloc(void* ptr, const size_t newSize) {
     newBlock->size = newSize;
     newBlock->data = (char*)newBlock + sizeof(BC_MemoryBlock);
 
-    BCMutexLock(&gMemoryMutex);
+    BC_MutexLock(&gMemoryMutex);
     gMemoryStats.currentUsage = gMemoryStats.currentUsage - oldSize + newSize;
     gMemoryStats.totalAllocated += (newSize > oldSize) ? (newSize - oldSize) : 0;
 
     if (gMemoryStats.currentUsage > gMemoryStats.peakUsage) {
         gMemoryStats.peakUsage = gMemoryStats.currentUsage;
     }
-    BCMutexUnlock(&gMemoryMutex);
+    BC_MutexUnlock(&gMemoryMutex);
 
     return newBlock->data;
 }
 
-void BCFree(void* ptr) {
+void BC_Free(void* ptr) {
     if (!ptr) return;
 
     BC_MemoryBlock* block = (BC_MemoryBlock*)((char*)ptr - sizeof(BC_MemoryBlock));
 
-    BCMutexLock(&gMemoryMutex);
+    BC_MutexLock(&gMemoryMutex);
     gMemoryStats.currentUsage -= block->size;
     gMemoryStats.freeCount++;
-    BCMutexUnlock(&gMemoryMutex);
+    BC_MutexUnlock(&gMemoryMutex);
 
     free(block);
 }
 
-void BCGetMemoryStats(size_t* totalAllocated, size_t* currentUsage, size_t* peakUsage) {
-	BCMutexLock(&gMemoryMutex);
-    if (totalAllocated) *totalAllocated = gMemoryStats.totalAllocated;
-    if (currentUsage) *currentUsage = gMemoryStats.currentUsage;
-    if (peakUsage) *peakUsage = gMemoryStats.peakUsage;
-    BCMutexUnlock(&gMemoryMutex);
+char* BC_Strdup(const char* str) {
+	if (!str) return NULL;
+
+	const size_t len = strlen(str) + 1;
+	char* dup = BC_Malloc(len);
+	if (dup) {
+		memcpy(dup, str, len);
+	}
+	return dup;
 }
 
 void BC_MemoryInfoHeapReset(void) {
-	BCMutexLock(&gMemoryMutex);
+	BC_MutexLock(&gMemoryMutex);
 	gMemoryStats.totalAllocated = 0;
 	gMemoryStats.currentUsage = 0;
 	gMemoryStats.peakUsage = 0;
 	gMemoryStats.allocationCount = 0;
 	gMemoryStats.freeCount = 0;
-	BCMutexUnlock(&gMemoryMutex);
+	BC_MutexUnlock(&gMemoryMutex);
 }
 #else
 void ___BC_INTERNAL___MemoryInitialize() {}
@@ -142,13 +145,13 @@ int BC_MemoryInfoGet(BC_MemoryInfo* info) {
 
 #if BC_SETTINGS_DEBUG_ALLOCATION_TRACK == 1
 
-	BCMutexLock(&gMemoryMutex);
+	BC_MutexLock(&gMemoryMutex);
 	info->freeCount = gMemoryStats.freeCount;
 	info->allocationCount = gMemoryStats.allocationCount;
 	info->totalAllocated = gMemoryStats.totalAllocated;
 	info->currentAllocUsage = gMemoryStats.currentUsage;
 	info->peakAllocUsage = gMemoryStats.peakUsage;
-	BCMutexUnlock(&gMemoryMutex);
+	BC_MutexUnlock(&gMemoryMutex);
 
 #endif
 

@@ -25,23 +25,23 @@ typedef struct BO_Set {
 // MARK: Forward
 // =========================================================
 
-static void SetPut(BO_ObjectRef* buckets, size_t cap, BO_ObjectRef val);
+static void PRIV_SetPut(BO_ObjectRef* buckets, size_t cap, BO_ObjectRef val);
 
 // =========================================================
 // MARK: Methods
 // =========================================================
 
-static void SetDeallocImpl(const BO_ObjectRef obj) {
+static void IMPL_SetDealloc(const BO_ObjectRef obj) {
 	const BO_SetRef s = (BO_SetRef)obj;
 	for (size_t i = 0; i < s->capacity; i++) {
 		if (s->buckets[i]) {
 			BO_Release(s->buckets[i]);
 		}
 	}
-	BCFree(s->buckets);
+	BC_Free(s->buckets);
 }
 
-static BO_StringRef SetToStringImpl(const BO_ObjectRef obj) {
+static BO_StringRef IMPL_SetToString(const BO_ObjectRef obj) {
 	const BO_SetRef s = (BO_SetRef)obj;
 	const BO_StringBuilderRef sb = BO_StringBuilderCreate(NULL);
 	BO_StringBuilderAppend(sb, "{ ");
@@ -70,7 +70,7 @@ static BO_StringRef SetToStringImpl(const BO_ObjectRef obj) {
 // =========================================================
 
 static BF_Class kBO_SetClass = {
-	.name = "BO_Set", .id = BF_CLASS_ID_INVALID, .dealloc = SetDeallocImpl, .hash = NULL, .equal = NULL, .toString = SetToStringImpl, .copy = NULL, .allocSize = sizeof(BO_Set)
+	.name = "BO_Set", .id = BF_CLASS_ID_INVALID, .dealloc = IMPL_SetDealloc, .hash = NULL, .equal = NULL, .toString = IMPL_SetToString, .copy = NULL, .allocSize = sizeof(BO_Set)
 };
 
 BF_ClassId BO_SetClassId(void) { return kBO_SetClass.id; }
@@ -82,21 +82,21 @@ void ___BO_INTERNAL___SetInitialize(void) { BF_ClassRegistryInsert(&kBO_SetClass
 // =========================================================
 
 BO_SetRef BO_SetCreate(void) {
-	const BO_MutableSetRef set = BCMutableSetCreate();
+	const BO_MutableSetRef set = BO_MutableSetCreate();
 	BC_FLAG_CLEAR(set->base.flags, BO_SET_FLAG_MUTABLE);
 	return set;
 }
 
-BO_MutableSetRef BCMutableSetCreate(void) {
+BO_MutableSetRef BO_MutableSetCreate(void) {
 	const BO_SetRef s = (BO_SetRef)BO_ObjectAllocWithConfig(NULL, kBO_SetClass.id, 0, BC_OBJECT_DEFAULT_FLAGS | BO_SET_FLAG_MUTABLE);
 	s->capacity = 8;
 	s->count = 0;
-	s->buckets = BCCalloc(s->capacity, sizeof(BO_ObjectRef));
+	s->buckets = BC_Calloc(s->capacity, sizeof(BO_ObjectRef));
 	return s;
 }
 
 BO_SetRef BO_SetCreateWithObjects(const BC_bool retain, const size_t count, ...) {
-	const BO_MutableSetRef s = BCMutableSetCreate();
+	const BO_MutableSetRef s = BO_MutableSetCreate();
 	va_list args;
 	va_start(args, count);
 	for (size_t i = 0; i < count; i++) {
@@ -125,15 +125,15 @@ void BO_SetAdd(const BO_MutableSetRef s, const BO_ObjectRef obj) {
 	// Resize Check
 	if (set->count >= (size_t)((double)set->capacity * 0.75)) {
 		const size_t newCap = set->capacity * 2;
-		BO_ObjectRef* newBuckets = BCCalloc(newCap, sizeof(BO_ObjectRef));
+		BO_ObjectRef* newBuckets = BC_Calloc(newCap, sizeof(BO_ObjectRef));
 		if (!newBuckets)
 			return;
 		for (size_t i = 0; i < set->capacity; i++) {
 			if (set->buckets[i]) {
-				SetPut(newBuckets, newCap, set->buckets[i]);
+				PRIV_SetPut(newBuckets, newCap, set->buckets[i]);
 			}
 		}
-		BCFree(set->buckets);
+		BC_Free(set->buckets);
 		set->buckets = newBuckets;
 		set->capacity = newCap;
 	}
@@ -177,7 +177,7 @@ void BO_SetRemove(const BO_MutableSetRef s, const BO_ObjectRef obj) {
 				BO_ObjectRef rehashObj = set->buckets[nextIdx];
 				set->buckets[nextIdx] = NULL;
 				set->count--;
-				SetPut(set->buckets, set->capacity, rehashObj);
+				PRIV_SetPut(set->buckets, set->capacity, rehashObj);
 				set->count++;
 				nextIdx = (nextIdx + 1) % set->capacity;
 			}
@@ -232,7 +232,7 @@ void BO_SetForEach(const BO_SetRef s, void (*block)(BO_ObjectRef item)) {
 // MARK: Internal
 // =========================================================
 
-static void SetPut(BO_ObjectRef* buckets, const size_t cap, const BO_ObjectRef val) {
+static void PRIV_SetPut(BO_ObjectRef* buckets, const size_t cap, const BO_ObjectRef val) {
 	const uint32_t hash = BO_Hash(val);
 	size_t idx = hash % cap;
 	while (buckets[idx]) {

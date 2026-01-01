@@ -27,11 +27,11 @@ typedef struct BO_String {
 // MARK: Impl
 // =========================================================
 
-uint32_t StringHashImpl(const BO_ObjectRef obj) {
+uint32_t IMPL_StringHash(const BO_ObjectRef obj) {
 	return BO_StringHash((BO_StringRef) obj);
 }
 
-BC_bool StringEqualImpl(const BO_ObjectRef a, const BO_ObjectRef b) {
+BC_bool IMPL_StringEqual(const BO_ObjectRef a, const BO_ObjectRef b) {
 	const BO_StringRef s1 = (BO_StringRef) a;
 	const BO_StringRef s2 = (BO_StringRef) b;
 
@@ -50,11 +50,11 @@ BC_bool StringEqualImpl(const BO_ObjectRef a, const BO_ObjectRef b) {
 	return memcmp(s1->buffer, s2->buffer, BO_StringLength(s1)) == 0;
 }
 
-BO_StringRef StringToStringImpl(const BO_ObjectRef obj) {
+BO_StringRef IMPL_StringToString(const BO_ObjectRef obj) {
 	return (BO_StringRef) BO_Retain(obj);
 }
 
-BO_ObjectRef StringCopyImpl(const BO_ObjectRef obj) { return BO_Retain(obj); }
+BO_ObjectRef IMPL_StringCopy(const BO_ObjectRef obj) { return BO_Retain(obj); }
 
 // =========================================================
 // MARK: Class
@@ -63,10 +63,10 @@ BO_ObjectRef StringCopyImpl(const BO_ObjectRef obj) { return BO_Retain(obj); }
 static BF_Class kBO_StringClass = {
 	.name = "BO_String",
 	.dealloc = NULL,
-	.hash = StringHashImpl,
-	.equal = StringEqualImpl,
-	.toString = StringToStringImpl,
-	.copy = StringCopyImpl,
+	.hash = IMPL_StringHash,
+	.equal = IMPL_StringEqual,
+	.toString = IMPL_StringToString,
+	.copy = IMPL_StringCopy,
 	.allocSize = sizeof(BO_String)
 };
 
@@ -91,24 +91,24 @@ static struct {
 } StringPool;
 
 void ___BO_INTERNAL___StringPoolInitialize(void) {
-	BCSpinlockInit(&StringPool.lock);
+	BC_SpinlockInit(&StringPool.lock);
 	memset(StringPool.buckets, 0, sizeof(StringPool.buckets));
 }
 
 void ___BO_INTERNAL___StringPoolDeinitialize(void) {
-	BCSpinlockDestroy(&StringPool.lock);
+	BC_SpinlockDestroy(&StringPool.lock);
 	for (size_t i = 0; i < BC_STRING_POOL_SIZE; i++) {
 		const StringPoolNode *node = StringPool.buckets[i];
 		while (node) {
 			const StringPoolNode *next = node->next;
-			BCFree(node->str);
+			BC_Free(node->str);
 			node = next;
 			if (next == NULL) StringPool.buckets[i] = NULL;
 		}
 	}
 }
 
-static BO_StringRef StringPoolGetOrInsert(
+static BO_StringRef PRIV_StringPoolGetOrInsert(
 	const char *text,
 	const size_t len,
 	const uint32_t hash,
@@ -116,7 +116,7 @@ static BO_StringRef StringPoolGetOrInsert(
 ) {
 	const uint32_t idx = hash % BC_STRING_POOL_SIZE;
 
-	BCSpinlockLock(&StringPool.lock);
+	BC_SpinlockLock(&StringPool.lock);
 
 	// Lookup
 	const StringPoolNode *node = StringPool.buckets[idx];
@@ -124,7 +124,7 @@ static BO_StringRef StringPoolGetOrInsert(
 		// Fast path for static literal strings
 		if (static_string && node->str->buffer == text) {
 			const BO_StringRef ret = (BO_StringRef) BO_Retain((BO_ObjectRef) node->str);
-			BCSpinlockUnlock(&StringPool.lock);
+			BC_SpinlockUnlock(&StringPool.lock);
 			return ret;
 		}
 
@@ -136,7 +136,7 @@ static BO_StringRef StringPoolGetOrInsert(
 			}
 			if (strcmp(node->str->buffer, text) == 0) {
 				const BO_StringRef ret = (BO_StringRef) BO_Retain((BO_ObjectRef) node->str);
-				BCSpinlockUnlock(&StringPool.lock);
+				BC_SpinlockUnlock(&StringPool.lock);
 				return ret;
 			}
 		}
@@ -175,7 +175,7 @@ static BO_StringRef StringPoolGetOrInsert(
 	newNode->next = StringPool.buckets[idx];
 	StringPool.buckets[idx] = newNode;
 
-	BCSpinlockUnlock(&StringPool.lock);
+	BC_SpinlockUnlock(&StringPool.lock);
 
 	newStr->base.ref_count = 0;
 
@@ -214,7 +214,7 @@ BO_StringRef BO_StringCreate(const char *fmt, ...) {
 
 BO_StringRef BO_StringPooled(const char *text) {
 	if (!text) return NULL;
-	return StringPoolGetOrInsert(
+	return PRIV_StringPoolGetOrInsert(
 		text,
 		strlen(text),
 		___BF_INTERNAL___StringHasher(text),
@@ -229,7 +229,7 @@ BO_StringRef BO_StringPooledWithInfo(
 	const BC_bool static_string
 ) {
 	if (!text) return NULL;
-	return StringPoolGetOrInsert(text, len, hash, static_string);
+	return PRIV_StringPoolGetOrInsert(text, len, hash, static_string);
 }
 
 // =========================================================
@@ -267,8 +267,8 @@ const char *BO_StringCPtr(const BO_StringRef str) { return str->buffer; }
 #define R "\033[0m"
 #define SB "\033[1m"
 
-void BF_StringPoolDebugDump(void) {
-	BCSpinlockLock(&StringPool.lock);
+void BO_StringPoolDebugDump(void) {
+	BC_SpinlockLock(&StringPool.lock);
 	const clock_t start = clock();
 
 	// --------------------------------------------------------------------------
@@ -330,7 +330,7 @@ void BF_StringPoolDebugDump(void) {
 		}
 	}
 
-	BCSpinlockUnlock(&StringPool.lock);
+	BC_SpinlockUnlock(&StringPool.lock);
 
 	const clock_t end = clock();
 	const double elapsed = (double) (end - start) / CLOCKS_PER_SEC * 1000;

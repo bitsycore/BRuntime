@@ -24,7 +24,7 @@ char** BC_Argv(void) {
 
 #ifdef _WIN32
 #include <Windows.h>
-static void PlatformSpecificInitialize() {
+static void PRIV_PlatformInitialize() {
 	// For UTF-8 output
 	SetConsoleOutputCP(CP_UTF8);
 
@@ -39,7 +39,7 @@ static void PlatformSpecificInitialize() {
 	SetConsoleMode(hOut, dwMode);
 }
 #else
-#define PlatformSpecificInitialize()
+#define PRIV_PlatformInitialize()
 #endif
 
 // =========================================================
@@ -56,7 +56,7 @@ void BC_Initialize(const int argc, char** argv) {
 	gArgc = argc;
 	gArgv = argv;
 
-	PlatformSpecificInitialize();
+	PRIV_PlatformInitialize();
 
 	___BC_INTERNAL___MemoryInitialize();
 

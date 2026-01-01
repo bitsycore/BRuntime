@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../Memory/BC_Memory.h"
 #include "../Strings/BC_StringBuilder.h"
 
 #define CG "\033[48;5;234m"
@@ -14,12 +15,12 @@
 void BC_LazyTableInit(BC_LazyTable *t, const char *title, const size_t cols, ...) {
 	t->title = title;
 	t->cols = cols;
-	t->widths = calloc(cols, sizeof(size_t));
-	t->headers = malloc(cols * sizeof(const char *));
+	t->widths = BC_Calloc(cols, sizeof(size_t));
+	t->headers = BC_Malloc(cols * sizeof(const char *));
 
 	t->row_count = 0;
 	t->row_capacity = 16;
-	t->rows = malloc(t->row_capacity * sizeof(char **));
+	t->rows = BC_Malloc(t->row_capacity * sizeof(char **));
 
 	va_list args;
 	va_start(args, cols);
@@ -34,16 +35,16 @@ void BC_LazyTableAddRow(BC_LazyTable *t, ...) {
 	// Double
 	if (t->row_count >= t->row_capacity) {
 		t->row_capacity *= 2;
-		t->rows = realloc(t->rows, t->row_capacity * sizeof(char **));
+		t->rows = BC_Realloc(t->rows, t->row_capacity * sizeof(char **));
 	}
 
-	t->rows[t->row_count] = malloc(t->cols * sizeof(char *));
+	t->rows[t->row_count] = BC_Malloc(t->cols * sizeof(char *));
 
 	va_list args;
 	va_start(args, t);
 	for (size_t i = 0; i < t->cols; i++) {
 		const char *val = va_arg(args, const char *);
-		t->rows[t->row_count][i] = strdup(val);
+		t->rows[t->row_count][i] = BC_Strdup(val);
 		const size_t len = strlen(val);
 		if (len > t->widths[i]) {
 			t->widths[i] = len;
@@ -119,18 +120,18 @@ void BC_LazyTablePrint(BC_LazyTable *t) {
 	char *output = BC_LazyTableToString(t);
 	if (output) {
 		fputs(output, stdout);
-		free(output);
+		BC_Free(output);
 	}
 }
 
 void BC_LazyTableFree(const BC_LazyTable *t) {
 	for (size_t r = 0; r < t->row_count; r++) {
 		for (size_t i = 0; i < t->cols; i++) {
-			free(t->rows[r][i]);
+			BC_Free(t->rows[r][i]);
 		}
-		free(t->rows[r]);
+		BC_Free(t->rows[r]);
 	}
-	free(t->rows);
-	free(t->widths);
-	free(t->headers);
+	BC_Free(t->rows);
+	BC_Free(t->widths);
+	BC_Free(t->headers);
 }

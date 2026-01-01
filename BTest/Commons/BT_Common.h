@@ -15,35 +15,38 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 
-void BIG_TITLE(const char* _x_);
-void SUB_TITLE(const char* _x_);
+void BT_PrintBigTitle(const char* _x_);
+void BT_PrintSubTitle(const char* _x_);
 
-#define log_fmt(...) BF_Print(__VA_ARGS__)
+double BT_GetTimeMicroseconds(clock_t start, clock_t end);
 
-#define TO_STR(_x_) \
-  BO_StringCPtr((BO_StringRef)(BFAutorelease($OBJ BO_ToString($OBJ(_x_)))))
+#define BT_Print(...) BF_Print(__VA_ARGS__)
 
-#define PRINT_ERR_IF_NOT(_cond_) \
+#define BT_ToStr(_x_) \
+  BO_StringCPtr((BO_StringRef)(BF_Autorelease($OBJ BO_ToString($OBJ(_x_)))))
+
+#define BT_PrintErrIfNot(_cond_) \
     if (!(_cond_)) { \
-        log_fmt(BC_AE_RED "Assert failed: " BC_AE_BRED #_cond_ BC_AE_RED " at: line %d\n" BC_AE_RESET, __LINE__); \
+        BT_Print(BC_AE_RED "Assert failed: " BC_AE_BRED #_cond_ BC_AE_RED " at: line %d\n" BC_AE_RESET, __LINE__); \
     }
 
-#define TEST(_name_) log_fmt(BC_AE_YELLOW "  • " BC_AE_RESET "%s\n", _name_)
+#define BT_Test(_name_) BT_Print(BC_AE_YELLOW "  • " BC_AE_RESET "%s\n", _name_)
 
-#define TITLE(_name_) \
-    log_fmt(BC_AE_CYAN "\n▶ " BC_AE_BCYAN "%s" BC_AE_RESET "\n", _name_)
+#define BT_Title(_name_) \
+    BT_Print(BC_AE_CYAN "\n▶ " BC_AE_BCYAN "%s" BC_AE_RESET "\n", _name_)
 
-#define ASSERT(_cond_, _msg_) \
+#define BT_Assert(_cond_, _msg_) \
     if (!(_cond_)) { \
-        log_fmt(BC_AE_RED "    ✗ " BC_AE_RESET "%s\n", _msg_); \
+        BT_Print(BC_AE_RED "    ✗ " BC_AE_RESET "%s\n", _msg_); \
     } else { \
-        log_fmt(BC_AE_GREEN "    ✓ " BC_AE_RESET "%s\n", _msg_); \
+        BT_Print(BC_AE_GREEN "    ✓ " BC_AE_RESET "%s\n", _msg_); \
     }
 
-#define ASSERT_SILENT(_cond_, _msg_) \
+#define BT_AssertSilent(_cond_, _msg_) \
     if (!(_cond_)) { \
-        log_fmt(BC_AE_RED "    ✗ " BC_AE_RESET "%s\n", _msg_); \
+        BT_Print(BC_AE_RED "    ✗ " BC_AE_RESET "%s\n", _msg_); \
     }
 
 #endif //BRUNTIME_BT_COMMON_H

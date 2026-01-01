@@ -18,11 +18,11 @@
 // =========================================================
 
 #if BC_SETTINGS_DEBUG_OBJECT_DUMP == 1
-static void ObjectDebugTrack(BO_ObjectRef obj);
-static void ObjectDebugMarkFreed(BO_ObjectRef obj);
+static void PRIV_ObjectDebugTrack(BO_ObjectRef obj);
+static void PRIV_ObjectDebugMarkFreed(BO_ObjectRef obj);
 #else
-#define ObjectDebugTrack(obj)
-#define ObjectDebugMarkFreed(obj)
+#define PRIV_ObjectDebugTrack(obj)
+#define PRIV_ObjectDebugMarkFreed(obj)
 #endif
 
 // =========================================================
@@ -50,7 +50,7 @@ BO_ObjectRef BO_ObjectAllocWithConfig(const BC_AllocatorRef alloc, const BF_Clas
 		BC_FLAG_SET(objRef->flags, BC_OBJECT_FLAG_NON_SYSTEM_ALLOCATOR);
 	}
 
-	ObjectDebugTrack(objRef);
+	PRIV_ObjectDebugTrack(objRef);
 
 	return objRef;
 }
@@ -81,7 +81,7 @@ void BO_Release(const BO_ObjectRef obj) {
 		if (cls && cls->dealloc)
 			cls->dealloc(obj);
 
-		ObjectDebugMarkFreed(obj);
+		PRIV_ObjectDebugMarkFreed(obj);
 
 		const BC_AllocatorRef allocator = BO_ObjectGetAllocator(obj);
 		void* raw_ptr = BO_ObjectGetBasePointer(obj);
@@ -157,66 +157,66 @@ static struct {
 	BO_ObjectDebugNode* head;
 	BC_atomic_bool enabled;
 	BC_atomic_bool keepFreedObjects;
-} ObjectDebugTracker;
+} PRIV_ObjectDebugTracker;
 
 void ___BO_INTERNAL___ObjectInitialize(void) {
-	BCSpinlockInit(&ObjectDebugTracker.lock);
-	ObjectDebugTracker.head = NULL;
-	ObjectDebugTracker.enabled = BC_false;
-	ObjectDebugTracker.keepFreedObjects = BC_false;
+	BC_SpinlockInit(&PRIV_ObjectDebugTracker.lock);
+	PRIV_ObjectDebugTracker.head = NULL;
+	PRIV_ObjectDebugTracker.enabled = BC_false;
+	PRIV_ObjectDebugTracker.keepFreedObjects = BC_false;
 }
 
 void ___BO_INTERNAL___ObjectDebugDeinitialize(void) {
-	BCSpinlockLock(&ObjectDebugTracker.lock);
+	BC_SpinlockLock(&PRIV_ObjectDebugTracker.lock);
 
-	BO_ObjectDebugNode* node = ObjectDebugTracker.head;
+	BO_ObjectDebugNode* node = PRIV_ObjectDebugTracker.head;
 	while (node) {
 		BO_ObjectDebugNode* next = node->next;
-		BCFree(node);
+		BC_Free(node);
 		node = next;
 	}
 
-	ObjectDebugTracker.head = NULL;
-	BCSpinlockUnlock(&ObjectDebugTracker.lock);
-	BCSpinlockDestroy(&ObjectDebugTracker.lock);
+	PRIV_ObjectDebugTracker.head = NULL;
+	BC_SpinlockUnlock(&PRIV_ObjectDebugTracker.lock);
+	BC_SpinlockDestroy(&PRIV_ObjectDebugTracker.lock);
 }
 
-static void ObjectDebugTrack(const BO_ObjectRef obj) {
-	if (!ObjectDebugTracker.enabled || BC_FLAG_HAS(obj->flags,BC_OBJECT_FLAG_NON_SYSTEM_ALLOCATOR))
+static void PRIV_ObjectDebugTrack(const BO_ObjectRef obj) {
+	if (!PRIV_ObjectDebugTracker.enabled || BC_FLAG_HAS(obj->flags,BC_OBJECT_FLAG_NON_SYSTEM_ALLOCATOR))
 		return;
 
-	BCSpinlockLock(&ObjectDebugTracker.lock);
+	BC_SpinlockLock(&PRIV_ObjectDebugTracker.lock);
 
-	BO_ObjectDebugNode* node = BCMalloc(sizeof(BO_ObjectDebugNode));
+	BO_ObjectDebugNode* node = BC_Malloc(sizeof(BO_ObjectDebugNode));
 	node->obj = obj;
 	node->copy = *obj;
-	node->next = ObjectDebugTracker.head;
-	ObjectDebugTracker.head = node;
+	node->next = PRIV_ObjectDebugTracker.head;
+	PRIV_ObjectDebugTracker.head = node;
 
-	BCSpinlockUnlock(&ObjectDebugTracker.lock);
+	BC_SpinlockUnlock(&PRIV_ObjectDebugTracker.lock);
 }
 
-static void ObjectDebugMarkFreed(const BO_ObjectRef obj) {
-	if (!ObjectDebugTracker.enabled || BC_FLAG_HAS(obj->flags,BC_OBJECT_FLAG_NON_SYSTEM_ALLOCATOR))
+static void PRIV_ObjectDebugMarkFreed(const BO_ObjectRef obj) {
+	if (!PRIV_ObjectDebugTracker.enabled || BC_FLAG_HAS(obj->flags,BC_OBJECT_FLAG_NON_SYSTEM_ALLOCATOR))
 		return;
 
-	BCSpinlockLock(&ObjectDebugTracker.lock);
+	BC_SpinlockLock(&PRIV_ObjectDebugTracker.lock);
 
 	BO_ObjectDebugNode* prev = NULL;
-	BO_ObjectDebugNode* curr = ObjectDebugTracker.head;
+	BO_ObjectDebugNode* curr = PRIV_ObjectDebugTracker.head;
 
 	while (curr) {
 		if (curr->obj == obj) {
 			curr->obj = NULL;
 
-			if (!ObjectDebugTracker.keepFreedObjects) {
+			if (!PRIV_ObjectDebugTracker.keepFreedObjects) {
 				if (prev) {
 					prev->next = curr->next;
 				}
 				else {
-					ObjectDebugTracker.head = curr->next;
+					PRIV_ObjectDebugTracker.head = curr->next;
 				}
-				BCFree(curr);
+				BC_Free(curr);
 			}
 			break;
 		}
@@ -224,10 +224,10 @@ static void ObjectDebugMarkFreed(const BO_ObjectRef obj) {
 		curr = curr->next;
 	}
 
-	BCSpinlockUnlock(&ObjectDebugTracker.lock);
+	BC_SpinlockUnlock(&PRIV_ObjectDebugTracker.lock);
 }
 
-static const char* FlagsToString(const BF_ClassId cls, const uint16_t flags) {
+static const char* PRIV_FlagsToString(const BF_ClassId cls, const uint16_t flags) {
 	static char buffer[30];
 	buffer[0] = '\0';
 
@@ -280,11 +280,11 @@ static const char* FlagsToString(const BF_ClassId cls, const uint16_t flags) {
 // =========================================================
 
 void BO_ObjectDebugSetEnabled(const BC_bool enabled) {
-	BC_atomic_store(&ObjectDebugTracker.enabled, enabled);
+	BC_atomic_store(&PRIV_ObjectDebugTracker.enabled, enabled);
 }
 
 void BO_ObjectDebugSetKeepFreed(const BC_bool keepFreed) {
-	BC_atomic_store(&ObjectDebugTracker.keepFreedObjects, keepFreed);
+	BC_atomic_store(&PRIV_ObjectDebugTracker.keepFreedObjects, keepFreed);
 }
 
 #define DGRAY "\033[48;5;234m"
@@ -293,7 +293,7 @@ void BO_ObjectDebugSetKeepFreed(const BC_bool keepFreed) {
 #define BOLD "\033[1m"
 
 void BO_ObjectDebugDump(void) {
-	BCSpinlockLock(&ObjectDebugTracker.lock);
+	BC_SpinlockLock(&PRIV_ObjectDebugTracker.lock);
 	const clock_t start = clock();
 
 	// --------------------------------------------------------------------------
@@ -314,14 +314,14 @@ void BO_ObjectDebugDump(void) {
 	// Print entries
 	size_t count = 0;
 	size_t freedCount = 0;
-	BO_ObjectDebugNode* node = ObjectDebugTracker.head;
+	BO_ObjectDebugNode* node = PRIV_ObjectDebugTracker.head;
 	while (node) {
 		const BO_ObjectRef obj = node->obj == NULL ? &node->copy : node->obj;
 		if (node->obj == NULL)
 			freedCount++;
 		const BF_Class* cls = BF_ClassIdGetRef(obj->cls);
 		const char* className = cls ? cls->name : "<unknown>";
-		const char* flags = FlagsToString(obj->cls, obj->flags);
+		const char* flags = PRIV_FlagsToString(obj->cls, obj->flags);
 		const int refCount = BC_atomic_load(&obj->ref_count);
 
 		// Truncate class name if too long
@@ -358,7 +358,7 @@ void BO_ObjectDebugDump(void) {
 				   allocatorPtr, "");
 		}
 		else {
-			const BC_bool enabledOld = BC_atomic_load(&ObjectDebugTracker.enabled);
+			const BC_bool enabledOld = BC_atomic_load(&PRIV_ObjectDebugTracker.enabled);
 			BO_ObjectDebugSetEnabled(BC_false);
 			const BO_StringRef description = BO_ToString(node->obj);
 			printf("│%s %-16p │ %-16s │ %-20s │ %-8d │ %-9s │ %-28s " RESET "│\n",
@@ -381,7 +381,7 @@ void BO_ObjectDebugDump(void) {
 		   "    %zu entr%s (%zu freed, %fms)\n\n",
 		   count, count == 1 ? "y" : "ies", freedCount, elapsed);
 
-	BCSpinlockUnlock(&ObjectDebugTracker.lock);
+	BC_SpinlockUnlock(&PRIV_ObjectDebugTracker.lock);
 }
 #else
 void ___BF_INTERNAL___ObjectDebugInitialize() {}

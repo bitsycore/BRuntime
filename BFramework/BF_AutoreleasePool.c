@@ -22,16 +22,16 @@ typedef struct AutoreleasePool {
 	uint16_t count;
 	uint16_t capacity;
 	BO_ObjectRef stack[];
-} AutoreleasePool;
+} PRIV_AutoreleasePool;
 
 // =========================================================
 // MARK: Thread Local Storage
 // =========================================================
 
-static BC_TLS struct {
-	AutoreleasePool* parent;
-	AutoreleasePool* hot;
-	AutoreleasePool* next;
+static BC_TLS struct RootPool {
+	PRIV_AutoreleasePool* parent;
+	PRIV_AutoreleasePool* hot;
+	PRIV_AutoreleasePool* next;
 	uint16_t count;
 	uint16_t capacity;
 	BO_ObjectRef stack[BF_AUTORELEASE_POOL_CAPACITY];
@@ -44,18 +44,18 @@ static BC_TLS struct {
 	.stack = {},
 };
 
-BC_TLS AutoreleasePool* CurrentAutoReleasePool = NULL;
+BC_TLS PRIV_AutoreleasePool* gCurrentAutoReleasePool = NULL;
 
 // Free list for pool reuse - avoids repeated malloc/free
-BC_TLS AutoreleasePool* gFreePoolList = NULL;
+BC_TLS PRIV_AutoreleasePool* gFreePoolList = NULL;
 BC_TLS uint8_t gFreePoolCount = 0;
 
 // =========================================================
 // MARK: Private Functions
 // =========================================================
 
-static inline AutoreleasePool* AllocNewAutoreleasePool(void) {
-	AutoreleasePool* pool;
+static inline PRIV_AutoreleasePool* PRIV_AllocPool(void) {
+	PRIV_AutoreleasePool* pool;
 
 	// Try to reuse from free list first
 	if (gFreePoolList) {
@@ -71,8 +71,8 @@ static inline AutoreleasePool* AllocNewAutoreleasePool(void) {
 	}
 	else {
 		// Allocate pool + stack
-		const size_t totalSize = sizeof(AutoreleasePool) + BF_AUTORELEASE_POOL_CAPACITY * sizeof(BO_ObjectRef);
-		pool = BCMalloc(totalSize);
+		const size_t totalSize = sizeof(PRIV_AutoreleasePool) + BF_AUTORELEASE_POOL_CAPACITY * sizeof(BO_ObjectRef);
+		pool = BC_Malloc(totalSize);
 		pool->count = 0;
 		pool->parent = NULL;
 		pool->next = NULL;
@@ -84,9 +84,9 @@ static inline AutoreleasePool* AllocNewAutoreleasePool(void) {
 }
 
 // Return pool to free list for reuse, or free if list is full
-static inline void FreeOrRecyclePool(AutoreleasePool* pool) {
+static inline void PRIV_FreeOrRecyclePool(PRIV_AutoreleasePool* pool) {
 	// Never free the root pool
-	if (pool == (AutoreleasePool*)&gRootPool)
+	if (pool == (PRIV_AutoreleasePool*)&gRootPool)
 		return;
 
 	// Add to free list if there's room, otherwise free
@@ -96,7 +96,7 @@ static inline void FreeOrRecyclePool(AutoreleasePool* pool) {
 		gFreePoolCount++;
 	}
 	else {
-		BCFree(pool);
+		BC_Free(pool);
 	}
 }
 
@@ -113,59 +113,59 @@ void ___BF_INTERNAL___AutoreleaseInitialize(void) {
 	gRootPool.capacity = BF_AUTORELEASE_POOL_CAPACITY;
 
 	// Reset thread-local state
-	CurrentAutoReleasePool = NULL;
+	gCurrentAutoReleasePool = NULL;
 	gFreePoolList = NULL;
 	gFreePoolCount = 0;
 }
 
 void ___BF_INTERNAL___AutoreleaseDeinitialize(void) {
 	// Clean up any active pools first
-	if (CurrentAutoReleasePool) {
-		while (CurrentAutoReleasePool) {
-			BFAutoreleasePoolPop();
+	if (gCurrentAutoReleasePool) {
+		while (gCurrentAutoReleasePool) {
+			BF_AutoreleasePoolPop();
 		}
 	}
 
 	// Free all pools in the free list
-	AutoreleasePool* pool = gFreePoolList;
+	PRIV_AutoreleasePool* pool = gFreePoolList;
 	while (pool) {
-		AutoreleasePool* next = pool->next;
-		BCFree(pool);
+		PRIV_AutoreleasePool* next = pool->next;
+		BC_Free(pool);
 		pool = next;
 	}
 
 	// Reset state
 	gFreePoolList = NULL;
 	gFreePoolCount = 0;
-	CurrentAutoReleasePool = NULL;
+	gCurrentAutoReleasePool = NULL;
 }
 
 // =========================================================
 // MARK: Autorelease Pool API
 // =========================================================
 
-void BFAutoreleasePoolPush(void) {
-	if (CurrentAutoReleasePool == NULL) {
+void BF_AutoreleasePoolPush(void) {
+	if (gCurrentAutoReleasePool == NULL) {
 		// First push - use the root pool
-		CurrentAutoReleasePool = (AutoreleasePool*)&gRootPool;
+		gCurrentAutoReleasePool = (PRIV_AutoreleasePool*)&gRootPool;
 		gRootPool.count = 0;
 		gRootPool.next = NULL;
-		gRootPool.hot = (AutoreleasePool*)&gRootPool;
+		gRootPool.hot = (PRIV_AutoreleasePool*)&gRootPool;
 	}
 	else {
 		// Subsequent push - allocate or reuse a pool
-		AutoreleasePool* pool = AllocNewAutoreleasePool();
-		pool->parent = CurrentAutoReleasePool;
-		CurrentAutoReleasePool = pool;
+		PRIV_AutoreleasePool* pool = PRIV_AllocPool();
+		pool->parent = gCurrentAutoReleasePool;
+		gCurrentAutoReleasePool = pool;
 	}
 }
 
-void BFAutoreleasePoolPop(void) {
-	if (!CurrentAutoReleasePool)
+void BF_AutoreleasePoolPop(void) {
+	if (!gCurrentAutoReleasePool)
 		return;
 
-	AutoreleasePool* pool = CurrentAutoReleasePool;
-	CurrentAutoReleasePool = pool->parent;
+	PRIV_AutoreleasePool* pool = gCurrentAutoReleasePool;
+	gCurrentAutoReleasePool = pool->parent;
 
 	// Walk the overflow chain and release all objects
 	while (pool) {
@@ -180,28 +180,28 @@ void BFAutoreleasePoolPop(void) {
 			--remaining;
 		}
 
-		AutoreleasePool* next = pool->next;
-		FreeOrRecyclePool(pool);
+		PRIV_AutoreleasePool* next = pool->next;
+		PRIV_FreeOrRecyclePool(pool);
 		pool = next;
 	}
 }
 
-BO_ObjectRef BFAutorelease(const BO_ObjectRef obj) {
+BO_ObjectRef BF_Autorelease(const BO_ObjectRef obj) {
 	if (!obj) return NULL;
 
-	if (!CurrentAutoReleasePool) {
+	if (!gCurrentAutoReleasePool) {
 		fprintf(stderr, "Warning: Autorelease with no pool. Leaking.\n");
 		return obj;
 	}
 
-	AutoreleasePool* pool = CurrentAutoReleasePool->hot;
+	PRIV_AutoreleasePool* pool = gCurrentAutoReleasePool->hot;
 
 	// Check if current pool is full
 	if (pool->count == pool->capacity) {
 		// Allocate overflow pool
-		AutoreleasePool* newPool = AllocNewAutoreleasePool();
+		PRIV_AutoreleasePool* newPool = PRIV_AllocPool();
 		pool->next = newPool;
-		CurrentAutoReleasePool->hot = newPool;
+		gCurrentAutoReleasePool->hot = newPool;
 		pool = newPool;
 	}
 

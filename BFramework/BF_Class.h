@@ -27,7 +27,7 @@ BF_Class* BF_ClassIdGetRef(BF_ClassId cid);
 // MARK: Class Ref
 // =========================================================
 
-BF_ClassId BCDebugClassFindId(const BF_Class* cls);
+BF_ClassId BF_DebugClassFindId(const BF_Class* cls);
 
 // =========================================================
 // MARK: Registry

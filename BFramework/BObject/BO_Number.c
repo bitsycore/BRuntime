@@ -50,9 +50,9 @@ DEFINE_NUMBER_STRUCT(double, Double)
 
 extern BF_Class kClassList[];
 
-static BC_bool IsNumber(const BF_Class* cls);
-static BF_Class* TypeToClass(BO_NumberType type);
-static BO_NumberType ClassToType(const BF_Class* cls);
+static BC_bool PRIV_IsNumber(const BF_Class* cls);
+static BF_Class* PRIV_TypeToClass(BO_NumberType type);
+static BO_NumberType PRIV_ClassToType(const BF_Class* cls);
 
 // =============================================================================
 // MARK: Create
@@ -99,19 +99,19 @@ static BO_NumberBool kBO_NumberBoolFalse;
 // MARK: Class Methods
 // =============================================================================
 
-static uint32_t NumberHashImpl(const BO_ObjectRef obj) {
+static uint32_t IMPL_NumberHash(const BO_ObjectRef obj) {
 	if (!obj) return 0;
-	const BO_NumberType type = ClassToType(BF_ClassIdGetRef(obj->cls));
+	const BO_NumberType type = PRIV_ClassToType(BF_ClassIdGetRef(obj->cls));
 	uint64_t v = 0;
 	BO_NumberGetExplicit((BO_NumberRef)obj, &v, type);
 	return (uint32_t)v;
 }
 
-static BC_bool NumberEqualImpl(const BO_ObjectRef a, const BO_ObjectRef b) {
+static BC_bool IMPL_NumberEqual(const BO_ObjectRef a, const BO_ObjectRef b) {
 	if (a == b) return BC_true;
 	if (!a || !b) return BC_false;
-	const BO_NumberType typeA = ClassToType(BF_ClassIdGetRef(a->cls));
-	const BO_NumberType typeB = ClassToType(BF_ClassIdGetRef(b->cls));
+	const BO_NumberType typeA = PRIV_ClassToType(BF_ClassIdGetRef(a->cls));
+	const BO_NumberType typeB = PRIV_ClassToType(BF_ClassIdGetRef(b->cls));
 	if (typeB == BO_NumberTypeError) return BC_false;
 
 	// Compare as double if either is float/double
@@ -134,8 +134,8 @@ static BC_bool NumberEqualImpl(const BO_ObjectRef a, const BO_ObjectRef b) {
 	return valA == valB;
 }
 
-static BO_StringRef NumberToStringImpl(const BO_ObjectRef obj) {
-	switch (ClassToType(BF_ClassIdGetRef(obj->cls))) {
+static BO_StringRef IMPL_NumberToString(const BO_ObjectRef obj) {
+	switch (PRIV_ClassToType(BF_ClassIdGetRef(obj->cls))) {
 	// Types stored in class_reserved
 	case BO_NumberTypeBool: return BO_StringCreate(obj->class_reserved ? "true" : "false");
 	case BO_NumberTypeInt8: return BO_StringCreate("%d", (int8_t)obj->class_reserved);
@@ -153,7 +153,7 @@ static BO_StringRef NumberToStringImpl(const BO_ObjectRef obj) {
 	}
 }
 
-static BO_ObjectRef NumberCopyImpl(const BO_ObjectRef obj) { return BO_Retain(obj); }
+static BO_ObjectRef IMPL_NumberCopy(const BO_ObjectRef obj) { return BO_Retain(obj); }
 
 // =============================================================================
 // MARK: Class
@@ -164,10 +164,10 @@ static BO_ObjectRef NumberCopyImpl(const BO_ObjectRef obj) { return BO_Retain(ob
     .name = "BO_Number" #StrName, \
     .id = BF_CLASS_ID_INVALID, \
     .dealloc = NULL, \
-    .hash = NumberHashImpl, \
-    .equal = NumberEqualImpl, \
-    .toString = NumberToStringImpl, \
-    .copy = NumberCopyImpl, \
+    .hash = IMPL_NumberHash, \
+    .equal = IMPL_NumberEqual, \
+    .toString = IMPL_NumberToString, \
+    .copy = IMPL_NumberCopy, \
     .allocSize = sizeof(BO_Number) \
 }
 
@@ -176,10 +176,10 @@ static BO_ObjectRef NumberCopyImpl(const BO_ObjectRef obj) { return BO_Retain(ob
     .name = "BO_Number" #StrName, \
     .id = BF_CLASS_ID_INVALID, \
     .dealloc = NULL, \
-    .hash = NumberHashImpl, \
-    .equal = NumberEqualImpl, \
-    .toString = NumberToStringImpl, \
-    .copy = NumberCopyImpl, \
+    .hash = IMPL_NumberHash, \
+    .equal = IMPL_NumberEqual, \
+    .toString = IMPL_NumberToString, \
+    .copy = IMPL_NumberCopy, \
     .allocSize = sizeof(BO_Number##StrName) \
 }
 
@@ -203,7 +203,7 @@ BO_BoolRef kBO_False = (BO_BoolRef)&kBO_NumberBoolFalse;
 #define CLASS_COUNT (sizeof(kClassList) / sizeof(kClassList[0]))
 
 BF_ClassId BO_NumberClassId(const BO_NumberType type) {
-	const BF_Class* cls = TypeToClass(type);
+	const BF_Class* cls = PRIV_TypeToClass(type);
 	return cls ? cls->id : BF_CLASS_ID_INVALID;
 }
 
@@ -234,7 +234,7 @@ void ___BO_INTERNAL___NumberInitialize(void) {
 #define DEFINE_NUMBER_GET(Type, Name) \
 	Type BO_NumberGet##Name(BO_NumberRef num) { \
 		if (!num) return 0; \
-		switch (ClassToType(BF_ClassIdGetRef(num->base.cls))) { \
+		switch (PRIV_ClassToType(BF_ClassIdGetRef(num->base.cls))) { \
 			/* Inline types stored in class_reserved */ \
 			case BO_NumberTypeBool:   return (Type)num->base.class_reserved; \
 			case BO_NumberTypeInt8:   return (Type)(int8_t)num->base.class_reserved; \
@@ -266,18 +266,18 @@ DEFINE_NUMBER_GET(BC_bool, Bool)
 
 BO_NumberType BO_NumberGetType(const BO_NumberRef num) {
 	if (!num) return BO_NumberTypeError;
-	return ClassToType(BF_ClassIdGetRef(num->base.cls));
+	return PRIV_ClassToType(BF_ClassIdGetRef(num->base.cls));
 }
 
 // =============================================================================
 // MARK: Internal
 // =============================================================================
 
-static inline BC_bool IsNumber(const BF_Class* cls) { return cls >= kClassList && cls < kClassList + CLASS_COUNT; }
+static inline BC_bool PRIV_IsNumber(const BF_Class* cls) { return cls >= kClassList && cls < kClassList + CLASS_COUNT; }
 
-static inline BF_Class* TypeToClass(const BO_NumberType type) {
+static inline BF_Class* PRIV_TypeToClass(const BO_NumberType type) {
 	if (type > BO_NumberTypeBool || type <= BO_NumberTypeError) return NULL;
 	return &kClassList[type];
 }
 
-static inline BO_NumberType ClassToType(const BF_Class* cls) { return !IsNumber(cls) ? BO_NumberTypeError : (BO_NumberType)(cls - kClassList); }
+static inline BO_NumberType PRIV_ClassToType(const BF_Class* cls) { return !PRIV_IsNumber(cls) ? BO_NumberTypeError : (BO_NumberType)(cls - kClassList); }

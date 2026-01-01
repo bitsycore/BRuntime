@@ -68,6 +68,6 @@ const char *BO_StringCPtr(BO_StringRef str);
 // MARK: Debug
 // =========================================================
 
-void BF_StringPoolDebugDump(void);
+void BO_StringPoolDebugDump(void);
 
 #endif // BCRUNTIME_BCSTRING_H

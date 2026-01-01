@@ -40,7 +40,7 @@ void demo(void) {
 			"InnerMap2", $$MAP("InnerKeyA", "InnerValueA", "InnerKeyB", "InnerValueB")
 		);
 
-		BFAutoreleaseAll(
+		BF_AutoreleaseAll(
 			$OBJ str,
 			$OBJ formatedStr,
 			$OBJ list,
@@ -58,29 +58,29 @@ int BF_Main() {
 
 	for (int i = 0; i < RETRY; i++) {
 
-		BIG_TITLE("BC Startup");
+		BT_PrintBigTitle("BC Startup");
 
 		BF_AutoreleaseScope() {
-			testNumber();
-			testString();
-			testArray();
-			testMap();
-			testStringBuilder();
-			testReleasePool();
-			testClassRegistry();
-			testBytesArray();
+			BT_TestNumber();
+			BT_TestString();
+			BT_TestArray();
+			BT_TestMap();
+			BT_TestStringBuilder();
+			BT_TestReleasePool();
+			BT_TestClassRegistry();
+			BT_TestBytesArray();
 
 			demo();
 
 			BO_ObjectDebugDump();
-			BF_StringPoolDebugDump();
+			BO_StringPoolDebugDump();
 
 		    BF_Print("Hello world %@", $$LIST("Hello", 1, 3, 4));
 		}
-		BIG_TITLE("BC End");
+		BT_PrintBigTitle("BC End");
 	}
 
-	benchmarkAutoreleasePool();
+	BT_BenchmarkAutoreleasePool();
 
 	return 0;
 }

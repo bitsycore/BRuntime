@@ -1,8 +1,8 @@
 #include "BT_Tests.h"
 
-void testReleasePool(void) {
+void BT_TestReleasePool(void) {
 	$LET pool = BO_ReleasePoolCreate(NULL, 16);
-	BFAutorelease($OBJ pool);
+	BF_Autorelease($OBJ pool);
 
 	$LET a = $("Hello in Release Pool");
 	$LET b = $(53);
@@ -12,5 +12,5 @@ void testReleasePool(void) {
 	BO_ReleasePoolAdd(pool, $OBJ b);
 	BO_ReleasePoolAdd(pool, $OBJ c);
 
-	log_fmt("Release Pool Finished\n");
+	BT_Print("Release Pool Finished\n");
 }

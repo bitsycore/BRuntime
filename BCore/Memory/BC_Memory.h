@@ -7,25 +7,28 @@
 
 #if BC_SETTINGS_DEBUG_ALLOCATION_TRACK == 1
 
-void BCFree(void* ptr);
-
 __attribute__((malloc, alloc_size(1)))
-void* BCMalloc(size_t size);
+void* BC_Malloc(size_t size);
 
 __attribute__((malloc, alloc_size(1,2)))
-void* BCCalloc(size_t count, size_t size);
+void* BC_Calloc(size_t count, size_t size);
 
 __attribute__((alloc_size(2)))
-void* BCRealloc(void* ptr, size_t newSize);
+void* BC_Realloc(void* ptr, size_t newSize);
+
+void BC_Free(void* ptr);
+
+char* BC_Strdup(const char* str);
 
 #else
 
 #include <stdlib.h>
 
-#define BCMalloc(_size_) malloc(_size_)
-#define BCCalloc(_count_, _size_) calloc(_count_, _size_)
-#define BCRealloc(_ptr_, _newSize_) realloc(_ptr_, _newSize_)
-#define BCFree(_ptr_) free(_ptr_)
+#define BC_Malloc(_size_) malloc(_size_)
+#define BC_Calloc(_count_, _size_) calloc(_count_, _size_)
+#define BC_Realloc(_ptr_, _newSize_) realloc(_ptr_, _newSize_)
+#define BC_Free(_ptr_) free(_ptr_)
+#define BC_Strdup(_str_) strdup(_str_)
 
 #endif
 

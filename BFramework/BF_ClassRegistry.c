@@ -38,28 +38,28 @@ static struct {
 // MARK: Forwards
 // =========================================================
 
-static inline BF_ClassId GetSegmentIndex(BF_ClassId class_index);
-static inline BF_ClassId GetSegmentOffset(BF_ClassId class_index);
-static inline BF_ClassId GetSegmentSize(BF_ClassId segment_index);
+static inline BF_ClassId PRIV_GetSegmentIndex(BF_ClassId class_index);
+static inline BF_ClassId PRIV_GetSegmentOffset(BF_ClassId class_index);
+static inline BF_ClassId PRIV_GetSegmentSize(BF_ClassId segment_index);
 
 // =========================================================
 // MARK: Initialization
 // =========================================================
 
 void ___BF_INTERNAL___ClassRegistryInitialize(void) {
-	BCSpinlockInit(&gClassRegistryState.lock);
+	BC_SpinlockInit(&gClassRegistryState.lock);
 	memset(gClassRegistryState.segments, 0, sizeof(gClassRegistryState.segments));
 	gClassRegistryState.segment_count = 0;
 	gClassRegistryState.total_classes = 0;
 }
 
 void ___BF_INTERNAL___ClassRegistryDeinitialize(void) {
-	BCSpinlockLock(&gClassRegistryState.lock);
+	BC_SpinlockLock(&gClassRegistryState.lock);
 
 	// Free all allocated segments
 	for (BF_ClassId i = 0; i < gClassRegistryState.segment_count; i++) {
 		if (gClassRegistryState.segments[i]) {
-			BCFree(gClassRegistryState.segments[i]);
+			BC_Free(gClassRegistryState.segments[i]);
 			gClassRegistryState.segments[i] = NULL;
 		}
 	}
@@ -67,8 +67,8 @@ void ___BF_INTERNAL___ClassRegistryDeinitialize(void) {
 	gClassRegistryState.segment_count = 0;
 	gClassRegistryState.total_classes = 0;
 
-	BCSpinlockUnlock(&gClassRegistryState.lock);
-	BCSpinlockDestroy(&gClassRegistryState.lock);
+	BC_SpinlockUnlock(&gClassRegistryState.lock);
+	BC_SpinlockDestroy(&gClassRegistryState.lock);
 }
 
 // =========================================================
@@ -80,25 +80,25 @@ BF_ClassId BF_ClassRegistryGetCount(void) {
 }
 
 BF_ClassId BF_ClassRegistryInsert(BF_Class* cls) {
-	BCSpinlockLock(&gClassRegistryState.lock);
+	BC_SpinlockLock(&gClassRegistryState.lock);
 
 	// Check if we need to allocate a new segment
 	const uint32_t current_index = gClassRegistryState.total_classes;
-	const uint32_t required_segment = GetSegmentIndex(current_index);
+	const uint32_t required_segment = PRIV_GetSegmentIndex(current_index);
 
 	// Allocate segments as needed
 	while (gClassRegistryState.segment_count <= required_segment) {
 		if (gClassRegistryState.segment_count >= BC_CLASS_REGISTRY_MAX_SEGMENTS) {
-			BCSpinlockUnlock(&gClassRegistryState.lock);
+			BC_SpinlockUnlock(&gClassRegistryState.lock);
 			return BF_CLASS_ID_INVALID; // gClassRegistryState is full
 		}
 
-		const uint32_t segment_size = GetSegmentSize(gClassRegistryState.segment_count);
+		const uint32_t segment_size = PRIV_GetSegmentSize(gClassRegistryState.segment_count);
 		gClassRegistryState.segments[gClassRegistryState.segment_count] =
-			BCMalloc(segment_size * sizeof(BF_Class*));
+			BC_Malloc(segment_size * sizeof(BF_Class*));
 
 		if (!gClassRegistryState.segments[gClassRegistryState.segment_count]) {
-			BCSpinlockUnlock(&gClassRegistryState.lock);
+			BC_SpinlockUnlock(&gClassRegistryState.lock);
 			return BF_CLASS_ID_INVALID; // Allocation failed
 		}
 
@@ -109,13 +109,13 @@ BF_ClassId BF_ClassRegistryInsert(BF_Class* cls) {
 	}
 
 	// Store the class pointer in the registry
-	const uint32_t segment = GetSegmentIndex(current_index);
-	const uint32_t offset = GetSegmentOffset(current_index);
+	const uint32_t segment = PRIV_GetSegmentIndex(current_index);
+	const uint32_t offset = PRIV_GetSegmentOffset(current_index);
 
 	gClassRegistryState.segments[segment][offset] = cls;
 	gClassRegistryState.total_classes++;
 	cls->id = current_index;
-	BCSpinlockUnlock(&gClassRegistryState.lock);
+	BC_SpinlockUnlock(&gClassRegistryState.lock);
 
 	return current_index;
 }
@@ -125,8 +125,8 @@ BF_Class* BF_ClassIdGetRef(const BF_ClassId cid) {
 		return NULL;
 	}
 
-	const uint32_t segment = GetSegmentIndex(cid);
-	const uint32_t offset = GetSegmentOffset(cid);
+	const uint32_t segment = PRIV_GetSegmentIndex(cid);
+	const uint32_t offset = PRIV_GetSegmentOffset(cid);
 
 	if (segment >= gClassRegistryState.segment_count || !gClassRegistryState.segments[segment]) {
 		return NULL;
@@ -135,19 +135,19 @@ BF_Class* BF_ClassIdGetRef(const BF_ClassId cid) {
 	return gClassRegistryState.segments[segment][offset];
 }
 
-BF_ClassId BCDebugClassFindId(const BF_Class* cls) {
+BF_ClassId BF_DebugClassFindId(const BF_Class* cls) {
 	if (cls == NULL) { return BF_CLASS_ID_INVALID; }
-	BCSpinlockLock(&gClassRegistryState.lock);
+	BC_SpinlockLock(&gClassRegistryState.lock);
 
 	// Slow Linear Search, only for debugging purposes
 	for (uint32_t i = 0; i < gClassRegistryState.total_classes; i++) {
 		if (BF_ClassIdGetRef(i) == cls) {
-			BCSpinlockUnlock(&gClassRegistryState.lock);
+			BC_SpinlockUnlock(&gClassRegistryState.lock);
 			return i;
 		}
 	}
 
-	BCSpinlockUnlock(&gClassRegistryState.lock);
+	BC_SpinlockUnlock(&gClassRegistryState.lock);
 	return BF_CLASS_ID_INVALID;
 }
 
@@ -155,7 +155,7 @@ BF_ClassId BCDebugClassFindId(const BF_Class* cls) {
 // MARK: Internal
 // =========================================================
 
-static inline BF_ClassId GetSegmentIndex(const BF_ClassId class_index) {
+static inline BF_ClassId PRIV_GetSegmentIndex(const BF_ClassId class_index) {
 	// Segments grow exponentially:
 	// Segment 0: indices [0, INITIAL_SIZE)
 	// Segment 1: indices [INITIAL_SIZE, INITIAL_SIZE + INITIAL_SIZE*2)
@@ -164,7 +164,7 @@ static inline BF_ClassId GetSegmentIndex(const BF_ClassId class_index) {
 
 	uint32_t cumulative = 0;
 	for (uint32_t seg = 0; seg < BC_CLASS_REGISTRY_MAX_SEGMENTS; seg++) {
-		const uint32_t seg_size = GetSegmentSize(seg);
+		const uint32_t seg_size = PRIV_GetSegmentSize(seg);
 		if (class_index < cumulative + seg_size) {
 			return seg;
 		}
@@ -175,19 +175,19 @@ static inline BF_ClassId GetSegmentIndex(const BF_ClassId class_index) {
 	return BC_CLASS_REGISTRY_MAX_SEGMENTS - 1;
 }
 
-static inline BF_ClassId GetSegmentOffset(const BF_ClassId class_index) {
+static inline BF_ClassId PRIV_GetSegmentOffset(const BF_ClassId class_index) {
 	// Calculate cumulative capacity up to the segment containing class_index
 	uint32_t cumulative = 0;
-	const uint32_t segment = GetSegmentIndex(class_index);
+	const uint32_t segment = PRIV_GetSegmentIndex(class_index);
 
 	for (uint32_t seg = 0; seg < segment; seg++) {
-		cumulative += GetSegmentSize(seg);
+		cumulative += PRIV_GetSegmentSize(seg);
 	}
 
 	// Offset within the segment is the difference
 	return class_index - cumulative;
 }
 
-static inline BF_ClassId GetSegmentSize(const BF_ClassId segment_index) {
+static inline BF_ClassId PRIV_GetSegmentSize(const BF_ClassId segment_index) {
 	return BC_CLASS_REGISTRY_INITIAL_SEGMENT_SIZE << segment_index;
 }

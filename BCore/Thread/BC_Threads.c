@@ -6,7 +6,7 @@
 
 #if BC_SETTINGS_ENABLE_THREAD_SAFETY == 1
 
-void BCMutexInit(BCMutex* mutex) {
+void BC_MutexInit(BCMutex* mutex) {
 #if defined(_WIN32)
     InitializeCriticalSection(mutex);
 #else
@@ -14,7 +14,7 @@ void BCMutexInit(BCMutex* mutex) {
 #endif
 }
 
-void BCMutexLock(BCMutex* mutex) {
+void BC_MutexLock(BCMutex* mutex) {
 #if defined(_WIN32)
     EnterCriticalSection(mutex);
 #else
@@ -22,7 +22,7 @@ void BCMutexLock(BCMutex* mutex) {
 #endif
 }
 
-void BCMutexUnlock(BCMutex* mutex) {
+void BC_MutexUnlock(BCMutex* mutex) {
 #if defined(_WIN32)
     LeaveCriticalSection(mutex);
 #else
@@ -30,7 +30,7 @@ void BCMutexUnlock(BCMutex* mutex) {
 #endif
 }
 
-void BCMutexDestroy(BCMutex* mutex) {
+void BC_MutexDestroy(BCMutex* mutex) {
 #if defined(_WIN32)
     DeleteCriticalSection(mutex);
 #else
@@ -38,7 +38,7 @@ void BCMutexDestroy(BCMutex* mutex) {
 #endif
 }
 
-void BCSpinlockInit(BCSpinlock* sl) {
+void BC_SpinlockInit(BCSpinlock* sl) {
 #if defined(_WIN32)
 	sl->v = 0;
 #elif __APPLE__
@@ -48,7 +48,7 @@ void BCSpinlockInit(BCSpinlock* sl) {
 #endif
 }
 
-void BCSpinlockLock(BCSpinlock* sl) {
+void BC_SpinlockLock(BCSpinlock* sl) {
 #if defined(_WIN32)
 	while (InterlockedCompareExchange(&sl->v, 1, 0) != 0) {
 		YieldProcessor();
@@ -60,7 +60,7 @@ void BCSpinlockLock(BCSpinlock* sl) {
 #endif
 }
 
-void BCSpinlockUnlock(BCSpinlock* sl) {
+void BC_SpinlockUnlock(BCSpinlock* sl) {
 #if defined(_WIN32)
 	InterlockedExchange(&sl->v, 0);
 #elif __APPLE__
@@ -70,7 +70,7 @@ void BCSpinlockUnlock(BCSpinlock* sl) {
 #endif
 }
 
-void BCSpinlockDestroy(BCSpinlock* sl) {
+void BC_SpinlockDestroy(BCSpinlock* sl) {
 #if defined(_WIN32)
 #elif __APPLE__
 #else
@@ -83,7 +83,7 @@ void BCSpinlockDestroy(BCSpinlock* sl) {
 // =========================================================
 
 #if defined(_WIN32)
-static BOOL CALLBACK WinInitOnceCallback(PINIT_ONCE InitOnce, const PVOID Parameter, PVOID *Context) {
+static BOOL CALLBACK PRIV_WinInitOnceCallback(PINIT_ONCE InitOnce, const PVOID Parameter, PVOID *Context) {
     void (*func)(void) = (void (*)(void))Parameter;
     if (func) {
         func();
@@ -92,9 +92,9 @@ static BOOL CALLBACK WinInitOnceCallback(PINIT_ONCE InitOnce, const PVOID Parame
 }
 #endif
 
-void BCRunOnce(BCOnceToken* token, void (*func)(void)) {
+void BC_RunOnce(BCOnceToken* token, void (*func)(void)) {
 #if defined(_WIN32)
-    InitOnceExecuteOnce(token, WinInitOnceCallback, (PVOID)func, NULL);
+    InitOnceExecuteOnce(token, PRIV_WinInitOnceCallback, (PVOID)func, NULL);
 #else
     pthread_once(token, func);
 #endif

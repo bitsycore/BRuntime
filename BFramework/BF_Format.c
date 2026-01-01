@@ -13,7 +13,7 @@
 // MARK: Core Parser
 // =========================================================
 
-static void VaListNext(va_list* args, const char specifier, const char* lengthMod) {
+static void PRIV_VaListNext(va_list* args, const char specifier, const char* lengthMod) {
 
 	// =========================================================
 	// LENGTH MODIFIER
@@ -87,7 +87,7 @@ typedef struct StringContext {
 	size_t current;
 } StringContext;
 
-static void StringOutput(void* context, const char* data, const size_t length) {
+static void IMPL_StringOutput(void* context, const char* data, const size_t length) {
 	StringContext* ctx = context;
 	if (ctx->current + length < ctx->capacity) {
 		memcpy(ctx->buffer + ctx->current, data, length);
@@ -117,27 +117,27 @@ typedef struct BufferedFileContext {
 	size_t used;
 } BufferedFileContext;
 
-static void FlushBufferedFile(BufferedFileContext* ctx) {
+static void PRIV_FlushBufferedFile(BufferedFileContext* ctx) {
 	if (ctx->used > 0) {
 		fwrite(ctx->buffer, 1, ctx->used, ctx->stream);
 		ctx->used = 0;
 	}
 }
 
-static void BufferedFileOutput(void* context, const char* data, const size_t length) {
+static void IMPL_BufferedFileOutput(void* context, const char* data, const size_t length) {
 	BufferedFileContext* ctx = context;
 
 	// ========================================================
 	// DATA LARGER THAN BUFFER SIZE
 	if (length >= BUFFERED_FILE_BUFFER_SIZE) {
-		FlushBufferedFile(ctx);
+		PRIV_FlushBufferedFile(ctx);
 		fwrite(data, 1, length, ctx->stream);
 		return;
 	}
 
 	// ========================================================
 	// NOT ENOUGH SPACE IN BUFFER SO FLUSH IT
-	if (ctx->used + length > BUFFERED_FILE_BUFFER_SIZE) { FlushBufferedFile(ctx); }
+	if (ctx->used + length > BUFFERED_FILE_BUFFER_SIZE) { PRIV_FlushBufferedFile(ctx); }
 
 	// ========================================================
 	// COPY TO BUFFER
@@ -292,7 +292,7 @@ int BF_Format(const BF_FormatOutputFunc outFunc, void* context, const char* fmt,
 		if (specLen < sizeof(specStackBuf)) {
 			specBuf = specStackBuf;
 		} else {
-			specBuf = BCMalloc(specLen + 1);
+			specBuf = BC_Malloc(specLen + 1);
 		}
 
 		memcpy(specBuf, specStart, specLen);
@@ -316,7 +316,7 @@ int BF_Format(const BF_FormatOutputFunc outFunc, void* context, const char* fmt,
 			if (needed < sizeof(outStackBuf)) {
 				outBuf = outStackBuf;
 			} else {
-				outBuf = BCMalloc(needed + 1);
+				outBuf = BC_Malloc(needed + 1);
 			}
 
 			// Use copy again
@@ -326,18 +326,18 @@ int BF_Format(const BF_FormatOutputFunc outFunc, void* context, const char* fmt,
 
 			// ========================================================
 			// CLEANUP
-			if (outBuf != outStackBuf) { BCFree(outBuf); }
+			if (outBuf != outStackBuf) { BC_Free(outBuf); }
 		}
 
 
 		// ========================================================
 		// CLEANUP
-		if (specBuf != specStackBuf) { BCFree(specBuf); } // Free only if heap allocated
+		if (specBuf != specStackBuf) { BC_Free(specBuf); } // Free only if heap allocated
 		va_end(copy);
 
 		// ========================================================
 		// Advance args
-		VaListNext(&args, specifier, lengthMod);
+		PRIV_VaListNext(&args, specifier, lengthMod);
 	}
 
 	return totalWritten;
@@ -345,21 +345,21 @@ int BF_Format(const BF_FormatOutputFunc outFunc, void* context, const char* fmt,
 
 int BF_PrintVa(const char* fmt, va_list args) {
 	BufferedFileContext ctx = {stdout, {0}, 0};
-	const int result = BF_Format(BufferedFileOutput, &ctx, fmt, args);
-	FlushBufferedFile(&ctx);
+	const int result = BF_Format(IMPL_BufferedFileOutput, &ctx, fmt, args);
+	PRIV_FlushBufferedFile(&ctx);
 	return result;
 }
 
 int BF_PrintFileVa(FILE* stream, const char* fmt, va_list args) {
 	BufferedFileContext ctx = {stream, {0}, 0};
-	const int result = BF_Format(BufferedFileOutput, &ctx, fmt, args);
-	FlushBufferedFile(&ctx);
+	const int result = BF_Format(IMPL_BufferedFileOutput, &ctx, fmt, args);
+	PRIV_FlushBufferedFile(&ctx);
 	return result;
 }
 
 int BF_PrintStringVa(char* str, const size_t size, const char* fmt, va_list args) {
 	StringContext ctx = {str, size, 0};
-	return BF_Format(StringOutput, &ctx, fmt, args);
+	return BF_Format(IMPL_StringOutput, &ctx, fmt, args);
 }
 
 int BF_Print(const char* fmt, ...) {

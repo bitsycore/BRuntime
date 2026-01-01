@@ -35,33 +35,33 @@ typedef pthread_spinlock_t BCSpinlock;
 
 #endif
 
-void BCMutexInit(BCMutex* mutex);
-void BCMutexLock(BCMutex* mutex);
-void BCMutexUnlock(BCMutex* mutex);
-void BCMutexDestroy(BCMutex* mutex);
+void BC_MutexInit(BCMutex* mutex);
+void BC_MutexLock(BCMutex* mutex);
+void BC_MutexUnlock(BCMutex* mutex);
+void BC_MutexDestroy(BCMutex* mutex);
 #define BC_MUTEX_MAYBE(_lock_name_) BCMutex _lock_name_;
 #define BC_MUTEX_MAYBE_STATIC(_lock_name_) static BC_MUTEX_MAYBE(_lock_name_);
 
-void BCSpinlockInit(BCSpinlock* sl);
-void BCSpinlockLock(BCSpinlock* sl);
-void BCSpinlockUnlock(BCSpinlock* sl);
-void BCSpinlockDestroy(BCSpinlock* sl);
+void BC_SpinlockInit(BCSpinlock* sl);
+void BC_SpinlockLock(BCSpinlock* sl);
+void BC_SpinlockUnlock(BCSpinlock* sl);
+void BC_SpinlockDestroy(BCSpinlock* sl);
 #define BC_SPINLOCK_MAYBE(_lock_name_) BCSpinlock _lock_name_;
 #define BC_SPINLOCK_MAYBE_STATIC(_lock_name_) static BC_SPINLOCK_MAYBE(_lock_name_);
 
 #else
 
-#define BCMutexInit(_)
-#define BCMutexLock(_)
-#define BCMutexUnlock(_)
-#define BCMutexDestroy(_)
+#define BC_MutexInit(_)
+#define BC_MutexLock(_)
+#define BC_MutexUnlock(_)
+#define BC_MutexDestroy(_)
 #define BC_MUTEX_MAYBE(_)
 #define BC_MUTEX_MAYBE_STATIC(_)
 
-#define BCSpinlockInit(_)
-#define BCSpinlockLock(_)
-#define BCSpinlockUnlock(_)
-#define BCSpinlockDestroy(_)
+#define BC_SpinlockInit(_)
+#define BC_SpinlockLock(_)
+#define BC_SpinlockUnlock(_)
+#define BC_SpinlockDestroy(_)
 #define BC_SPINLOCK_MAYBE(_)
 #define BC_SPINLOCK_MAYBE_STATIC(_)
 
@@ -82,11 +82,11 @@ typedef pthread_once_t BCOnceToken;
 #endif
 
 #define BC_ONCE_MAYBE_STATIC(_name_) static BCOnceToken _name_ = BC_ONCE_INIT;
-void BCRunOnce(BCOnceToken* token, void (*func)(void));
+void BC_RunOnce(BCOnceToken* token, void (*func)(void));
 
 #else
 #define BC_ONCE_MAYBE_STATIC(_name_)
-#define BCRunOnce(_, _fun_) (_fun_())
+#define BC_RunOnce(_, _fun_) (_fun_())
 #endif
 
 #ifdef __cplusplus

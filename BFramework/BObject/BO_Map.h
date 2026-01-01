@@ -19,7 +19,7 @@ BF_ClassId BO_MapClassId();
 // =========================================================
 
 BO_MapRef BO_MapCreate();
-BO_MutableMapRef BCMutableMapCreate();
+BO_MutableMapRef BO_MutableMapCreate();
 BO_MapRef BO_MapCreateWithObjects(BC_bool retain, size_t count, ...);
 
 // =========================================================
