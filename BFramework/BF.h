@@ -17,7 +17,7 @@
 void BF_Initialize(int argc, char** argv);
 void BF_Deinitialize(void);
 
-#ifdef BF_RUNTIME_MAIN
+#ifdef BF_IMPLEMENT_MAIN
 
 int BF_Main(void);
 
