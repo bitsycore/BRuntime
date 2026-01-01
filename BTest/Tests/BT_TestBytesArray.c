@@ -1,6 +1,4 @@
 #include "BT_Tests.h"
-#include "../../BFramework/BF_Format.h"
-#include "../../BFramework/BObject/BO_BytesArray.h"
 
 #define BT_BytesArrayAssert(p) BT_AssertSilent(p, "Failed: " #p)
 

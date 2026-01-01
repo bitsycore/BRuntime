@@ -1,7 +1,7 @@
 #ifndef BFRAMEWORK_AUTORELEASE_POOL_H
 #define BFRAMEWORK_AUTORELEASE_POOL_H
 
-#include "BFramework/BF_Types.h"
+#include "BF_Types.h"
 
 void BF_AutoreleasePoolPush(void);
 void BF_AutoreleasePoolPop(void);

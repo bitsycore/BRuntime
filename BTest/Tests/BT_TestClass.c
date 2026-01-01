@@ -1,8 +1,5 @@
 #include "../Tests/BT_Tests.h"
 
-#include <BFramework/BF_Class.h>
-#include <BFramework/BObject/BO_Object.h>
-
 static BF_Class TestClass1 = {
 	.name = "TestClass1",
 	.dealloc = NULL,

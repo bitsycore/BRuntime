@@ -4,9 +4,8 @@ set(BFRAMEWORK_SOURCES
 		BF_AutoreleasePool.c
 		BF_AutoreleasePool.h
 		BF_Boxing.h
-		BF_Class.c
 		BF_Class.h
-		BF_ClassRegistry.c
+		BF_Class.c
 		BF_Format.c
 		BF_Format.h
 		BF_Settings.h
@@ -32,11 +31,11 @@ set(BFRAMEWORK_SOURCES
 		BObject/BO_StringBuilder.h
 )
 
-add_library(BFramework-STATIC STATIC ${BFRAMEWORK_SOURCES})
+add_library(BFramework STATIC ${BFRAMEWORK_SOURCES})
 
-target_include_directories(BFramework-STATIC
+target_include_directories(BFramework
 		PUBLIC
 		${CMAKE_CURRENT_SOURCE_DIR}/../
 )
 
-target_link_libraries(BFramework-STATIC BCore-STATIC)
+target_link_libraries(BFramework BCore)

@@ -58,10 +58,10 @@ typedef struct BO_Map* BO_MutableMapRef;
 // MARK: Function Types
 // =========================================================
 
-typedef void (*BFDeallocFunc)(BO_ObjectRef obj);
-typedef uint32_t (*BO_HashFunc)(BO_ObjectRef obj);
-typedef BC_bool (*BO_EqualFunc)(BO_ObjectRef a, BO_ObjectRef b);
-typedef BO_StringRef (*BFToStringFunc)(BO_ObjectRef obj);
-typedef BO_ObjectRef (*BFCopyFunc)(BO_ObjectRef);
+typedef void (*BF_DeallocFunc)(BO_ObjectRef obj);
+typedef uint32_t (*BF_HashFunc)(BO_ObjectRef obj);
+typedef BC_bool (*BF_EqualFunc)(BO_ObjectRef a, BO_ObjectRef b);
+typedef BO_StringRef (*BF_ToStringFunc)(BO_ObjectRef obj);
+typedef BO_ObjectRef (*BF_CopyFunc)(BO_ObjectRef);
 
 #endif //BFRAMEWORK_TYPES_H

@@ -1,5 +1,3 @@
-#include <BCore/BC_Macro.h>
-
 #define BF_RUNTIME_MAIN
 #include <BFramework/BF.h>
 

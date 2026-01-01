@@ -8,11 +8,11 @@
 typedef struct BF_Class {
 	const char* name;
 	BF_ClassId id;
-	BFDeallocFunc dealloc;
-	BO_HashFunc hash;
-	BO_EqualFunc equal;
-	BFToStringFunc toString;
-	BFCopyFunc copy;
+	BF_DeallocFunc dealloc;
+	BF_HashFunc hash;
+	BF_EqualFunc equal;
+	BF_ToStringFunc toString;
+	BF_CopyFunc copy;
 	size_t allocSize;
 } BF_Class;
 
