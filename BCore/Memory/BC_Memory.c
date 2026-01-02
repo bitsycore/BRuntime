@@ -194,6 +194,20 @@ int BC_MemoryInfoGet(BC_MemoryInfo* info) {
 #define RESET "\033[0m"
 #define BOLD "\033[1m"
 
+static void PRIV_FormatBytes(const size_t bytes, char *out, const size_t out_size)
+{
+	const char *units[] = { "B", "KB", "MB", "GB", "TB" };
+	double value = (double)bytes;
+	int unit = 0;
+
+	while (value >= 1024.0 && unit < 4) {
+		value /= 1024.0;
+		unit++;
+	}
+
+	snprintf(out, out_size, "%.2f %s", value, units[unit]);
+}
+
 void BC_MemoryInfoPrint(void) {
 	BC_MemoryInfo info;
 	const int result = BC_MemoryInfoGet(&info);
@@ -218,9 +232,15 @@ void BC_MemoryInfoPrint(void) {
 	}
 
 	// Heap Statistics
-	printf("│"DGRAY" Current Heap Usage    │ %31zu bytes "RESET"│\n", info.currentAllocUsage);
-	printf("│"BLACK" Peak Heap Usage       │ %31zu bytes "RESET"│\n", info.peakAllocUsage);
-	printf("│"DGRAY" Total Heap Allocated  │ %31zu bytes "RESET"│\n", info.totalAllocated);
+	char cur[37], peak[37], total[37];
+	PRIV_FormatBytes(info.currentAllocUsage, cur, sizeof(cur));
+	PRIV_FormatBytes(info.peakAllocUsage, peak, sizeof(peak));
+	PRIV_FormatBytes(info.totalAllocated, total, sizeof(total));
+	printf("│" DGRAY " Current Heap Usage    │ %37s " RESET "│\n", cur);
+	printf("│" BLACK " Peak Heap Usage       │ %37s " RESET "│\n", peak);
+	printf("│" DGRAY " Total Heap Allocated  │ %37s " RESET "│\n", total);
+
+
 	printf("├"BLACK"───────────────────────┼───────────────────────────────────────"RESET"┤\n");
 	printf("│"DGRAY" Number of Allocations │ %37zu "RESET"│\n", info.allocationCount);
 	printf("│"BLACK" Number of Frees       │ %37zu "RESET"│\n", info.freeCount);
