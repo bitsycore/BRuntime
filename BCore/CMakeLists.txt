@@ -24,4 +24,6 @@ set(BCORE_SOURCES
 		Thread/BC_Threads.h
 )
 
+set(BCore_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
+
 add_library(BCore STATIC ${BCORE_SOURCES})
