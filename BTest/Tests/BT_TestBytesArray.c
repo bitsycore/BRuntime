@@ -8,7 +8,7 @@ void BT_TestBytesArray(void) {
     // Test Creation
     const BO_BytesArrayRef arr1 = BO_BytesArrayCreate(5);
 	BF_Autorelease($OBJ arr1);
-    BT_BytesArrayAssert(BO_BytesArrayCount(arr1) == 5);
+    BT_BytesArrayAssert(BO_BytesArraySize(arr1) == 5);
     for (size_t i = 0; i < 5; i++) {
         BT_BytesArrayAssert(BO_BytesArrayGet(arr1, i) == 0);
     }
@@ -16,7 +16,7 @@ void BT_TestBytesArray(void) {
     const uint8_t data[] = {0x01, 0x02, 0x03, 0x04, 0x05};
     const BO_BytesArrayRef arr2 = BO_BytesArrayCreateWithBytes(5, data);
 	BF_Autorelease($OBJ arr2);
-    BT_BytesArrayAssert(BO_BytesArrayCount(arr2) == 5);
+    BT_BytesArrayAssert(BO_BytesArraySize(arr2) == 5);
     for (size_t i = 0; i < 5; i++) {
         BT_BytesArrayAssert(BO_BytesArrayGet(arr2, i) == data[i]);
     }

@@ -29,13 +29,13 @@ static void PRIV_ListAdd(BO_ListRef arr, BO_ObjectRef item, BC_bool retain);
 // MARK: Impl
 // =========================================================
 
-static void IMPL_ArrayDealloc(const BO_ObjectRef obj) {
+static void IMPL_ListDealloc(const BO_ObjectRef obj) {
 	const BO_ListRef arr = (BO_ListRef)obj;
 	for (size_t i = 0; i < arr->count; i++) BO_Release(arr->items[i]);
 	BC_Free(arr->items);
 }
 
-static BO_StringRef IMPL_ArrayToString(const BO_ObjectRef obj) {
+static BO_StringRef IMPL_ListToString(const BO_ObjectRef obj) {
 	const BO_ListRef arr = (BO_ListRef)obj;
 	const BO_StringBuilderRef sb = BO_StringBuilderCreate(NULL);
 	BO_StringBuilderAppendChar(sb, '[');
@@ -62,10 +62,10 @@ static BO_StringRef IMPL_ArrayToString(const BO_ObjectRef obj) {
 static BF_Class kBO_ListClass = {
 	.name = "BO_List",
 	.id = BF_CLASS_ID_INVALID,
-	.dealloc = IMPL_ArrayDealloc,
+	.dealloc = IMPL_ListDealloc,
 	.hash = NULL,
 	.equal = NULL,
-	.toString = IMPL_ArrayToString,
+	.toString = IMPL_ListToString,
 	.copy = NULL,
 	.allocSize = sizeof(BO_List)
 };

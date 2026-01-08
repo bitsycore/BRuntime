@@ -6,8 +6,19 @@
 
 void BT_Demo(void) {
 	BF_AutoreleaseScope() {
+		$LET str = $("Boxed %s", "String Demo");
+		BF_Print("%@ \n", str);
 
-		$LET str = $("Boxed");
+		$LET bytes = BO_BytesArrayCreate(64);
+		BF_Autorelease($OBJ bytes);
+		BO_BytesArrayFill(bytes, 'A');
+		$LET copiedBytes = (BO_BytesArrayRef)BO_Copy($OBJ bytes);
+		BF_Autorelease($OBJ copiedBytes);
+		BO_BytesArrayFill(bytes, 'D');
+
+		BF_PrintString((char*)BO_BytesArrayBytes(bytes), 64, "Bytes Array Length: %zu\n", BO_BytesArraySize(bytes));
+		BF_Print("%.*s \n", BO_BytesArraySize(bytes), BO_BytesArrayBytes(bytes));
+
 		$LET strAutorelease = $$("Boxed Autoreleased");
 
 		$LET formatedStr = $("String with construction %@", str);
@@ -54,6 +65,11 @@ int BF_Main() {
 	BO_ObjectDebugSetEnabled(BC_true);
 	BO_ObjectDebugSetKeepFreed(BC_false);
 
+	BT_Demo();
+
+	BO_ObjectDebugDump();
+	BO_StringPoolDebugDump();
+	return 0;
 	for (int i = 0; i < RETRY; i++) {
 
 		BT_PrintBigTitle("BC Startup");

@@ -29,7 +29,7 @@ typedef struct AutoreleasePool {
 // MARK: Thread Local Storage
 // =========================================================
 
-static BC_TLS struct RootPool {
+static BC_TLS struct {
 	PRIV_AutoreleasePool* parent;
 	PRIV_AutoreleasePool* hot;
 	PRIV_AutoreleasePool* next;
