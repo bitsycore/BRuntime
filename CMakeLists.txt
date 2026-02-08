@@ -9,4 +9,8 @@ endif()
 add_subdirectory(BCore)
 add_subdirectory(BFramework)
 
+add_subdirectory(BSkia)
+add_subdirectory(BXCompose)
+
+add_subdirectory(BXComposeTest)
 add_subdirectory(BTest)
